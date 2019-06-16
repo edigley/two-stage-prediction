@@ -25,10 +25,8 @@ class DirectExecutor implements Executor {
 	}
 };
 
-class TSPEvaluator implements Evaluator<IntegerGene, Double> {
+class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double> {
 
-	static int generation = 0;
-	
 	@Override
 	public ISeq<Phenotype<IntegerGene, Double>> evaluate(Seq<Phenotype<IntegerGene, Double>> population) {
 		long nPhenEvaluated = population.stream().filter(Phenotype::isEvaluated).count();
@@ -36,19 +34,19 @@ class TSPEvaluator implements Evaluator<IntegerGene, Double> {
 		long phen1Gen = population.get(0).getGeneration();
 		int popSize = population.size();
 		String header = "Start - Generation / phen1Gen / popSize / nPhenEvaluated";
-		System.out.println(String.format(format, header, Genetic.generation, phen1Gen, popSize, nPhenEvaluated));
+		System.out.println(String.format(format, header, GeneticAlgorithm.generation, phen1Gen, popSize, nPhenEvaluated));
 		population.stream().forEach(p -> System.out.println(" --> " + FarsiteExecutor.toFarsiteParams(p.getGenotype()) + " " + p.isEvaluated()));
 		return population.asISeq();
 	}
 	
 }
 
-public class Genetic {
+public class GeneticAlgorithm {
 	
 	static long generation = 0;
 	private static long id = 0;
 	
-	private static final Logger logger = LoggerFactory.getLogger(Genetic.class);
+	private static final Logger logger = LoggerFactory.getLogger(GeneticAlgorithm.class);
 	
     private static synchronized Double eval(Genotype<IntegerGene> gt) {
      	id++;
@@ -75,11 +73,11 @@ public class Genetic {
         );
         
         Engine<IntegerGene, Double> engine = Engine
-        	.builder(Genetic::eval, genotypeFactory)
+        	.builder(GeneticAlgorithm::eval, genotypeFactory)
         	.populationSize(25)
         	.minimizing()
         	.alterers(new MultiPointCrossover<>(0.4), new Mutator<>(0.1))
-        	.evaluator(new TSPEvaluator())
+        	.evaluator(new FarsitePopulationEvaluator())
         	.mapping(EvolutionResult.toUniquePopulation())
         	.build();
 
