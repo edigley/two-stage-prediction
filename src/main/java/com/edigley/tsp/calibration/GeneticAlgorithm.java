@@ -1,5 +1,4 @@
-package com.edigley.tsp;
-import java.util.concurrent.Executor;
+package com.edigley.tsp.calibration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +18,6 @@ import io.jenetics.util.ISeq;
 import io.jenetics.util.Seq;
 import io.jenetics.engine.Engine.Evaluator;
 
-class DirectExecutor implements Executor {
-	public void execute(Runnable r) {
-		r.run();
-	}
-};
-
 class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double> {
 
 	@Override
@@ -43,47 +36,56 @@ class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double> {
 
 public class GeneticAlgorithm {
 	
+	private static final Logger logger = LoggerFactory.getLogger(GeneticAlgorithm.class);
+	
+	private static final int NUMBER_OF_GENERATIONS = 10;
+	private static final int POPULATION_SIZE = 25;
+	private static final double RECOMBINATION_PROBABILITY = 0.4;
+	private static final double MUTATION_PROBABILITY = 0.1;
+	
 	static long generation = 0;
 	private static long id = 0;
 	
-	private static final Logger logger = LoggerFactory.getLogger(GeneticAlgorithm.class);
+	private static FarsiteExecutor executor;
 	
-    private static synchronized Double eval(Genotype<IntegerGene> gt) {
+    public void setExecutor(FarsiteExecutor executor) {
+		GeneticAlgorithm.executor = executor;
+	}
+
+	private static synchronized Double eval(Genotype<IntegerGene> gt) {
      	id++;
-		Double fireError = FarsiteExecutor.run(generation, id, gt);
+		Double fireError = executor.run(generation, id, gt);
 		System.out.println(FarsiteExecutor.toCmdArg(generation, id, gt) + " " + fireError);
 		logger.info(FarsiteExecutor.toCmdArg(generation, id, gt) + " " + fireError);
     	return fireError;
     }
 
-    public static void main(String[] args) {
-    	
-    	final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
-    	
-        final Genotype<IntegerGene> genotypeFactory = Genotype.of(
-        	IntegerChromosome.of(2, 15, 1),   // fms - t1
-        	IntegerChromosome.of(2, 15, 1),   // fms - t10
-        	IntegerChromosome.of(2, 15, 1),   // fms - t100
-        	IntegerChromosome.of(20, 70, 1),  // fms - t1000
-        	IntegerChromosome.of(70, 100, 1), // fms - t10000
-        	IntegerChromosome.of(0, 150, 1),  //  ws - wind speed
-        	IntegerChromosome.of(0, 360, 1),  //  wd - wind direction
-        	IntegerChromosome.of(30, 50, 1),  //  th - temperature highest
-        	IntegerChromosome.of(30, 100, 1)  //  hh - humidity highest
-        );
-        
-        Engine<IntegerGene, Double> engine = Engine
-        	.builder(GeneticAlgorithm::eval, genotypeFactory)
-        	.populationSize(25)
-        	.minimizing()
-        	.alterers(new MultiPointCrossover<>(0.4), new Mutator<>(0.1))
-        	.evaluator(new FarsitePopulationEvaluator())
-        	.mapping(EvolutionResult.toUniquePopulation())
-        	.build();
+    private final Genotype<IntegerGene> genotypeFactory = Genotype.of(
+    	IntegerChromosome.of(  2,  15, 1 ),   // fms - t1
+    	IntegerChromosome.of(  2,  15, 1 ),   // fms - t10
+    	IntegerChromosome.of(  2,  15, 1 ),   // fms - t100
+    	IntegerChromosome.of( 20,  70, 1 ),   // fms - t1000
+    	IntegerChromosome.of( 70, 100, 1 ),   // fms - t10000
+    	IntegerChromosome.of(  0, 150, 1 ),   //  ws - wind speed
+    	IntegerChromosome.of(  0, 360, 1 ),   //  wd - wind direction
+    	IntegerChromosome.of( 30,  50, 1 ),   //  th - temperature highest
+    	IntegerChromosome.of( 30, 100, 1 )    //  hh - humidity highest
+    );
 
-        Phenotype<IntegerGene, Double> result = engine
-        	.stream()
-        	.limit(10)
+	private final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
+
+	private Engine<IntegerGene, Double> engine = Engine
+    	.builder(GeneticAlgorithm::eval, genotypeFactory)
+    	.populationSize(POPULATION_SIZE)
+    	.minimizing()
+    	.alterers(new MultiPointCrossover<>(RECOMBINATION_PROBABILITY), new Mutator<>(MUTATION_PROBABILITY))
+    	.evaluator(new FarsitePopulationEvaluator())
+    	.mapping(EvolutionResult.toUniquePopulation())
+    	.build();
+	
+	public Phenotype<IntegerGene,Double> run() {
+        Phenotype<IntegerGene, Double> result = engine.stream()
+        	.limit(NUMBER_OF_GENERATIONS)
         	.peek(r -> {
         		generation = r.getGeneration();
         		System.out.println(String.format("Generation / Durations : %s / %s", generation, r.getDurations().getEvaluationDuration()));
@@ -92,9 +94,7 @@ public class GeneticAlgorithm {
         	.peek(r -> System.out.println(statistics))
         	.collect(EvolutionResult.toBestPhenotype());
 
-        logger.info("Genetic - Best Result:\n" + result);
-        System.out.println("Genetic - Best Result:\n" + FarsiteExecutor.toFarsiteParams(result.getGenotype()) + " " + result.getFitness());
-        
-    }
-
+        return result;
+	}
+    
 }

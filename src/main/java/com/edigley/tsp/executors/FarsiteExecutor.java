@@ -13,27 +13,39 @@ import io.jenetics.Genotype;
 public class FarsiteExecutor {
 
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteExecutor.class);
+
+	private File farsiteFile;
+
+	private File scenarioDir;
+
+	public FarsiteExecutor(File farsiteFile, File scenarioDir) {
+		this.farsiteFile = farsiteFile;
+		this.scenarioDir = scenarioDir;
+	}
 	
+	public FarsiteExecutor(String farsiteFilePath, String scenarioDirPath) {
+		this(new File(farsiteFilePath), new File(scenarioDirPath));
+	}
+
 	public static String toFarsiteParams(Genotype<?> gt) {
 		return gt.toString().replace("[", "").replace("]", "").replace(",", " ");
 	}
-	
+
 	public static String toCmdArg(long generation, long id, Genotype<?> gt) {
 		String genotypeAsString = toFarsiteParams(gt);
 		return generation + " " + id + " " + genotypeAsString + " 1";
 	}
-	
-	public static Double run(long generation, long id, Genotype<?> gt) throws RuntimeException {
-		File dir = new File("/home/edigley/doutorado_uab/git/spif/playpen/cloud/jonquera/");
-		String farsiteExecutable = "/home/edigley/git/spif/fireSimulator86400";
-		String command = farsiteExecutable + " scenario_jonquera.ini run " + toCmdArg(generation, id, gt) + " | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
+
+	public Double run(long generation, long id, Genotype<?> gt) throws RuntimeException {
+		String pattern = "%s scenario_jonquera.ini run %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
+		String command = String.format(pattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, gt));
 		String[] args = new String[3];
 		args[0] = "sh";
 		args[1] = "-c";
 		args[2] = command;
 		Process process;
 		try {
-			process = Runtime.getRuntime().exec(args, null, dir);
+			process = Runtime.getRuntime().exec(args, null, scenarioDir);
 			Double fireError = ProcessUtil.monitorProcessExecution(process);
 			return fireError;
 		} catch (IOException e) {
@@ -42,11 +54,11 @@ public class FarsiteExecutor {
 		} finally {
 			args[2] = "rm -rf output/raster_" + generation + "_" + id + ".toa";
 			try {
-				Runtime.getRuntime().exec(args, null, dir);
+				Runtime.getRuntime().exec(args, null, scenarioDir);
 			} catch (IOException e) {
 				logger.error("Couldn't delete output file", e);
 			}
 		}
 	}
-	
+
 }
