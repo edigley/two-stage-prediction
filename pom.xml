@@ -3,12 +3,23 @@
   <groupId>com.edigley</groupId>
   <artifactId>two-stage-prediction</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>genetic</name>
+  <packaging>nar</packaging>
+  <name>Two-Stage Prediction</name>
   <description>Two-Stage Prediction Framework</description>
   
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<architecture.option />
+		<debug.option />
+		<ij.executable.name />
+		<nar.arch.path />
+		<java.os.include />
+		<libdl.name>dl</libdl.name>
+		<skipTests>true</skipTests>
+		<stack.protector.option />
+		<subsystem.option />
+		<maven.antrun.version>1.8</maven.antrun.version>
 	</properties>
 	
 	<build>
@@ -38,6 +49,14 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
+				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>2.5.1</version>
 				<executions>
@@ -52,6 +71,50 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.github.maven-nar</groupId>
+				<artifactId>nar-maven-plugin</artifactId>
+				<version>3.5.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<c>
+						<name>gcc</name>
+						<includes>
+							<include>**/*.c</include>
+							<include>**/*.h</include>
+						</includes>
+						<options>
+							<option>-DLAUNCHER_VERSION="${project.version}"</option>
+							<option>-DBUILD_NUMBER="${buildNumber}"</option>
+							<option>-I${JAVA_HOME}/include</option>
+							<option>${java.os.include}</option>
+							<option>${stack.protector.option}</option>
+							<option>${architecture.option}</option>
+							<option>${subsystem.option}</option>
+							<option>${debug.option}</option>
+						</options>
+					</c>
+					<linker>
+						<name>gcc</name>
+						<options>
+							<option>${architecture.option}</option>
+							<option>${subsystem.option}</option>
+						</options>
+						<sysLibs>
+							<sysLib>
+								<name>${libdl.name}</name>
+							</sysLib>
+						</sysLibs>
+					</linker>
+					<libraries>
+						<library>
+							<type>executable</type>
+							<run>true</run>
+							<!-- <subSystem>gui</subSystem> -->
+						</library>
+					</libraries>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
