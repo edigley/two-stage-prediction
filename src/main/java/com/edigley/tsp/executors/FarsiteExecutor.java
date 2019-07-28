@@ -37,7 +37,7 @@ public class FarsiteExecutor {
 	}
 
 	public Double run(long generation, long id, Genotype<?> gt) throws RuntimeException {
-		String pattern = "%s scenario_jonquera.ini run %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
+		String pattern = "%s scenario.ini run %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
 		String command = String.format(pattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, gt));
 		String[] args = new String[3];
 		args[0] = "sh";
