@@ -44,7 +44,7 @@ public class Calibrator {
 		farsiteFile = (File) cmd.getParsedOptionValue(FARSITE);
 		scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO);
 		
-		assertsFilesExists(farsiteFile, scenarioDir);
+		assertsFilesExists(farsiteFile, scenarioDir, new File(scenarioDir, "scenario.ini"));
 		
 		geneticAlgorithm = new GeneticAlgorithm();
 		geneticAlgorithm.setExecutor(new FarsiteExecutor(farsiteFile, scenarioDir));
