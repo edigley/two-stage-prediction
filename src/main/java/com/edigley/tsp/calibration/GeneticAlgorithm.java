@@ -3,7 +3,10 @@ package com.edigley.tsp.calibration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.executors.FarsiteExecution;
+import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
+import com.edigley.tsp.executors.FarsiteIndividual;
 
 import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
@@ -23,12 +26,12 @@ class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double> {
 	@Override
 	public ISeq<Phenotype<IntegerGene, Double>> evaluate(Seq<Phenotype<IntegerGene, Double>> population) {
 		long nPhenEvaluated = population.stream().filter(Phenotype::isEvaluated).count();
-		String format = "---------> %s : %s / %s / %s / %s <---------";
+		String pattern = "---------> %s : %s / %s / %s / %s <---------";
 		long phen1Gen = population.get(0).getGeneration();
 		int popSize = population.size();
 		String header = "Start - Generation / phen1Gen / popSize / nPhenEvaluated";
-		System.out.println(String.format(format, header, GeneticAlgorithm.generation, phen1Gen, popSize, nPhenEvaluated));
-		population.stream().forEach(p -> System.out.println(" --> " + FarsiteExecutor.toFarsiteParams(p.getGenotype()) + " " + p.isEvaluated()));
+		System.out.println(String.format(pattern, header, GeneticAlgorithm.generation, phen1Gen, popSize, nPhenEvaluated));
+		population.stream().forEach(p -> System.out.println(" --> " + FarsiteIndividual.toStringParams(p.getGenotype()) + " " + p.isEvaluated()));
 		return population.asISeq();
 	}
 	
@@ -37,6 +40,8 @@ class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double> {
 public class GeneticAlgorithm {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GeneticAlgorithm.class);
+	
+	private static FarsiteExecutionMemoization cache;
 	
 	private static final int NUMBER_OF_GENERATIONS = 10;
 	private static final int POPULATION_SIZE = 25;
@@ -52,12 +57,24 @@ public class GeneticAlgorithm {
 		GeneticAlgorithm.executor = executor;
 	}
 
+    public void setFarsiteExecutionCache(FarsiteExecutionMemoization cache) {
+    	GeneticAlgorithm.cache = cache;
+    }
+    
 	private static synchronized Double eval(Genotype<IntegerGene> gt) {
      	id++;
-		Double fireError = executor.run(generation, id, gt);
-		System.out.println(FarsiteExecutor.toCmdArg(generation, id, gt) + " " + fireError);
-		logger.info(FarsiteExecutor.toCmdArg(generation, id, gt) + " " + fireError);
-    	return fireError;
+     	FarsiteIndividual individual = new FarsiteIndividual(gt);
+     	FarsiteExecution cachedExecution = cache.get(individual);
+		if (cachedExecution != null) {
+			System.out.println(String.format("Cached: %2s %3s %s", generation, id, cachedExecution));
+     		return cachedExecution.getFireError();
+     	} else {
+			FarsiteExecution execution = executor.run(generation, id, individual);
+			cache.add(execution);
+			System.out.println(String.format("%2s %3s %s", generation, id, execution));
+			logger.info(String.format("%2s %3s %s", generation, id, execution));
+	    	return execution.getFireError();
+     	}
     }
 
     private final Genotype<IntegerGene> genotypeFactory = Genotype.of(

@@ -21,6 +21,10 @@ public class CLI {
 	public static final String FARSITE = "f";
 	
 	public static final String SCENARIO = "s";
+	
+	public static final String MEMOIZATION = "m";
+
+	public static final String TIME_OUT = "t";
 
 	public static final String HELP = "help";
 
@@ -53,15 +57,23 @@ public class CLI {
 		Options options = new Options();
 		Option executable = new Option(FARSITE, "farsite", true, "Farsite executable file path");
 		Option scenario = new Option(SCENARIO, "scenario", true, "Scenario directory path");
-
+		Option memoization = new Option(MEMOIZATION, "memoization", true, "Memoization file path");
+		Option timeOut = new Option(TIME_OUT, "timeout", true, "Timeout for each individual execution");
+		
 		executable.setRequired(true);
 		scenario.setRequired(true);
-
+		memoization.setRequired(false);
+		timeOut.setRequired(false);
+		
 		executable.setType(File.class);
 		scenario.setType(File.class);
+		memoization.setType(File.class);
+		timeOut.setType(Number.class);
 		
 		options.addOption(executable);
 		options.addOption(scenario);
+		options.addOption(memoization);
+		options.addOption(timeOut);
 		return options;
 	}
 
