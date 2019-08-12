@@ -14,8 +14,15 @@ import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.calibration.Calibrator;
 
+import io.jenetics.prngine.LCG64ShiftRandom;
+import io.jenetics.util.RandomRegistry;
+
 public class CLI {
 
+	static {
+		RandomRegistry.setRandom(new LCG64ShiftRandom.ThreadSafe(123));
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(CLI.class);
 	
 	public static final String FARSITE = "f";

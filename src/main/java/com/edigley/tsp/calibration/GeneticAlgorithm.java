@@ -15,23 +15,25 @@ import io.jenetics.MultiPointCrossover;
 import io.jenetics.Mutator;
 import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
+import io.jenetics.engine.Engine.Evaluator;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.util.ISeq;
 import io.jenetics.util.Seq;
-import io.jenetics.engine.Engine.Evaluator;
 
 class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double> {
 
 	@Override
 	public ISeq<Phenotype<IntegerGene, Double>> evaluate(Seq<Phenotype<IntegerGene, Double>> population) {
 		long nPhenEvaluated = population.stream().filter(Phenotype::isEvaluated).count();
-		String pattern = "---------> %s : %s / %s / %s / %s <---------";
+		String pattern = "FarsitePopulationEvaluator.evaluate ---------> %s : %s / %s / %s / %s <---------";
 		long phen1Gen = population.get(0).getGeneration();
 		int popSize = population.size();
 		String header = "Start - Generation / phen1Gen / popSize / nPhenEvaluated";
 		System.out.println(String.format(pattern, header, GeneticAlgorithm.generation, phen1Gen, popSize, nPhenEvaluated));
-		population.stream().forEach(p -> System.out.println(" --> " + FarsiteIndividual.toStringParams(p.getGenotype()) + " " + p.isEvaluated()));
+		population.stream().forEach(
+			p -> System.out.println(" --> " + FarsiteIndividual.toStringParams(p.getGenotype()) + " " + p.isEvaluated())
+		);
 		return population.asISeq();
 	}
 	
@@ -63,16 +65,20 @@ public class GeneticAlgorithm {
     
 	private static synchronized Double eval(Genotype<IntegerGene> gt) {
      	id++;
+     	String logMessage = "";
      	FarsiteIndividual individual = new FarsiteIndividual(gt);
      	FarsiteExecution cachedExecution = cache.get(individual);
 		if (cachedExecution != null) {
-			System.out.println(String.format("Cached: %2s %3s %s", generation, id, cachedExecution));
+			logMessage = String.format("%2s %3s %s -> CACHED", generation, id, cachedExecution);
+			System.out.println(logMessage);
+			logger.info(logMessage);
      		return cachedExecution.getFireError();
      	} else {
 			FarsiteExecution execution = executor.run(generation, id, individual);
 			cache.add(execution);
-			System.out.println(String.format("%2s %3s %s", generation, id, execution));
-			logger.info(String.format("%2s %3s %s", generation, id, execution));
+			logMessage = String.format("%2s %3s %s", generation, id, execution);
+			System.out.println(logMessage);
+			logger.info(logMessage);
 	    	return execution.getFireError();
      	}
     }
@@ -96,7 +102,7 @@ public class GeneticAlgorithm {
     	.populationSize(POPULATION_SIZE)
     	.minimizing()
     	.alterers(new MultiPointCrossover<>(RECOMBINATION_PROBABILITY), new Mutator<>(MUTATION_PROBABILITY))
-    	.evaluator(new FarsitePopulationEvaluator())
+    	//.evaluator(new FarsitePopulationEvaluator())
     	.mapping(EvolutionResult.toUniquePopulation())
     	.build();
 	

@@ -3,7 +3,6 @@ package com.edigley.tsp.executors;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -36,6 +35,7 @@ public class FarsiteExecutionMemoization {
 				fw = new FileWriter(file, true);
 			}
 		} catch (IOException e) {
+			System.err.println("Error when loading memoization file: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}

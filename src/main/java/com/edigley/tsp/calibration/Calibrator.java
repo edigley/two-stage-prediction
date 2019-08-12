@@ -54,10 +54,10 @@ public class Calibrator {
 		geneticAlgorithm.setExecutor(new FarsiteExecutor(farsiteFile, scenarioDir, (Long) cmd.getParsedOptionValue(TIME_OUT)));
 		
 		FarsiteExecutionMemoization cache;
-		if (cmd.hasOption(SCENARIO)) {
+		if (cmd.hasOption(MEMOIZATION)) {
 			cache = new FarsiteExecutionMemoization(((File) cmd.getParsedOptionValue(MEMOIZATION)));
 		} else {
-			cache = new FarsiteExecutionMemoization(new File("farsite_execution_memoization.txt"));
+			cache = new FarsiteExecutionMemoization(new File("farsite_execution_memoization_default.txt"));
 		}
 		
 		geneticAlgorithm.setFarsiteExecutionCache(cache);
