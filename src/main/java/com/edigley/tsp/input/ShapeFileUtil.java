@@ -38,6 +38,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.TopologyException;
 
 public class ShapeFileUtil {
 	
@@ -71,7 +73,11 @@ public class ShapeFileUtil {
 			Feature feature = it.next();
 			//geometry = geometry.union(((GeometryCollection)feature.getDefaultGeometryProperty().getValue())).convexHull();
 			GeometryCollection other = (GeometryCollection)feature.getDefaultGeometryProperty().getValue();
-			geometry = geometry.union(gf.createPolygon(other.getCoordinates()));
+			try {
+				geometry = geometry.union(gf.createPolygon(other.getCoordinates()));
+			} catch (TopologyException e) {
+				logger.warn("Could'not perform union with geometry", e);
+			}
 		}
 		it.close();
 		
@@ -139,23 +145,12 @@ public class ShapeFileUtil {
 		// logger.info("---> centroid: " + centroid.getDimension());
 	}
 	
-	public static void save(File file, MultiPolygon p2, CoordinateReferenceSystem crs)
+	public static void save(File file, MultiPolygon multiPolygon, CoordinateReferenceSystem crs)
 			throws Exception, MalformedURLException, IOException {
 
-		// Create simple feature type
-		SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
-		ReferencingObjectFactory refFactory = new ReferencingObjectFactory();
-		typeBuilder.setName("farsiteOutputAsPolygon");
-		typeBuilder.setCRS(crs);
-		typeBuilder.add("the_geom", MultiPolygon.class);
-		SimpleFeatureType featureType = typeBuilder.buildFeatureType();
+		SimpleFeatureType featureType = createSimpleFeatureType(crs);
 
-		// build feature collection
-		List<SimpleFeature> features = new ArrayList<>();
-		SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(featureType);
-		featureBuilder.add(p2);// p1Feature.getDefaultGeometryProperty().getValue());
-		features.add(featureBuilder.buildFeature("the-feature-id"));
-		SimpleFeatureCollection collection = new ListFeatureCollection(featureType, features);
+		SimpleFeatureCollection collection = buildFeatureCollection(multiPolygon, featureType);
 
 		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
 		Map<String, Serializable> params = new HashMap<>();
@@ -189,6 +184,70 @@ public class ShapeFileUtil {
 		} finally {
 			newDataStore.dispose();
 		}
+	}
+
+	private static SimpleFeatureCollection buildFeatureCollection(MultiPolygon multiPolygon,
+			SimpleFeatureType featureType) {
+		// build feature collection
+		List<SimpleFeature> features = new ArrayList<>();
+		SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(featureType);
+		featureBuilder.add(multiPolygon);// p1Feature.getDefaultGeometryProperty().getValue());
+		features.add(featureBuilder.buildFeature("the-feature-id"));
+		SimpleFeatureCollection collection = new ListFeatureCollection(featureType, features);
+		return collection;
+	}
+
+	private static SimpleFeatureType createSimpleFeatureType(CoordinateReferenceSystem crs) {
+		// Create simple feature type
+		SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
+		ReferencingObjectFactory refFactory = new ReferencingObjectFactory();
+		typeBuilder.setName("farsiteOutputAsPolygon");
+		typeBuilder.setCRS(crs);
+		typeBuilder.add("the_geom", MultiPolygon.class);
+		SimpleFeatureType featureType = typeBuilder.buildFeatureType();
+		return featureType;
+	}
+	
+	public static Double calculatePredictionError(File gAFile, File gBFile) throws Exception {
+			
+			MultiPolygon pA = (MultiPolygon) ShapeFileUtil.getGeometry(gAFile);
+			logger.info("---> pA.getArea(): " + pA.getArea());
+
+			//MultiLineString l2 = (MultiLineString) getGeometry(p2FileName);
+			//MultiLineString lB = (MultiLineString) getGeometriesPoligon(p2FileName);
+			//System.out.println("---> lB.getArea(): " + lB.getArea());
+			//GeometryFactory gf = new GeometryFactory();
+			//Polygon pB = gf.createPolygon(lB.getCoordinates());
+			
+			MultiPolygon mpB = null;
+			Polygon pB = null;
+			
+			try {
+				mpB = (MultiPolygon) ShapeFileUtil.getGeometriesPoligon(gBFile);
+				logger.info("---> mpB.getArea(): " + mpB.getArea());
+			} catch (ClassCastException e) {
+				pB = (Polygon) ShapeFileUtil.getGeometriesPoligon(gBFile);
+				logger.info("---> pB.getArea(): " + pB.getArea());
+			}
+
+			// GeometryFunction functions = new GeometryFunction();
+			// GeometryFunctions
+			// MultiPolygon p = (MultiPolygon)
+			// getPolygon("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/perimetres/jonquera_perimeter_1.shp");
+			Geometry symDiff = pA.symDifference( (mpB != null) ? mpB : pB );
+			double symDiffArea = symDiff.getArea();
+			logger.info("---> (pB symDiff pA).getArea(): " + symDiffArea);
+			double predictionError = symDiffArea / pA.getArea();
+			logger.info("---> predictionError: " + predictionError);
+			return predictionError;
+
+	}
+	
+	public static void saveGeometryPolygon(File gFile, File outputFile) throws Exception {
+		Feature p1Feature = ShapeFileUtil.getFirstFeature(gFile);
+		CoordinateReferenceSystem crs = p1Feature.getDefaultGeometryProperty().getDescriptor().getCoordinateReferenceSystem();
+		//MultiPolygon pB = (MultiPolygon) ShapeFileUtil.getGeometriesPoligon(gFile);
+		//ShapeFileUtil.save(outputFile, ShapeFileUtil.getGeometriesPoligon(gFile), crs);
 	}
 
 }
