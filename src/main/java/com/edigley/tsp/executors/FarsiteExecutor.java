@@ -7,6 +7,8 @@ import org.apache.commons.lang.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.input.ScenarioProperties;
+import com.edigley.tsp.input.ShapeFileUtil;
 import com.edigley.tsp.util.ProcessUtil;
 
 import io.jenetics.Genotype;
@@ -15,6 +17,8 @@ public class FarsiteExecutor {
 
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteExecutor.class);
 
+	private ScenarioProperties scenarioProperties; 
+	
 	private File farsiteFile;
 
 	private File scenarioDir;
@@ -42,7 +46,7 @@ public class FarsiteExecutor {
 	}
 
 	public static String toCmdArg(long generation, long id, FarsiteIndividual individual) {
-		return generation + " " + id + " " + individual + " 1";
+		return generation + " " + id + " " + individual.toString();// + " 1";
 	}
 	
 	public FarsiteExecution run(long generation, long id, FarsiteIndividual individual) throws RuntimeException {
@@ -51,6 +55,18 @@ public class FarsiteExecutor {
 		
 		FarsiteExecution execution = new FarsiteExecution(individual);
 		Double fireError = execute(generation, id, individual);
+		
+		if (fireError.equals(Double.NaN) || fireError > 9999) {
+			System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " + fireError);
+			File gAFile = scenarioProperties.getPerimeterAtT1();
+			File gBFile = scenarioProperties.getOutputFile(generation, id);
+			try {
+				fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
+			} catch (Exception e) {
+				System.err.println("Couldn't compare non-finished scenario result");
+				logger.warn("Couldn't compare non-finished scenario result", e);
+			}
+		}
 		
 		stopWatch.stop();
 		
@@ -85,6 +101,10 @@ public class FarsiteExecutor {
 				logger.error("Couldn't delete output file", e);
 			}
 		}
+	}
+
+	public void setScenarioProperties(ScenarioProperties scenarioProperties) {
+		this.scenarioProperties = scenarioProperties;
 	}
 
 }

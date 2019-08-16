@@ -7,6 +7,7 @@ import com.edigley.tsp.executors.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.executors.FarsiteIndividual;
+import com.edigley.tsp.input.ScenarioProperties;
 
 import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
@@ -55,6 +56,8 @@ public class GeneticAlgorithm {
 	
 	private static FarsiteExecutor executor;
 	
+	private static ScenarioProperties scenarioProperties;
+	
     public void setExecutor(FarsiteExecutor executor) {
 		GeneticAlgorithm.executor = executor;
 	}
@@ -90,9 +93,10 @@ public class GeneticAlgorithm {
     	IntegerChromosome.of( 20,  70, 1 ),   // fms - t1000
     	IntegerChromosome.of( 70, 100, 1 ),   // fms - t10000
     	IntegerChromosome.of(  0, 150, 1 ),   //  ws - wind speed
-    	IntegerChromosome.of(  0, 360, 1 ),   //  wd - wind direction
+    	IntegerChromosome.of(345, 360, 1 ),   //  wd - wind direction (  0, 360, 1 )
     	IntegerChromosome.of( 30,  50, 1 ),   //  th - temperature highest
-    	IntegerChromosome.of( 30, 100, 1 )    //  hh - humidity highest
+    	IntegerChromosome.of( 30, 100, 1 ),   //  hh - humidity highest
+    	IntegerChromosome.of( -9, 9, 1 )      //  adj - adjustment factor
     );
 
 	private final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
@@ -105,7 +109,7 @@ public class GeneticAlgorithm {
     	//.evaluator(new FarsitePopulationEvaluator())
     	.mapping(EvolutionResult.toUniquePopulation())
     	.build();
-	
+
 	public Phenotype<IntegerGene,Double> run() {
         Phenotype<IntegerGene, Double> result = engine.stream()
         	.limit(NUMBER_OF_GENERATIONS)
@@ -118,6 +122,10 @@ public class GeneticAlgorithm {
         	.collect(EvolutionResult.toBestPhenotype());
 
         return result;
+	}
+
+	public void setScenarioProperties(ScenarioProperties scenarioProperties) {
+		this.scenarioProperties = scenarioProperties;
 	}
     
 }

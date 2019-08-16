@@ -4,7 +4,7 @@ import io.jenetics.Genotype;
 
 public class FarsiteIndividual {
 
-	public static String HEADER = "t1 t10 t100 t1000 t10000 ws wd th hh";
+	public static String HEADER = "t1 t10 t100 t1000 t10000 ws wd th hh adj";
 	
 	public static int HEADER_LENGTH = HEADER.trim().split("\\s+").length;
 	
@@ -17,6 +17,7 @@ public class FarsiteIndividual {
 	private int wd;
 	private int th;
 	private int hh;
+	private int adj;
 
 	public FarsiteIndividual(String[] params) {
 		assert HEADER_LENGTH <= params.length;
@@ -29,6 +30,7 @@ public class FarsiteIndividual {
 		wd = Integer.valueOf(params[6]);
 		th = Integer.valueOf(params[7]);
 		hh = Integer.valueOf(params[8]);
+		adj = Integer.valueOf(params[9]);
 	}
 	
 	public FarsiteIndividual(String individualAsString) {
@@ -45,9 +47,9 @@ public class FarsiteIndividual {
 	
 	@Override
 	public String toString() {
-		//return t1 + " " + t10 + " " + t100 + " " + t1000 + " " + t10000 + " " + ws + " " + wd + " " + th + " " + hh;
-		String pattern = "%3s %3s %3s %3s %3s %3s %3s %3s %3s";
-		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh);
+		//return t1 + " " + t10 + " " + t100 + " " + t1000 + " " + t10000 + " " + ws + " " + wd + " " + th + " " + hh + " " + adj;
+		String pattern = "%3s %3s %3s %3s %3s %3s %3s %3s %3s %.1f";
+		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh, 1+(0.1*adj));
 	}
 
 	@Override
@@ -63,6 +65,7 @@ public class FarsiteIndividual {
 		result = prime * result + th;
 		result = prime * result + wd;
 		result = prime * result + ws;
+		result = prime * result + adj;
 		return result;
 	}
 
@@ -92,6 +95,8 @@ public class FarsiteIndividual {
 		if (th != other.th)
 			return false;
 		if (hh != other.hh)
+			return false;
+		if (adj != other.adj)
 			return false;
 		return true;
 	}

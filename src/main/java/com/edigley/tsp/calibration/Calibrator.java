@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.executors.FarsiteIndividual;
+import com.edigley.tsp.input.ScenarioProperties;
 
 import io.jenetics.IntegerGene;
 import io.jenetics.Phenotype;
@@ -31,6 +32,8 @@ public class Calibrator {
 	private File farsiteFile;
 	
 	private File scenarioDir;
+	
+	private ScenarioProperties scenarioProperties; 
 	
 	private GeneticAlgorithm geneticAlgorithm;
 	
@@ -48,10 +51,17 @@ public class Calibrator {
 		farsiteFile = (File) cmd.getParsedOptionValue(FARSITE);
 		scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO);
 		
-		assertsFilesExists(farsiteFile, scenarioDir, new File(scenarioDir, "scenario.ini"));
+		assertsFilesExists(farsiteFile, scenarioDir, new File(scenarioDir, ScenarioProperties.SCENARIO_FILE_NAME));
 		
 		geneticAlgorithm = new GeneticAlgorithm();
-		geneticAlgorithm.setExecutor(new FarsiteExecutor(farsiteFile, scenarioDir, (Long) cmd.getParsedOptionValue(TIME_OUT)));
+		
+		scenarioProperties = new ScenarioProperties(scenarioDir);
+		geneticAlgorithm.setScenarioProperties(scenarioProperties);
+		
+		Long farsiteExecutionTimeOut = (Long) cmd.getParsedOptionValue(TIME_OUT);
+		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut);
+		executor.setScenarioProperties(scenarioProperties);
+		geneticAlgorithm.setExecutor(executor);
 		
 		FarsiteExecutionMemoization cache;
 		if (cmd.hasOption(MEMOIZATION)) {

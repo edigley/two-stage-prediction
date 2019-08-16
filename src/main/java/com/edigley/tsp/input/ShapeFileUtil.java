@@ -145,6 +145,18 @@ public class ShapeFileUtil {
 		// logger.info("---> centroid: " + centroid.getDimension());
 	}
 	
+	public static void save(File file, Polygon polygon, CoordinateReferenceSystem crs) throws Exception, MalformedURLException, IOException {
+		
+		GeometryFactory gf = new GeometryFactory();
+		
+		Polygon[] polys = new Polygon[1];
+		polys[0] = polygon;
+		
+		MultiPolygon multiPolygon = gf.createMultiPolygon(polys);
+		
+		save(file, multiPolygon, crs);
+	}
+	
 	public static void save(File file, MultiPolygon multiPolygon, CoordinateReferenceSystem crs)
 			throws Exception, MalformedURLException, IOException {
 
@@ -246,6 +258,20 @@ public class ShapeFileUtil {
 	public static void saveGeometryPolygon(File gFile, File outputFile) throws Exception {
 		Feature p1Feature = ShapeFileUtil.getFirstFeature(gFile);
 		CoordinateReferenceSystem crs = p1Feature.getDefaultGeometryProperty().getDescriptor().getCoordinateReferenceSystem();
+		
+		MultiPolygon mpB = null;
+		Polygon pB = null;
+		
+		try {
+			mpB = (MultiPolygon) ShapeFileUtil.getGeometriesPoligon(gFile);
+			logger.info("---> mpB.getArea(): " + mpB.getArea());
+			ShapeFileUtil.save(outputFile, mpB, null);
+		} catch (ClassCastException e) {
+			pB = (Polygon) ShapeFileUtil.getGeometriesPoligon(gFile);
+			ShapeFileUtil.save(outputFile, pB, null);
+			logger.info("---> pB.getArea(): " + pB.getArea());
+		}
+		
 		//MultiPolygon pB = (MultiPolygon) ShapeFileUtil.getGeometriesPoligon(gFile);
 		//ShapeFileUtil.save(outputFile, ShapeFileUtil.getGeometriesPoligon(gFile), crs);
 	}
