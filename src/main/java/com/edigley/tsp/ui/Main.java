@@ -20,7 +20,8 @@ public class Main {
 		+ " -c playpen/fire-scenarios/jonquera/ "
 		+ " -m playpen/farsite_execution_memoization_60_seconds_with_adj_factor_and_max_simulated_time.txt " 
 		+ " -t 60"
-		+ " -s 1234";
+		+ " -p 4"
+		+ " -s 123";
 		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);

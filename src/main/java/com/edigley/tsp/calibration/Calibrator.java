@@ -5,6 +5,7 @@ import static com.edigley.tsp.ui.CLI.SCENARIO_CONFIGURATION;
 import static com.edigley.tsp.ui.CLI.MEMOIZATION;
 import static com.edigley.tsp.ui.CLI.TIME_OUT;
 import static com.edigley.tsp.ui.CLI.SEED;
+import static com.edigley.tsp.ui.CLI.PARALLELIZATION_LEVEL;
 import static com.edigley.tsp.util.CLIUtils.assertsFilesExists;
 
 import java.io.File;
@@ -63,7 +64,14 @@ public class Calibrator {
 			farsiteExecutionTimeOut = scenarioProperties.getFarsiteExecutionTimeout();
 		}
 		
-		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut);
+		Long farsiteExecutionParallelizationLevel = null;
+		if (cmd.hasOption(PARALLELIZATION_LEVEL)) {
+			farsiteExecutionParallelizationLevel = (Long) cmd.getParsedOptionValue(PARALLELIZATION_LEVEL);
+		} else {
+			farsiteExecutionParallelizationLevel = scenarioProperties.getFarsiteParallelizationLevel();
+		}
+		
+		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut, farsiteExecutionParallelizationLevel);
 		executor.setScenarioProperties(scenarioProperties);
 		geneticAlgorithm.setExecutor(executor);
 		

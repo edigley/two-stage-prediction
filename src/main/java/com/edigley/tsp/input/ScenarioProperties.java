@@ -31,7 +31,7 @@ public class ScenarioProperties {
 	
 	private int populationSize;
 	
-	private int farsiteParallelizationLevel;
+	private Long farsiteParallelizationLevel;
 	
 	private long farsiteExecutionTimeout;
 	
@@ -54,7 +54,7 @@ public class ScenarioProperties {
 		this.populationSize = Integer.valueOf(scenarioProperties.getProperty("population_size", Integer.toString(POPULATION_SIZE).trim()));
 		this.crossoverProbability = Double.valueOf(scenarioProperties.getProperty("pCrossover", Double.toString(RECOMBINATION_PROBABILITY).trim()));
 		this.mutationProbability = Double.valueOf(scenarioProperties.getProperty("pMutation", Double.toString(MUTATION_PROBABILITY).trim()));
-		this.farsiteParallelizationLevel = Integer.valueOf(scenarioProperties.getProperty("num_threads").trim());
+		this.farsiteParallelizationLevel = Long.valueOf(scenarioProperties.getProperty("num_threads", "1").trim());
 		this.farsiteExecutionTimeout = Integer.valueOf(scenarioProperties.getProperty("ExecutionLimit").trim());
 		
 	}
@@ -103,7 +103,7 @@ public class ScenarioProperties {
 		return populationSize;
 	}
 
-	public int getFarsiteParallelizationLevel() {
+	public Long getFarsiteParallelizationLevel() {
 		return farsiteParallelizationLevel;
 	}
 

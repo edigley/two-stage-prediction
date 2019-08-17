@@ -4,7 +4,7 @@ import com.edigley.tsp.input.FileHeader;
 
 public class FarsiteExecution {
 
-	public static final FileHeader header = new FileHeader(FarsiteIndividual.header + " fireError maxSimulatedTime executionTime ");
+	public static final FileHeader header = new FileHeader(FarsiteIndividual.header + " fireError maxSimulatedTime parallelizationLevel executionTime ");
 	
 	public static final int PARAMS_START_POS = FarsiteIndividual.header.length;
 	
@@ -14,6 +14,8 @@ public class FarsiteExecution {
 	
 	private Double maxSimulatedTime;
 	
+	private long parallelizationLevel;
+
 	private long executionTime;
 	
 	public FarsiteExecution(FarsiteIndividual individual) {
@@ -26,7 +28,8 @@ public class FarsiteExecution {
 		individual = new FarsiteIndividual(params);
 		fireError = Double.valueOf(params[PARAMS_START_POS]);
 		maxSimulatedTime = Double.valueOf(params[PARAMS_START_POS+1]);
-		executionTime = Long.valueOf(params[PARAMS_START_POS+2]);
+		parallelizationLevel = Long.valueOf(params[PARAMS_START_POS+2]);
+		executionTime = Long.valueOf(params[PARAMS_START_POS+3]);
 	}
 
 	public Double getFireError() {
@@ -52,11 +55,19 @@ public class FarsiteExecution {
 	public FarsiteIndividual getIndividual() {
 		return individual;
 	}
+	
+	public long getParallelizationLevel() {
+		return parallelizationLevel;
+	}
+	
+	public void setParallelizationLevel(long parallelizationLevel) {
+		this.parallelizationLevel = parallelizationLevel;
+	}
 
 	@Override
 	public String toString() {
-		String pattern = "%s  %.6f  %6.0f %6s";
-		return String.format(pattern, individual, fireError, maxSimulatedTime, executionTime);
+		String pattern = "%s  %.6f  %6.0f %6s %6s";
+		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime);
 	}
 	
 }

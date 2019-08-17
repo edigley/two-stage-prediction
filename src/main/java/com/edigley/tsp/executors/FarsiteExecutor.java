@@ -24,11 +24,14 @@ public class FarsiteExecutor {
 	private File scenarioDir;
 	
 	private Long timeout;
+	
+	private Long parallelizationLevel;
 
-	public FarsiteExecutor(File farsiteFile, File scenarioDir, Long timeout) {
+	public FarsiteExecutor(File farsiteFile, File scenarioDir, Long timeout, Long parallelizationLevel) {
 		this.farsiteFile = farsiteFile;
 		this.scenarioDir = scenarioDir;
 		this.timeout = timeout;
+		this.parallelizationLevel = parallelizationLevel;
 	}
 	
 	public FarsiteExecutor(File farsiteFile, File scenarioDir) {
@@ -54,6 +57,7 @@ public class FarsiteExecutor {
 		stopWatch.start();
 		
 		FarsiteExecution execution = new FarsiteExecution(individual);
+		execution.setParallelizationLevel(parallelizationLevel);
 		Double fireError = execute(generation, id, individual);
 		
 		if (fireError.equals(Double.NaN) || fireError > 9999) {
@@ -86,8 +90,8 @@ public class FarsiteExecutor {
 	}
 	
 	private Double execute(long generation, long id, FarsiteIndividual individual) throws RuntimeException {
-		String pattern = "%s scenario.ini run %s %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
-		String command = String.format(pattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout);
+		String pattern = "%s scenario.ini run %s   %s   %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
+		String command = String.format(pattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout, parallelizationLevel);
 		logger.info("Going to run farsite wrapper with command: " + command);
 		String[] args = new String[3];
 		args[0] = "sh";
