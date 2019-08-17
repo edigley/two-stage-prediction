@@ -1,9 +1,10 @@
 package com.edigley.tsp.calibration;
 
 import static com.edigley.tsp.ui.CLI.FARSITE;
-import static com.edigley.tsp.ui.CLI.SCENARIO;
+import static com.edigley.tsp.ui.CLI.SCENARIO_CONFIGURATION;
 import static com.edigley.tsp.ui.CLI.MEMOIZATION;
 import static com.edigley.tsp.ui.CLI.TIME_OUT;
+import static com.edigley.tsp.ui.CLI.SEED;
 import static com.edigley.tsp.util.CLIUtils.assertsFilesExists;
 
 import java.io.File;
@@ -15,17 +16,15 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.executors.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
-import com.edigley.tsp.executors.FarsiteIndividual;
 import com.edigley.tsp.input.ScenarioProperties;
-
-import io.jenetics.IntegerGene;
-import io.jenetics.Phenotype;
 
 public class Calibrator {
 
 	private static final Logger logger = LoggerFactory.getLogger(Calibrator.class);
+	private static transient String msg;
 	
 	private CommandLine cmd;
 	
@@ -37,7 +36,7 @@ public class Calibrator {
 	
 	private GeneticAlgorithm geneticAlgorithm;
 	
-	private Phenotype<IntegerGene, Double> result;
+	private FarsiteExecution result;
 
 	// auxiliary flags
 	private boolean prepared = false;
@@ -49,16 +48,21 @@ public class Calibrator {
 
 	public void prepare() throws java.text.ParseException, IOException, ParseException {
 		farsiteFile = (File) cmd.getParsedOptionValue(FARSITE);
-		scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO);
+		scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
 		
 		assertsFilesExists(farsiteFile, scenarioDir, new File(scenarioDir, ScenarioProperties.SCENARIO_FILE_NAME));
 		
-		geneticAlgorithm = new GeneticAlgorithm();
-		
 		scenarioProperties = new ScenarioProperties(scenarioDir);
-		geneticAlgorithm.setScenarioProperties(scenarioProperties);
+
+		geneticAlgorithm = new GeneticAlgorithm(scenarioProperties, (Long) cmd.getParsedOptionValue(SEED));
 		
-		Long farsiteExecutionTimeOut = (Long) cmd.getParsedOptionValue(TIME_OUT);
+		Long farsiteExecutionTimeOut = null;
+		if (cmd.hasOption(TIME_OUT)) {
+			farsiteExecutionTimeOut = (Long) cmd.getParsedOptionValue(TIME_OUT);
+		} else {
+			farsiteExecutionTimeOut = scenarioProperties.getFarsiteExecutionTimeout();
+		}
+		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut);
 		executor.setScenarioProperties(scenarioProperties);
 		geneticAlgorithm.setExecutor(executor);
@@ -89,8 +93,9 @@ public class Calibrator {
 	}
 
 	public void printSummaryStatistics(StopWatch stopWatch) {
-        logger.info("Genetic - Best Result:\n" + result);
-        System.out.println("Genetic - Best Result:\n" + FarsiteIndividual.toStringParams(result.getGenotype()) + " " + result.getFitness());
+		msg = String.format("Genetic Algorithm - Best Calibrated Result: %s", result);
+        logger.info(msg);
+        System.out.println(msg);
 	}
 
 	public void releaseResources() {

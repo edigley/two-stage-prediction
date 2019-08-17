@@ -17,9 +17,10 @@ public class Main {
 		
 		tspCMD = ""
 		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction " 
-		+ " -s playpen/fire-scenarios/jonquera/ "
+		+ " -c playpen/fire-scenarios/jonquera/ "
 		+ " -m playpen/farsite_execution_memoization_60_seconds_with_adj_factor_and_max_simulated_time.txt " 
-		+ " -t 60";
+		+ " -t 60"
+		+ " -s 1234";
 		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);

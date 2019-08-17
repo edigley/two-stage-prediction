@@ -8,25 +8,55 @@ import java.util.Properties;
 
 public class ScenarioProperties {
 
+	//defaultValues for properties
 	public static final String SCENARIO_FILE_NAME = "scenario.ini";
+	public static final int NUMBER_OF_GENERATIONS = 10;
+	public static final int POPULATION_SIZE = 25;
+	public static final double RECOMBINATION_PROBABILITY = 0.4;
+	public static final double MUTATION_PROBABILITY = 0.1;
 	
+	private Properties scenarioProperties;
+
 	private File scenarioFile;
+	
+	private File landscapeFile;
+	
+	private File perimeterAtT0File;
 	
 	private File perimeterAtT1File;
 	
 	private File outputDir;
 	
-	private Properties scenarioProperties;
+	private int numGenerations;
+	
+	private int populationSize;
+	
+	private int farsiteParallelizationLevel;
+	
+	private long farsiteExecutionTimeout;
+	
+	private double crossoverProbability;
+	
+	private double mutationProbability;
 
 	public ScenarioProperties(File scenarioDir) throws FileNotFoundException, IOException {
 		assert scenarioDir.exists();
-		this.scenarioFile = new File(scenarioDir, SCENARIO_FILE_NAME);
+		scenarioFile = new File(scenarioDir, SCENARIO_FILE_NAME);
 		assert scenarioFile.exists();
-		this.scenarioProperties = new Properties();
+		scenarioProperties = new Properties();
 		scenarioProperties.load(new FileInputStream(scenarioFile));
 		
-		this.perimeterAtT1File = new File(scenarioDir, scenarioProperties.getProperty("real_fire_map_t1").replace(".asc", ".shp"));
-		this.outputDir = new File(scenarioDir, scenarioProperties.getProperty("output_path"));
+		this.landscapeFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeFile"));
+		this.perimeterAtT0File = new File(scenarioDir, scenarioProperties.getProperty("ignitionFile"));
+		this.perimeterAtT1File = new File(scenarioDir, scenarioProperties.getProperty("real_fire_map_t1").trim().replace(".asc", ".shp"));
+		this.outputDir = new File(scenarioDir, scenarioProperties.getProperty("output_path").trim());
+		this.numGenerations = Integer.valueOf(scenarioProperties.getProperty("numGenerations", Integer.toString(NUMBER_OF_GENERATIONS).trim()));
+		this.populationSize = Integer.valueOf(scenarioProperties.getProperty("population_size", Integer.toString(POPULATION_SIZE).trim()));
+		this.crossoverProbability = Double.valueOf(scenarioProperties.getProperty("pCrossover", Double.toString(RECOMBINATION_PROBABILITY).trim()));
+		this.mutationProbability = Double.valueOf(scenarioProperties.getProperty("pMutation", Double.toString(MUTATION_PROBABILITY).trim()));
+		this.farsiteParallelizationLevel = Integer.valueOf(scenarioProperties.getProperty("num_threads").trim());
+		this.farsiteExecutionTimeout = Integer.valueOf(scenarioProperties.getProperty("ExecutionLimit").trim());
+		
 	}
 	
 	public File getPerimeterAtT1() {
@@ -63,6 +93,38 @@ public class ScenarioProperties {
 
 		System.out.println(p1File);
 		System.out.println(outputFile);
+	}
+
+	public int getNumGenerations() {
+		return numGenerations;
+	}
+
+	public int getPopulationSize() {
+		return populationSize;
+	}
+
+	public int getFarsiteParallelizationLevel() {
+		return farsiteParallelizationLevel;
+	}
+
+	public double getCrossoverProbability() {
+		return crossoverProbability;
+	}
+
+	public double getMutationProbability() {
+		return mutationProbability;
+	}
+
+	public long getFarsiteExecutionTimeout() {
+		return farsiteExecutionTimeout;
+	}
+
+	public File getLandscapeFile() {
+		return landscapeFile;
+	}
+
+	public File getPerimeterAtT0File() {
+		return perimeterAtT0File;
 	}
 
 }
