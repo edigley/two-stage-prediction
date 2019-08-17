@@ -1,12 +1,14 @@
 package com.edigley.tsp.executors;
 
+import com.edigley.tsp.input.FileHeader;
+
 import io.jenetics.Genotype;
 
 public class FarsiteIndividual {
 
-	public static String HEADER = "t1 t10 t100 t1000 t10000 ws wd th hh adj";
-	
-	public static int HEADER_LENGTH = HEADER.trim().split("\\s+").length;
+	public static final FileHeader header = new FileHeader("t1 t10 t100 t1000 t10000 ws wd th hh adj");
+
+	public static final int PARAMS_START_POS = 0;
 	
 	private int t1;
 	private int t10;
@@ -20,17 +22,27 @@ public class FarsiteIndividual {
 	private int adj;
 
 	public FarsiteIndividual(String[] params) {
-		assert HEADER_LENGTH <= params.length;
-		t1 = Integer.valueOf(params[0]);
-		t10 = Integer.valueOf(params[1]);
-		t100 = Integer.valueOf(params[2]);
-		t1000 = Integer.valueOf(params[3]);
-		t10000 = Integer.valueOf(params[4]);
-		ws = Integer.valueOf(params[5]);
-		wd = Integer.valueOf(params[6]);
-		th = Integer.valueOf(params[7]);
-		hh = Integer.valueOf(params[8]);
-		adj = Integer.valueOf(params[9]);
+		assert header.length <= params.length;
+		t1 = getGene(params, "t1");
+		t10 = getGene(params, "t10");
+		t100 = getGene(params, "t100");
+		t1000 = getGene(params, "t1000");
+		t10000 = getGene(params, "t10000");
+		ws = getGene(params, "ws");
+		wd = getGene(params, "wd");
+		th = getGene(params, "th");
+		hh = getGene(params, "hh");
+		adj = getGene(params, "adj");
+	}
+
+	private Integer getGene(String[] params, String gene) {
+		String param = params[PARAMS_START_POS + header.map.get(gene)];
+		
+		if (gene.equals("adj")) {
+			return convertAdjustmentFactorToInt(param);
+		}
+		
+		return Integer.valueOf(param);
 	}
 	
 	public FarsiteIndividual(String individualAsString) {
@@ -45,11 +57,52 @@ public class FarsiteIndividual {
 		return gt.toString().replace("[", "").replace("]", "").replace(",", " ");
 	}
 	
+	public static Double convertAdjustmentFactorToDouble(int adjI) {
+		//convert from range [-9 to 9] to [0.1 to 1.9]
+		double adjD = 1 + (0.1 * adjI);
+		return adjD;
+	}
+	
+	public static int convertAdjustmentFactorToInt(String adjS) {
+		//convert from range [0.1 to 1.9] to [-9 to 9] 
+		String[] splitValue = adjS.split("\\.");
+		//assert splitValue.length == 2;
+		if (splitValue.length == 2) {
+			int integerPart = Integer.valueOf(splitValue[0]);
+			int decimalPart = Integer.valueOf(splitValue[1]);
+			return (integerPart == 1) ? decimalPart : (decimalPart - 10);
+		} else {
+			return Integer.valueOf(adjS);
+		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.1"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.2"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.3"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.4"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.5"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.6"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.7"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.8"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("0.9"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.0"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.1"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.2"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.3"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.4"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.5"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.6"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.7"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.8"));
+		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.9"));
+	}
+	
 	@Override
 	public String toString() {
-		//return t1 + " " + t10 + " " + t100 + " " + t1000 + " " + t10000 + " " + ws + " " + wd + " " + th + " " + hh + " " + adj;
-		String pattern = "%3s %3s %3s %3s %3s %3s %3s %3s %3s %.1f";
-		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh, 1+(0.1*adj));
+		double adj = convertAdjustmentFactorToDouble(this.adj); // convert the adjustment factor to decimal ranging from 0.1 to 1.9
+		String pattern = "%3s %3s %3s %3s %3s %4s %4s %3s %3s  %.2f";
+		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh, adj);
 	}
 
 	@Override

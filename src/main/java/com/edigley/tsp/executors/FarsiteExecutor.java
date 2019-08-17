@@ -42,7 +42,7 @@ public class FarsiteExecutor {
 
 	public static String toCmdArg(long generation, long id, Genotype<?> gt) {
 		String genotypeAsString = FarsiteIndividual.toStringParams(gt);
-		return generation + " " + id + " " + genotypeAsString + " 1";
+		return generation + " " + id + " " + genotypeAsString;// + " 1";
 	}
 
 	public static String toCmdArg(long generation, long id, FarsiteIndividual individual) {
@@ -57,17 +57,25 @@ public class FarsiteExecutor {
 		Double fireError = execute(generation, id, individual);
 		
 		if (fireError.equals(Double.NaN) || fireError > 9999) {
-			System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " + fireError);
+			//System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " + fireError + "\n");
+			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
 			File gAFile = scenarioProperties.getPerimeterAtT1();
 			File gBFile = scenarioProperties.getOutputFile(generation, id);
 			try {
-				fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
+				fireError = Double.parseDouble(String.format("%.6f", ShapeFileUtil.calculatePredictionError(gAFile, gBFile)));
 			} catch (Exception e) {
-				System.err.println("Couldn't compare non-finished scenario result");
-				logger.warn("Couldn't compare non-finished scenario result", e);
+				System.err.printf("Couldn't compare non-finished scenario result for individual %s. Error message: %s\n", individual, e.getMessage());
+				logger.error("Couldn't compare non-finished scenario result", e);
 			}
 		}
 		
+		try {
+			Double maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
+			execution.setMaxSimulatedTime(maxSimulatedTime);
+		} catch (Exception e) {
+			System.err.printf("Couldn't extract maximum simulated time for individual %s \n", individual);
+			logger.warn("Couldn't extract maximum simulated time for inidividual " + individual, e);
+		}
 		stopWatch.stop();
 		
 		long executionTime = Math.round(stopWatch.getTime()/1000.0);

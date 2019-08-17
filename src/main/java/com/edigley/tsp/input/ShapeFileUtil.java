@@ -5,9 +5,16 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
+import javax.xml.transform.stream.StreamSource;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
@@ -25,8 +32,10 @@ import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.factory.ReferencingObjectFactory;
+import org.geotools.util.Comparators;
 import org.opengis.feature.Feature;
 import org.opengis.feature.GeometryAttribute;
+import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -87,26 +96,52 @@ public class ShapeFileUtil {
 	}
 	
 	public static Object getGeometry(File file) throws Exception {
-
-		Feature feature = getFirstFeature(file);
+		Feature feature = getLastFeature(file);
 		GeometryAttribute sourceGeometry = feature.getDefaultGeometryProperty();
 		return sourceGeometry.getValue();
-
 	}
 
+	public static Feature getFeature(File file) throws Exception {
+		Feature feature = getLastFeature(file);
+		return feature;
+	}
+	
+	public static Feature getLastFeature(File file) throws Exception {
+		List<Feature> allFeatures = getAllFeatures(file);
+		return allFeatures.get(allFeatures.size()-1);
+	}
+	
 	public static Feature getFirstFeature(File file) throws Exception {
+		List<Feature> allFeatures = getAllFeatures(file);
+		return allFeatures.get(0);
+	}
+	
+	public static Double getSimulatedTime(File file) throws Exception {
+		Feature lastFeature = getLastFeature(file);
+		//properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
+		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi")
+				.stream()
+				.map(p -> Double.valueOf(p.getValue().toString()))
+				.max(Comparator.comparing(Double::doubleValue)).orElseThrow(NoSuchElementException::new);
+		return maxSimulatedTime;
+	}	
+	
+	public static List<Feature> getAllFeatures(File file) throws Exception {
 		logger.info("getFirstFeature.fileName: " + file.getAbsolutePath());
 		Map<String, String> connect = new HashMap<>();
 		connect.put("url", file.toURI().toString());
 
 		DataStore dataStore = DataStoreFinder.getDataStore(connect);
 		String[] typeNames = dataStore.getTypeNames();
+		//Arrays.stream(typeNames).forEach(v -> System.out.println("typeNames: " + v));
 		String typeName = typeNames[0];
 
 		logger.info("getFirstFeature: Reading feature content: " + typeName);
 
 		FeatureSource featureSource = dataStore.getFeatureSource(typeName);
 		FeatureCollection features = featureSource.getFeatures();
+		
+		List<Feature> allFeatures = new ArrayList<>();
 		
 		FeatureIterator it = features.features();
 
@@ -116,18 +151,19 @@ public class ShapeFileUtil {
 		while (it.hasNext()) {
 			nOfFeatures++;
 			feature = it.next();
+			allFeatures.add(feature);
 		}
 		it.close();
 		
 		logger.info("getFirstFeature.nOfFeatures: " + nOfFeatures);
 
-		return feature;
+		return allFeatures;
 	}
 	
 	public static void describe(File file) throws Exception {
 		logger.info("describe.fileName: " + file.getAbsolutePath());
 
-		Feature feature = getFirstFeature(file);
+		Feature feature = getLastFeature(file);
 		logger.info("---> getPolygon.feature.getType(): " + feature.getType());
 		logger.info("---> feature.getProperties().size(): " + feature.getProperties().size());
 		feature.getProperties().stream().forEach(p -> logger.info(p.getName().toString()));
@@ -256,7 +292,7 @@ public class ShapeFileUtil {
 	}
 	
 	public static void saveGeometryPolygon(File gFile, File outputFile) throws Exception {
-		Feature p1Feature = ShapeFileUtil.getFirstFeature(gFile);
+		Feature p1Feature = ShapeFileUtil.getLastFeature(gFile);
 		CoordinateReferenceSystem crs = p1Feature.getDefaultGeometryProperty().getDescriptor().getCoordinateReferenceSystem();
 		
 		MultiPolygon mpB = null;

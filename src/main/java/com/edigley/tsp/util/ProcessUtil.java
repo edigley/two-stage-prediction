@@ -29,8 +29,8 @@ public class ProcessUtil {
 				if (process.waitFor(timeOut, TimeUnit.SECONDS)) {
 					return processFarsiteExecutionResult(process, errorGobbler, outputGobbler, true);
 				} else {
-					logger.debug("Farsite execution has timed out");
-					System.err.println("Farsite execution has timed out");
+					logger.error("Farsite execution has timed out");
+					//System.err.println("Farsite execution has timed out");
 					return Double.NaN;
 				}
 			} else {

@@ -16,14 +16,14 @@ public class FarsiteExecutionMemoization {
 		try {
 			if (!file.exists()) {
 				fw = new FileWriter(file);
-				fw.append(FarsiteExecution.HEADER + "\n");
+				fw.append(FarsiteExecution.header + "\n");
 				fw.flush();
 			} else {
 				Scanner sc = new Scanner(file);
 				String firstLine = sc.nextLine(); 
-				if (!firstLine.equals(FarsiteExecution.HEADER)) {
+				if (!firstLine.equals(FarsiteExecution.header.toString())) {
 					String pattern = "First line from file %s doesn't contain expected header. Expected: %s. Actual: %s";
-					System.err.println(String.format(pattern, file.getAbsolutePath(), FarsiteExecution.HEADER, firstLine));
+					System.err.println(String.format(pattern, file.getAbsolutePath(), FarsiteExecution.header, firstLine));
 					System.exit(5);
 				}
 				String nextLine;

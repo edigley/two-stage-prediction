@@ -1,14 +1,18 @@
 package com.edigley.tsp.executors;
 
+import com.edigley.tsp.input.FileHeader;
+
 public class FarsiteExecution {
 
-	public static String HEADER = FarsiteIndividual.HEADER + " fireError executionTime";
+	public static final FileHeader header = new FileHeader(FarsiteIndividual.header + " fireError maxSimulatedTime executionTime ");
 	
-	public static int HEADER_LENGTH = HEADER.trim().split("\\s+").length;
+	public static final int PARAMS_START_POS = FarsiteIndividual.header.length;
 	
 	private FarsiteIndividual individual;
 
 	private Double fireError;
+	
+	private Double maxSimulatedTime;
 	
 	private long executionTime;
 	
@@ -18,10 +22,10 @@ public class FarsiteExecution {
 	
 	public FarsiteExecution(String executionAsString) {
 		String[] params = executionAsString.trim().split("\\s+");
-		assert HEADER_LENGTH <= params.length;
+		assert header.length <= params.length;
 		individual = new FarsiteIndividual(params);
-		fireError = Double.valueOf(params[9]);
-		executionTime = Long.valueOf(params[10]);
+		fireError = Double.valueOf(params[PARAMS_START_POS]);
+		executionTime = Long.valueOf(params[PARAMS_START_POS+1]);
 	}
 
 	public Double getFireError() {
@@ -40,15 +44,18 @@ public class FarsiteExecution {
 		this.executionTime = executionTime;
 	}
 
+	public void setMaxSimulatedTime(Double maxSimulatedTime) {
+		this.maxSimulatedTime = maxSimulatedTime;
+	}
+	
 	public FarsiteIndividual getIndividual() {
 		return individual;
 	}
 
 	@Override
 	public String toString() {
-		//return individual + " " + fireError + " " + executionTime;
-		String pattern = "%s %11s %6s";
-		return String.format(pattern, individual, fireError, executionTime);
+		String pattern = "%s %11s %.0f %6s";
+		return String.format(pattern, individual, fireError, maxSimulatedTime, executionTime);
 	}
 	
 }

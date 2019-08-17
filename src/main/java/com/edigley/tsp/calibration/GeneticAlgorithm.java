@@ -96,7 +96,7 @@ public class GeneticAlgorithm {
     	IntegerChromosome.of(345, 360, 1 ),   //  wd - wind direction (  0, 360, 1 )
     	IntegerChromosome.of( 30,  50, 1 ),   //  th - temperature highest
     	IntegerChromosome.of( 30, 100, 1 ),   //  hh - humidity highest
-    	IntegerChromosome.of( -9, 9, 1 )      //  adj - adjustment factor
+    	IntegerChromosome.of( -9, 9, 1 )      // adj - adjustment factor
     );
 
 	private final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
