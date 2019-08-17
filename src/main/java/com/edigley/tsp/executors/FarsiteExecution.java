@@ -25,7 +25,8 @@ public class FarsiteExecution {
 		assert header.length <= params.length;
 		individual = new FarsiteIndividual(params);
 		fireError = Double.valueOf(params[PARAMS_START_POS]);
-		executionTime = Long.valueOf(params[PARAMS_START_POS+1]);
+		maxSimulatedTime = Double.valueOf(params[PARAMS_START_POS+1]);
+		executionTime = Long.valueOf(params[PARAMS_START_POS+2]);
 	}
 
 	public Double getFireError() {
@@ -54,7 +55,7 @@ public class FarsiteExecution {
 
 	@Override
 	public String toString() {
-		String pattern = "%s %11s %.0f %6s";
+		String pattern = "%s  %.6f  %6.0f %6s";
 		return String.format(pattern, individual, fireError, maxSimulatedTime, executionTime);
 	}
 	

@@ -58,6 +58,8 @@ public class GeneticAlgorithm {
 	
 	private static ScenarioProperties scenarioProperties;
 	
+	private static transient String msg;
+	
     public void setExecutor(FarsiteExecutor executor) {
 		GeneticAlgorithm.executor = executor;
 	}
@@ -68,20 +70,21 @@ public class GeneticAlgorithm {
     
 	private static synchronized Double eval(Genotype<IntegerGene> gt) {
      	id++;
-     	String logMessage = "";
      	FarsiteIndividual individual = new FarsiteIndividual(gt);
+     	logger.debug(String.format("Going to check cached value for individual %s", individual));
      	FarsiteExecution cachedExecution = cache.get(individual);
+     	logger.debug(String.format("Cached value for individual %s: %s", individual, cachedExecution));
 		if (cachedExecution != null) {
-			logMessage = String.format("%2s %3s %s -> CACHED", generation, id, cachedExecution);
-			System.out.println(logMessage);
-			logger.info(logMessage);
+			msg = String.format("%2s %3s %s -> CACHED", generation, id, cachedExecution);
+			System.out.println(msg);
+			logger.info(msg);
      		return cachedExecution.getFireError();
      	} else {
 			FarsiteExecution execution = executor.run(generation, id, individual);
 			cache.add(execution);
-			logMessage = String.format("%2s %3s %s", generation, id, execution);
-			System.out.println(logMessage);
-			logger.info(logMessage);
+			msg = String.format("%2s %3s %s", generation, id, execution);
+			System.out.println(msg);
+			logger.info(msg);
 	    	return execution.getFireError();
      	}
     }

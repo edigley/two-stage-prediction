@@ -64,9 +64,11 @@ public class FarsiteIndividual {
 	}
 	
 	public static int convertAdjustmentFactorToInt(String adjS) {
+		assert adjS.length() == 3;
 		//convert from range [0.1 to 1.9] to [-9 to 9] 
 		String[] splitValue = adjS.split("\\.");
-		//assert splitValue.length == 2;
+		//System.out.println("splitValue: " + Arrays.toString(splitValue));
+		assert splitValue.length == 2;
 		if (splitValue.length == 2) {
 			int integerPart = Integer.valueOf(splitValue[0]);
 			int decimalPart = Integer.valueOf(splitValue[1]);
@@ -98,13 +100,6 @@ public class FarsiteIndividual {
 		System.out.printf("%s\n", convertAdjustmentFactorToInt("1.9"));
 	}
 	
-	@Override
-	public String toString() {
-		double adj = convertAdjustmentFactorToDouble(this.adj); // convert the adjustment factor to decimal ranging from 0.1 to 1.9
-		String pattern = "%3s %3s %3s %3s %3s %4s %4s %3s %3s  %.2f";
-		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh, adj);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -152,6 +147,13 @@ public class FarsiteIndividual {
 		if (adj != other.adj)
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		double adj = convertAdjustmentFactorToDouble(this.adj); // convert the adjustment factor to decimal ranging from 0.1 to 1.9
+		String pattern = "%3s %3s %3s %3s %3s %4s %4s %3s %3s  %.1f";
+		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh, adj);
 	}
 	
 }
