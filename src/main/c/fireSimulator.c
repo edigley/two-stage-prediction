@@ -283,97 +283,67 @@ void createFarsiteInputFiles(INDVTYPE_FARSITE individual, int generation) {
  */
 int main(int argc, char *argv[]) {
 
-    if (argc == 1 ) { //binary valid
+    if (argc == 1 ) { // binary file valid
+        printf("%s - ERROR: FireSimulator.main -> binary file valid.\n", getCurrentTime());
     	return 0;
     }
 
-    if (argc < 3 ) { //error: number of args invalid
-        printf("%s - ERROR: FireSimulator.main -> number of args invalid. Please inform at least a configuration and a population files.", getCurrentTime());
-        printf("You can optionally inform the individual to be executed.\n");
-        return 1;
-    }
-
-    POPULATIONTYPE population;
-    if  (argc <= 5) { //must read population file
-        readPopulation(&population, argv[2]);
-        //print_population_farsite(population);
-        //print_individuo(0, population.popu_fs[0]);
-    }
-
-    double adjustmentError;
     char * configurationFile = argv[1];
-    char * atmPath;
     int generation = 0;
-    int individuoId;
     int timeout;
 	int parallelizationLevel;
     INDVTYPE_FARSITE * individual;
-    int begin, end;
-    char individualAsString[256]; // 256 bytes allocated here on the stack.
-    char * adjustmentErrorsFileName = "output_individuals_adjustment_result.txt";
-    FILE * adjustmentErrors;
 
-    if  (argc > 5) { //specify the individual directly 
-        printf("%s - INFO: FireSimulator.main -> Gonna run farsite for individual specified directly: %s\n", getCurrentTime(), argv[2]);
+    if  (argc > 5) { // specify the individual directly 
+
+        printf("%s - INFO: FireSimulator.main -> Gonna execute for individual specified directly: %s\n", getCurrentTime(), argv[2]);
         printf("%s - INFO: FireSimulator.main -> argc: %d\n", getCurrentTime(), argc);
         individual = (INDVTYPE_FARSITE *)malloc(sizeof(INDVTYPE_FARSITE));
         individual->generation = atoi(argv[3]);
         individual->id = atoi(argv[4]);
         printf("%s - INFO: FireSimulator.main -> Gonna read all the individual params...\n", getCurrentTime());
-        int i;
-        //for the main parameters
-        for (i=0; i < 9; i++) {
-            individual->parameters[i] = atof(argv[i+5]);
+
+        if (strcmp(argv[3], "gen") == 0) { // only generate farsite input files
+
+            printf("%s - INFO: FireSimulator.main -> Gonna only generate farsite input files for individual specified directly: %s\n", getCurrentTime(), argv[2]);
+
+            genFarsiteInputFiles(configurationFile, *individual);
+
+        } else if (strcmp(argv[3], "run") == 0) { // run farsite generating input files
+
+            printf("%s - INFO: FireSimulator.main -> Gonna run farsite for individual specified directly: %s\n", getCurrentTime(), argv[2]);
+
+            int i;
+            // for the main parameters
+            for (i=0; i < 9; i++) {
+                individual->parameters[i] = atof(argv[i+5]);
+            }
+            // for the adjustment factors
+            for (i=9; i < 21; i++) {
+                individual->parameters[i] = (i+5 < argc) ? atof(argv[i+5]) : 1.0;
+            }
+            timeout = atoi(argv[15]);
+            printf("%s - INFO: FireSimulator.main -> timeout: %d\n", getCurrentTime(), timeout); 
+            parallelizationLevel = atoi(argv[16]);
+            printf("%s - INFO: FireSimulator.main -> parallelizationLevel: %d\n", getCurrentTime(), parallelizationLevel); 
+            printf("%s - INFO: FireSimulator.main -> Gonna call runIndividual funtion...\n", getCurrentTime());
+            runIndividual(configurationFile, *individual, timeout, parallelizationLevel);
+
+        } else {
+            printf("%s - ERROR: FireSimulator.main -> %s is not a valid action. Please specify what to do: [ run | gen ] \n", getCurrentTime(), argv[3]);
+            return 2;
         }
-        //for the adjustment factors
-        for (i=9; i < 21; i++) {
-            individual->parameters[i] = (i+5 < argc) ? atof(argv[i+5]) : 1.0;
-        }
-        timeout = atoi(argv[15]);
-        printf("%s - INFO: FireSimulator.main -> timeout: %d\n", getCurrentTime(), timeout); 
-		parallelizationLevel = atoi(argv[16]);
-        printf("%s - INFO: FireSimulator.main -> parallelizationLevel: %d\n", getCurrentTime(), parallelizationLevel); 
-        printf("%s - INFO: FireSimulator.main -> Gonna call runIndividual funtion...\n", getCurrentTime());
-        runIndividual(configurationFile, *individual, timeout, parallelizationLevel);
-    } else if (argc == 5) { //run only the population specified individual
-        individuoId = atoi(argv[4]);
-        begin = individuoId;
-        end = individuoId + 1;
-    } else if (argc == 4) { //run all individuals in population
-        begin = 0;
-        end = population.popuSize;
+        
     } else { //error
         printf("%s - ERROR: FireSimulator.main -> Provide the right arguments to the program \n", getCurrentTime());
         printf(" * - argv[1] file path: spif configuration file \n");
-        printf(" * - argv[2] file path: population file \n");
-        printf(" * - argv[3] string [ run | gen ]: \"run\" if should run farsite or \"gen\" if should only generate farsite input files \n");
-        printf(" * - argv[4] int [optional]: identifier of the individual to be simulated. It should range between 0 to (population_size - 1) \n");
-        // ~/doutorado_uab/git/spif/fireSimulator scenario_case_1_central_point.ini run 0 0 2 2 3 48 96 45 141 30 76 0.061901
-        // ~/doutorado_uab/git/spif/fireSimulator scenario_case_1_central_point.ini farsite_individuals_1000_formatted.txt run 0
-        // cd ~/doutorado_uab/git/spif && make fire && scenario=jonquera && cd playpen/${scenario} && ~/doutorado_uab/git/spif/fireSimulator scenario_${scenario}.ini run 0 99 2 2 3 48 96 45 141 30 76 0.06
-        return;
-    }
-
-    if ((adjustmentErrors = fopen(adjustmentErrorsFileName, "w")) == NULL) { 
-        printf("%s - ERROR: FireSimulator.main -> Error opening output adjustment errors file 'w' %s.\n", getCurrentTime(), adjustmentErrorsFileName);
-        return;
-    } else {
-        int i;
-        for (i=begin; i < end; i++) {
-
-            printf("%s - INFO: FireSimulator.main -> Going to start for individual (%d,%d)...\n", getCurrentTime(), generation, i);
-            individualToString(generation, population.popu_fs[i], individualAsString, sizeof(individualAsString));
-            printf("%s - INFO: FireSimulator.main -> %s\n", getCurrentTime(), individualAsString); 
-
-            if (strcmp(argv[3], "gen") == 0) { // only generate farsite input files
-                genFarsiteInputFiles(configurationFile, population.popu_fs[i]);
-            } else if (strcmp(argv[3], "run") == 0) { // run farsite generating input files
-                runIndividual(configurationFile, population.popu_fs[i], timeout, parallelizationLevel);
-            } else {
-                printf("%s - ERROR: FireSimulator.main -> %s is not a valid action. Please specify what to do: [ run | gen ] \n", getCurrentTime(), argv[3]);
-            }
-        }
-        fclose(adjustmentErrors);
+        printf(" * - argv[2] string [ run | gen ]: \"run\" if should run farsite or \"gen\" if should only generate farsite input files \n");
+        printf(" * - argv[3-4] int : identifier of the generation and individual to be simulated. \n");
+        printf(" * - argv[5-13] int : individual params. \n");
+        printf(" * - argv[14] double : adjustment factor. Values < 1.0 then fire grow slower. It grows faster otherwise. \n");
+        printf(" * - argv[15] int : execution timeout in seconds. \n");
+        printf(" * - argv[15] int : number of threads to perform the execution. \n");
+        return 1;
     }
 
 }
