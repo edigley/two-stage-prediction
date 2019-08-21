@@ -66,7 +66,8 @@ public class FarsiteExecutor {
 			File gAFile = scenarioProperties.getPerimeterAtT1();
 			File gBFile = scenarioProperties.getOutputFile(generation, id);
 			try {
-				fireError = Double.parseDouble(String.format("%.6f", ShapeFileUtil.calculatePredictionError(gAFile, gBFile)));
+				Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
+				fireError = Double.parseDouble(String.format("%.6f", _fireError));
 			} catch (Exception e) {
 				System.err.printf("Couldn't compare non-finished scenario result for individual %s. Error message: %s\n", individual, e.getMessage());
 				logger.error("Couldn't compare non-finished scenario result", e);

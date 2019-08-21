@@ -60,39 +60,48 @@ public class ShapeFileUtil {
 		connect.put("url", file.toURI().toString());
 
 		DataStore dataStore = DataStoreFinder.getDataStore(connect);
-		String[] typeNames = dataStore.getTypeNames();
-		String typeName = typeNames[0];
 
-		logger.info("getGeometriesPoligon: Reading feature content: " + typeName);
+		try {
+			String[] typeNames = dataStore.getTypeNames();
+			String typeName = typeNames[0];
 
-		FeatureSource featureSource = dataStore.getFeatureSource(typeName);
-		FeatureCollection features = featureSource.getFeatures();
-		
-		FeatureIterator it = features.features();
+			logger.info("getGeometriesPoligon: Reading feature content: " + typeName);
 
-		int nOfFeatures = 0;
-		
-		GeometryFactory gf = new GeometryFactory();
-		//Polygon pB = gf.createPolygon(lB.getCoordinates());
-		//Geometry geometry = ((GeometryCollection) it.next().getDefaultGeometryProperty().getValue()).convexHull();
-		Geometry geometry = gf.createPolygon(((GeometryCollection) it.next().getDefaultGeometryProperty().getValue()).getCoordinates());
-		
-		while (it.hasNext()) {
-			nOfFeatures++;
-			Feature feature = it.next();
-			//geometry = geometry.union(((GeometryCollection)feature.getDefaultGeometryProperty().getValue())).convexHull();
-			GeometryCollection other = (GeometryCollection)feature.getDefaultGeometryProperty().getValue();
-			try {
-				geometry = geometry.union(gf.createPolygon(other.getCoordinates()));
-			} catch (TopologyException e) {
-				logger.warn("Could'not perform union with geometry", e);
+			FeatureSource featureSource = dataStore.getFeatureSource(typeName);
+			FeatureCollection features = featureSource.getFeatures();
+
+			FeatureIterator it = features.features();
+
+			int nOfFeatures = 0;
+
+			GeometryFactory gf = new GeometryFactory();
+			// Polygon pB = gf.createPolygon(lB.getCoordinates());
+			// Geometry geometry = ((GeometryCollection)
+			// it.next().getDefaultGeometryProperty().getValue()).convexHull();
+			Geometry geometry = gf.createPolygon(
+					((GeometryCollection) it.next().getDefaultGeometryProperty().getValue()).getCoordinates());
+
+			while (it.hasNext()) {
+				nOfFeatures++;
+				Feature feature = it.next();
+				// geometry =
+				// geometry.union(((GeometryCollection)feature.getDefaultGeometryProperty().getValue())).convexHull();
+				GeometryCollection other = (GeometryCollection) feature.getDefaultGeometryProperty().getValue();
+				try {
+					geometry = geometry.union(gf.createPolygon(other.getCoordinates()));
+				} catch (TopologyException e) {
+					logger.warn("Could'not perform union with geometry", e);
+				}
 			}
-		}
-		it.close();
-		
-		logger.info("getGeometriesPoligon.nOfFeatures: " + nOfFeatures);
+			it.close();
 
-		return geometry;
+			logger.info("getGeometriesPoligon.nOfFeatures: " + nOfFeatures);
+
+			return geometry;
+
+		} finally {
+			dataStore.dispose();
+		}
 	}
 	
 	public static Object getGeometry(File file) throws Exception {
