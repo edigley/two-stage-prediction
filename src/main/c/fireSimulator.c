@@ -284,7 +284,7 @@ void createFarsiteInputFiles(INDVTYPE_FARSITE individual, int generation) {
 int main(int argc, char *argv[]) {
 
     if (argc == 1 ) { // binary file valid
-        printf("%s - ERROR: FireSimulator.main -> binary file valid.\n", getCurrentTime());
+        printf("%s - SUCCESS: FireSimulator.main -> binary file valid.\n", getCurrentTime());
     	return 0;
     }
 
@@ -303,13 +303,13 @@ int main(int argc, char *argv[]) {
         individual->id = atoi(argv[4]);
         printf("%s - INFO: FireSimulator.main -> Gonna read all the individual params...\n", getCurrentTime());
 
-        if (strcmp(argv[3], "gen") == 0) { // only generate farsite input files
+        if (strcmp(argv[2], "gen") == 0) { // only generate farsite input files
 
             printf("%s - INFO: FireSimulator.main -> Gonna only generate farsite input files for individual specified directly: %s\n", getCurrentTime(), argv[2]);
 
             genFarsiteInputFiles(configurationFile, *individual);
 
-        } else if (strcmp(argv[3], "run") == 0) { // run farsite generating input files
+        } else if (strcmp(argv[2], "run") == 0) { // run farsite generating input files
 
             printf("%s - INFO: FireSimulator.main -> Gonna run farsite for individual specified directly: %s\n", getCurrentTime(), argv[2]);
 
@@ -336,6 +336,7 @@ int main(int argc, char *argv[]) {
         
     } else { //error
         printf("%s - ERROR: FireSimulator.main -> Provide the right arguments to the program \n", getCurrentTime());
+        printf(" * - argv[0 string: binary execublae file \n");
         printf(" * - argv[1] file path: spif configuration file \n");
         printf(" * - argv[2] string [ run | gen ]: \"run\" if should run farsite or \"gen\" if should only generate farsite input files \n");
         printf(" * - argv[3-4] int : identifier of the generation and individual to be simulated. \n");

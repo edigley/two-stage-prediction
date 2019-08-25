@@ -140,33 +140,37 @@ public class ShapeFileUtil {
 		Map<String, String> connect = new HashMap<>();
 		connect.put("url", file.toURI().toString());
 
-		DataStore dataStore = DataStoreFinder.getDataStore(connect);
-		String[] typeNames = dataStore.getTypeNames();
-		//Arrays.stream(typeNames).forEach(v -> System.out.println("typeNames: " + v));
-		String typeName = typeNames[0];
-
-		logger.info("getFirstFeature: Reading feature content: " + typeName);
-
-		FeatureSource featureSource = dataStore.getFeatureSource(typeName);
-		FeatureCollection features = featureSource.getFeatures();
-		
 		List<Feature> allFeatures = new ArrayList<>();
-		
-		FeatureIterator it = features.features();
-
-		Feature feature = null;
-
-		int nOfFeatures = 0;
-		while (it.hasNext()) {
-			nOfFeatures++;
-			feature = it.next();
-			allFeatures.add(feature);
+		DataStore dataStore = DataStoreFinder.getDataStore(connect);
+		try {
+			String[] typeNames = dataStore.getTypeNames();
+			//Arrays.stream(typeNames).forEach(v -> System.out.println("typeNames: " + v));
+			String typeName = typeNames[0];
+	
+			logger.info("getFirstFeature: Reading feature content: " + typeName);
+	
+			FeatureSource featureSource = dataStore.getFeatureSource(typeName);
+			FeatureCollection features = featureSource.getFeatures();
+			
+			FeatureIterator it = features.features();
+	
+			Feature feature = null;
+	
+			int nOfFeatures = 0;
+			while (it.hasNext()) {
+				nOfFeatures++;
+				feature = it.next();
+				allFeatures.add(feature);
+			}
+			it.close();
+			logger.info("getFirstFeature.nOfFeatures: " + nOfFeatures);
+			return allFeatures;
+		} catch (Exception e) {
+			logger.error("Error when getting all features from file " + file.getAbsolutePath(), e);
+			throw e;
+		} finally {
+			dataStore.dispose();
 		}
-		it.close();
-		
-		logger.info("getFirstFeature.nOfFeatures: " + nOfFeatures);
-
-		return allFeatures;
 	}
 	
 	public static void describe(File file) throws Exception {
@@ -231,24 +235,26 @@ public class ShapeFileUtil {
 					transaction.commit();
 					transaction.close();
 				} catch (Exception e) {
+					logger.error("Error when trying to commit/clos the transaction. Going to perform a rollback...", e);
 					transaction.rollback();
 					transaction.close();
+					logger.error("A rollback was successfully performed");
 					throw e;
 				}
 			}
 		} catch (Exception e) {
+			logger.error("Error when closing the transaction", e);
 			throw e;
 		} finally {
 			newDataStore.dispose();
 		}
 	}
 
-	private static SimpleFeatureCollection buildFeatureCollection(MultiPolygon multiPolygon,
-			SimpleFeatureType featureType) {
+	private static SimpleFeatureCollection buildFeatureCollection(MultiPolygon mp, SimpleFeatureType featureType) {
 		// build feature collection
 		List<SimpleFeature> features = new ArrayList<>();
 		SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(featureType);
-		featureBuilder.add(multiPolygon);// p1Feature.getDefaultGeometryProperty().getValue());
+		featureBuilder.add(mp);// p1Feature.getDefaultGeometryProperty().getValue());
 		features.add(featureBuilder.buildFeature("the-feature-id"));
 		SimpleFeatureCollection collection = new ListFeatureCollection(featureType, features);
 		return collection;

@@ -82,14 +82,15 @@ void initFarsiteVariables(char * configurationFile, int numgen) {
     dictionary * configuration;
     configuration = iniparser_load(configurationFile);
     
-    numGenerations = iniparser_getint(configuration, "genetic:numGenerations",1);
-    num_threads    = iniparser_getint(configuration, "main:num_threads",1);
+    numGenerations = iniparser_getint(configuration, "genetic:numGenerations", 1);
+    num_threads    = iniparser_getint(configuration, "main:num_threads", 1);
     doWindFields   = iniparser_getint(configuration, "main:doWindFields", 0);
     doMeteoSim     = iniparser_getint(configuration, "main:doMeteoSim", 0);
-    CalibrateAdjustments = iniparser_getint(configuration,"main:CalibrateAdjustments",0);
-    FuelsToCalibrateFileName = iniparser_getstr(configuration,"main:FuelsToCalibrate"); 
+
+    CalibrateAdjustments = iniparser_getint(configuration, "main:CalibrateAdjustments", 0);
+    FuelsToCalibrateFileName = iniparser_getstr(configuration, "main:FuelsToCalibrate"); 
    
-    CustomFuelFile      = iniparser_getstr(configuration,"farsite:CustomFuelFile"); 
+    CustomFuelFile      = iniparser_getstr(configuration, "farsite:CustomFuelFile");
     farsite_path        = iniparser_getstr(configuration, "farsite:farsite_path");
     input_path          = iniparser_getstr(configuration, "farsite:input_path");
     output_path         = iniparser_getstr(configuration, "farsite:output_path");
@@ -103,14 +104,15 @@ void initFarsiteVariables(char * configurationFile, int numgen) {
     baseWndFile         = iniparser_getstr(configuration, "farsite:baseWndFile");
     baseWtrFile         = iniparser_getstr(configuration, "farsite:baseWtrFile");
     baseFmsFile         = iniparser_getstr(configuration, "farsite:baseFmsFile");
-    baseAdjFile         = iniparser_getstr(configuration,"farsite:baseAdjFile");
+    baseAdjFile         = iniparser_getstr(configuration, "farsite:baseAdjFile");
     RasterFileName      = iniparser_getstr(configuration, "farsite:RasterFileName");
     shapefile           = iniparser_getstr(configuration, "farsite:shapefile");
     VectorFileName      = iniparser_getstr(configuration, "farsite:VectorFileName");
     doRaster            = iniparser_getstr(configuration, "farsite:doRaster");
     doShape             = iniparser_getstr(configuration, "farsite:doShape");
     doVector            = iniparser_getstr(configuration, "farsite:doVector");
-    if (numgen == numGenerations) {
+
+    if (numgen > numGenerations) { // predication step
         ignitionFile        = iniparser_getstr(configuration, "prediction:PignitionFile");
         ignitionFileType    = iniparser_getstr(configuration, "prediction:PignitionFileType");
         ConditMonth         = iniparser_getstr(configuration, "prediction:PConditMonth");
@@ -128,7 +130,7 @@ void initFarsiteVariables(char * configurationFile, int numgen) {
         real_fire_map_t0    = iniparser_getstr(configuration, "prediction:Preal_fire_map_t0");
         real_fire_map_t1    = iniparser_getstr(configuration, "prediction:Preal_fire_map_t1");
         real_fire_map_tINI  = iniparser_getstr(configuration, "prediction:Preal_fire_map_tINI");
-    } else {  
+    } else {                       // calibration step
 		 ignitionFile        = iniparser_getstr(configuration, "farsite:ignitionFile");
 		 ignitionFileType    = iniparser_getstr(configuration, "farsite:ignitionFileType");
 		 ConditMonth         = iniparser_getstr(configuration, "farsite:ConditMonth");
@@ -144,7 +146,6 @@ void initFarsiteVariables(char * configurationFile, int numgen) {
 		 start_time          = iniparser_getint(configuration, "farsite:start_time",1);
 		 end_time            = iniparser_getint(configuration, "farsite:end_time",1);
 		 real_fire_map_t0    = iniparser_getstr(configuration, "farsite:real_fire_map_t0");
-         
     	 real_fire_map_t1    = iniparser_getstr(configuration, "farsite:real_fire_map_t1");
 	 	 real_fire_map_tINI  = iniparser_getstr(configuration, "farsite:real_fire_map_tINI");		
 	}
@@ -154,13 +155,14 @@ void initFarsiteVariables(char * configurationFile, int numgen) {
     secondaryVisibleStep = iniparser_getstr(configuration, "farsite:secondaryVisibleStep");
     perimeterResolution  = iniparser_getstr(configuration, "farsite:perimeterResolution");
     distanceResolution   = iniparser_getstr(configuration, "farsite:distanceResolution");
+    FireSimLimit         = iniparser_getint(configuration, "farsite:ExecutionLimit", 1);
+
     TEMP_VARIATION       = iniparser_getdouble(configuration, "farsite:TEMP_VARIATION",1.0);
     HUM_VARIATION        = iniparser_getdouble(configuration, "farsite:HUM_VARIATION",1.0);
-    FireSimLimit         = iniparser_getint(configuration, "farsite:ExecutionLimit", 1);
     
     if (CalibrateAdjustments) {
     	FILE *FuelsToCalibrateFILE;
-	    int i,nFuel;
+	    int i, nFuel;
 	
 	    for (i=0;i<256;i++) {
             FuelsUs[i]=0;
