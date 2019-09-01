@@ -130,13 +130,26 @@
 			<name>OpenGeo Maven Repository</name>
 			<url>http://repo.opengeo.org</url>
 		</repository>
+      <repository>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+        <id>boundless</id>
+        <name>Boundless Maven Repository</name>
+        <url>http://repo.boundlessgeo.com/main</url>
+      </repository>
+      <repository>
+          <id>maven2-repository.dev.java.net</id>
+          <name>Java.net repository</name>
+          <url>http://download.java.net/maven/2</url>
+      </repository>
 	</repositories>
 	
   <dependencies>
 	<dependency>
 	    <groupId>io.jenetics</groupId>
 	    <artifactId>jenetics</artifactId>
-	    <version>4.4.0</version>
+	    <version>5.0.0</version>
 	</dependency>
 	<dependency>
 	    <groupId>io.jenetics</groupId>
@@ -189,6 +202,11 @@
 		<version>15.2</version>
 	</dependency>
 	<!-- 
+	<dependency>
+		<groupId>org.geotools</groupId>
+		<artifactId>gt-swing</artifactId>
+		<version>15.2</version>
+	</dependency>
 	<dependency>
 		<groupId>org.geotools</groupId>
 		<artifactId>gt-process-geometry</artifactId>

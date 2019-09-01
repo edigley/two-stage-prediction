@@ -15,13 +15,13 @@ public class Main {
 		String cmdPattern = "two-stage-prediction.jar -f %s -s %s -m %s -t %s";
 		String tspCMD = String.format(cmdPattern, farsiteExecutor, scenarioDir, memoizationFile, timeout);
 		
-		tspCMD = ""
-		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction " 
-		+ " -c playpen/fire-scenarios/jonquera/ "
-		+ " -m playpen/farsite_execution_memoization_60_seconds_with_adj_factor_and_max_simulated_time.txt " 
-		+ " -t 60"
-		+ " -p 4"
-		+ " -s 123";
+		tspCMD = "" 
+		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+		+ " -c playpen/fire-scenarios/jonquera/ " 
+		+ " -m playpen/farsite_execution_memoization_3600_seconds_with_adj_factor_and_max_simulated_time.txt "  
+		+ " -t 3600 " 
+		+ " -p 1 " 
+		+ " -s 123 ";
 		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);

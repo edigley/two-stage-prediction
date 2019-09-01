@@ -102,11 +102,11 @@ public class Calibrator {
 
 	public void printSummaryStatistics(StopWatch stopWatch) {
 		msg = String.format("Genetic Algorithm - Best Calibrated Result: %s", result);
-        logger.info(msg);
-        System.out.println(msg);
+        logger.info(msg);System.out.println(msg);
 	}
 
 	public void releaseResources() {
+		FarsitePopulationEvaluator.getInstance().release();
 	}
 
 }

@@ -1,9 +1,7 @@
 package com.edigley.tsp.calibration;
 
-import java.io.File;
 import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.executors.FarsiteIndividual;
 import com.edigley.tsp.input.ScenarioProperties;
 
-import io.jenetics.Chromosome;
 import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
 import io.jenetics.IntegerGene;
@@ -40,7 +37,8 @@ public class GeneticAlgorithm {
 	private double MUTATION_PROBABILITY;
 	
 	static long generation = 0;
-	private static long id = 0;
+
+	public static AtomicInteger atomicCount = new AtomicInteger(0);
 	
 	private static FarsiteExecutor executor;
 	
@@ -52,43 +50,6 @@ public class GeneticAlgorithm {
 
     private final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
 	
-    int count = 0;
-    private GeneticAlgorithm() {
-    	
-    	RandomRegistry.setRandom(new LCG64ShiftRandom.ThreadSafe(123));
-    	
-		Stream<Genotype<IntegerGene>> instances = genotypeFactory.instances();
-		
-		//System.out.println("instances.count(): " + instances.count());
-		//System.out.println("instances.findFirst(): " + new FarsiteIndividual(instances.findFirst().get()));
-		instances.forEach(i -> {
-			if (++count < 25) {
-				System.out.println("instance: " + new FarsiteIndividual(i));
-			} else {
-				System.exit(5);
-			}
-			
-		});
-		
-		Iterator<Chromosome<IntegerGene>> it = genotypeFactory.iterator();
-		while(it.hasNext()) {
-			System.out.println(it.next());
-		}
-		
-		System.out.println("genotypeFactory.length(): " + genotypeFactory.length());
-		System.out.println("genotypeFactory.getChromosome(0): " + genotypeFactory.getChromosome(0));
-		System.out.println("genotypeFactory.getChromosome(): " + genotypeFactory.getChromosome());
-		Iterator<Chromosome<IntegerGene>> it2 = genotypeFactory.iterator();
-		while(it2.hasNext()) {
-			System.out.println(it2.next());
-		}
-		
-		//System.out.println("this.engine.getPopulationSize(): " + this.engine.getPopulationSize());
-		
-		System.exit(45);
-
-    }
-
 	public GeneticAlgorithm(ScenarioProperties scenarioProperties) {
 		this(scenarioProperties, null);
 	}
@@ -112,27 +73,6 @@ public class GeneticAlgorithm {
 
 	}
 	
-	private static synchronized Double eval(Genotype<IntegerGene> gt) {
-     	id++;
-     	FarsiteIndividual individual = new FarsiteIndividual(gt);
-     	logger.debug(String.format("Going to check cached value for individual %s", individual));
-     	FarsiteExecution cachedExecution = cache.get(individual);
-     	logger.debug(String.format("Cached value for individual %s: %s", individual, cachedExecution));
-		if (cachedExecution != null) {
-			msg = String.format("%2s %3s %s -> CACHED", generation, id, cachedExecution);
-			logger.info(msg);
-			System.out.println(msg);
-     		return cachedExecution.getFireError();
-     	} else {
-			FarsiteExecution execution = executor.run(generation, id, individual);
-			cache.add(execution);
-			msg = String.format("%2s %3s %s", generation, id, execution);
-			logger.info(msg);
-			System.out.println(msg);
-	    	return execution.getFireError();
-     	}
-    }
-
 	private Genotype<IntegerGene> createGenotypeFactory() {
 		return Genotype.of(
         	IntegerChromosome.of(  2,  15, 1 ),   // fms - t1
@@ -149,14 +89,14 @@ public class GeneticAlgorithm {
 	}
 	
 	private Engine<IntegerGene, Double> prepareEvolutionEngine() {
-		return Engine.builder(GeneticAlgorithm::eval, genotypeFactory)
+		return new Engine.Builder<IntegerGene, Double>(FarsitePopulationEvaluator.getInstance(), genotypeFactory)
+		    //.executor(FarsitePopulationEvaluator.executorService)
 	    	.populationSize(POPULATION_SIZE)
 	    	.minimizing()
 	    	.alterers(
 	    		new MultiPointCrossover<>(RECOMBINATION_PROBABILITY), 
 	    		new Mutator<>(MUTATION_PROBABILITY)
 	    	)
-	    	//.evaluator(new FarsitePopulationEvaluator())
 	    	.mapping(EvolutionResult.toUniquePopulation())
 	    	.build();
 	}
@@ -165,7 +105,7 @@ public class GeneticAlgorithm {
         Phenotype<IntegerGene, Double> bestPhenotype = engine.stream()
         	.limit(NUMBER_OF_GENERATIONS)
         	.peek(r -> {
-        		generation = r.getGeneration();
+        		generation = r.getGeneration() + 1;
         		long duration = r.getDurations().getEvaluationDuration().get(ChronoUnit.SECONDS);
         		String pattern = "Generation = %s / Durations = %s";
 				System.out.println(String.format(pattern, generation, duration));
@@ -185,12 +125,8 @@ public class GeneticAlgorithm {
 
     public void setFarsiteExecutionCache(FarsiteExecutionMemoization cache) {
     	GeneticAlgorithm.cache = cache;
+    	FarsitePopulationEvaluator.setCache(cache);
+    	FarsitePopulationEvaluator.setFarsiteExecutor(executor);
     }
-
-    public static void main(String[] args) throws Exception {
-    	File scenarioDir = new File("playpen/fire-scenarios/jonquera/");
-		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
-    	GeneticAlgorithm ga = new GeneticAlgorithm();
-	}
-    
+   
 }
