@@ -78,7 +78,7 @@ public class FarsiteExecutor {
 			Double maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
 			execution.setMaxSimulatedTime(maxSimulatedTime);
 		} catch (Exception e) {
-			System.err.printf("Couldn't extract maximum simulated time for individual %s \n", individual);
+			System.err.printf("Couldn't extract maximum simulated time for individual %s - %s\n", individual, e.getMessage());
 			logger.warn("Couldn't extract maximum simulated time for inidividual " + individual, e);
 		}
 		stopWatch.stop();
@@ -94,6 +94,7 @@ public class FarsiteExecutor {
 		String pattern = "%s scenario.ini run %s   %s   %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
 		String command = String.format(pattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout, parallelizationLevel);
 		logger.info("Going to run farsite wrapper with command: " + command);
+		logger.info("Going to run farsite in dir: " + scenarioDir);
 		String[] args = new String[3];
 		args[0] = "sh";
 		args[1] = "-c";
@@ -101,6 +102,10 @@ public class FarsiteExecutor {
 		Process process;
 		try {
 			process = Runtime.getRuntime().exec(args, null, scenarioDir);
+			
+			FarsiteExecutionMonitor.monitorFarsiteExecution(generation, id, individual, scenarioProperties);
+			//FarsiteExecutionMonitor.monitorFarsiteExecutionImproved(generation, id, individual, scenarioProperties);
+			
 			Double fireError = ProcessUtil.monitorProcessExecution(process, timeout);
 			return fireError;
 		} catch (Exception e) {
@@ -120,4 +125,27 @@ public class FarsiteExecutor {
 		this.scenarioProperties = scenarioProperties;
 	}
 
+	public Long getTimeout() {
+		return timeout;
+	}
+
+	public static void main(String[] args) throws Exception {
+		
+		//FarsiteIndividual individual = new FarsiteIndividual("   6   4   4  48  83   10  356  34  67  0.1  ");
+		//FarsiteIndividual individual = new FarsiteIndividual("  9  12  14  22  87   65  353  38  65  1.7");
+		FarsiteIndividual individual = new FarsiteIndividual("  8   7   7  21  99    5  347  45  35  0.4");
+		File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
+		//File scenarioDir = new File("playpen/fire-scenarios/jonquera/");
+		File scenarioDir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/");
+		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
+		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir);
+		executor.setScenarioProperties(scenarioProperties);
+		executor.timeout = 300L;
+		executor.parallelizationLevel = 1L;
+		FarsiteExecution execution = executor.run(3, 3, individual);
+		System.out.println("execution: " + execution);
+		
+		FarsiteExecutionMonitor.release();
+	}
+	
 }

@@ -71,4 +71,15 @@ public class FarsiteExecutionMemoization {
 		}
 	}
 	
+	public static void main(String[] args) {
+		FarsiteExecutionMemoization cache = new FarsiteExecutionMemoization(new File("playpen/farsite_execution_memoization_7200_seconds.txt"));
+		
+		FarsiteIndividual individual = new FarsiteIndividual(" 15  13   6  58  99  102  349  36  30  1.0  ");
+		// 15  13   6  57  89  102  349  36  30  1,0  0,942831     330      1   7207
+		// 15  13   6  57  89  102  349  36  30  1,0  0,942831     330      1   7207
+		System.out.println(cache.executions.size());
+		
+		System.out.println(cache.get(individual));
+	}
+	
 }

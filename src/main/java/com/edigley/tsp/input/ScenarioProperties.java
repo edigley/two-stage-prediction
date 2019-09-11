@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 public class ScenarioProperties {
@@ -38,6 +41,20 @@ public class ScenarioProperties {
 	private double crossoverProbability;
 	
 	private double mutationProbability;
+	
+	private Integer farsiteStartMonth;
+	private Integer farsiteStartDay;
+	private Integer farsiteStartHour;
+	private Integer farsiteStartMin;
+	private LocalDateTime startTime;
+	
+	private Integer farsiteEndMonth;
+	private Integer farsiteEndHour;
+	private Integer farsiteEndDay;
+	private Integer farsiteEndMin;
+	private LocalDateTime endTime;
+	
+	private long simulatedTime;
 
 	public ScenarioProperties(File scenarioDir) throws FileNotFoundException, IOException {
 		assert scenarioDir.exists();
@@ -47,15 +64,50 @@ public class ScenarioProperties {
 		scenarioProperties.load(new FileInputStream(scenarioFile));
 		
 		this.landscapeFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeFile"));
+		
 		this.perimeterAtT0File = new File(scenarioDir, scenarioProperties.getProperty("ignitionFile"));
 		this.perimeterAtT1File = new File(scenarioDir, scenarioProperties.getProperty("real_fire_map_t1").trim().replace(".asc", ".shp"));
+		
 		this.outputDir = new File(scenarioDir, scenarioProperties.getProperty("output_path").trim());
+		
 		this.numGenerations = Integer.valueOf(scenarioProperties.getProperty("numGenerations", Integer.toString(NUMBER_OF_GENERATIONS).trim()));
 		this.populationSize = Integer.valueOf(scenarioProperties.getProperty("population_size", Integer.toString(POPULATION_SIZE).trim()));
 		this.crossoverProbability = Double.valueOf(scenarioProperties.getProperty("pCrossover", Double.toString(RECOMBINATION_PROBABILITY).trim()));
 		this.mutationProbability = Double.valueOf(scenarioProperties.getProperty("pMutation", Double.toString(MUTATION_PROBABILITY).trim()));
+		
 		this.farsiteParallelizationLevel = Long.valueOf(scenarioProperties.getProperty("num_threads", "1").trim());
 		this.farsiteExecutionTimeout = Integer.valueOf(scenarioProperties.getProperty("ExecutionLimit").trim());
+		
+		this.farsiteStartMonth = Integer.valueOf(scenarioProperties.getProperty("StartMonth").trim());
+		this.farsiteStartDay = Integer.valueOf(scenarioProperties.getProperty("StartDay").trim());
+		this.farsiteStartHour = Integer.valueOf(scenarioProperties.getProperty("StartHour").trim());
+		this.farsiteStartMin = Integer.valueOf(scenarioProperties.getProperty("StartMin").trim());
+		
+		this.startTime = LocalDateTime.of(2011, farsiteStartMonth, farsiteStartDay, farsiteStartHour, farsiteStartMin);
+		
+		this.farsiteEndMonth = Integer.valueOf(scenarioProperties.getProperty("EndMonth").trim());
+		this.farsiteEndDay = Integer.valueOf(scenarioProperties.getProperty("EndDay").trim());
+		this.farsiteEndHour = Integer.valueOf(scenarioProperties.getProperty("EndHour").trim());
+		this.farsiteEndMin = Integer.valueOf(scenarioProperties.getProperty("EndMin").trim());
+		
+		this.endTime = LocalDateTime.of(2011, farsiteEndMonth, farsiteEndDay, farsiteEndHour, farsiteEndMin);
+		
+		this.simulatedTime = Duration.between(startTime, endTime).getSeconds()/60;
+		
+		System.out.println("ScenarioProperties.startTime: " + this.startTime);
+		System.out.println("ScenarioProperties.endTime: " + this.endTime);
+		System.out.println("ScenarioProperties.this.simulatedTime: " + this.simulatedTime);
+		
+/*
+		StartMonth  = 7
+		StartDay    = 22
+		StartHour   = 1200
+		StartMin    = 00
+		EndMonth    = 7
+		EndDay      = 23
+		EndHour     = 1800
+		EndMin      = 30
+*/
 		
 	}
 	
@@ -125,6 +177,10 @@ public class ScenarioProperties {
 
 	public File getPerimeterAtT0File() {
 		return perimeterAtT0File;
+	}
+
+	public long getSimulatedTime() {
+		return simulatedTime;
 	}
 
 }

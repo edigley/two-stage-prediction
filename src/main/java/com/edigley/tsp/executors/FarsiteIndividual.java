@@ -109,11 +109,11 @@ public class FarsiteIndividual {
 		result = prime * result + t10;
 		result = prime * result + t100;
 		result = prime * result + t1000;
-		result = prime * result + t10000;
+		/*result = prime * result + t10000;*/
 		result = prime * result + th;
 		result = prime * result + wd;
 		result = prime * result + ws;
-		result = prime * result + adj;
+		/*result = prime * result + adj;*/
 		return result;
 	}
 
@@ -134,8 +134,8 @@ public class FarsiteIndividual {
 			return false;
 		if (t1000 != other.t1000)
 			return false;
-		if (t10000 != other.t10000)
-			return false;
+		/*if (t10000 != other.t10000)
+			return false;*/
 		if (wd != other.wd)
 			return false;
 		if (ws != other.ws)
@@ -144,8 +144,8 @@ public class FarsiteIndividual {
 			return false;
 		if (hh != other.hh)
 			return false;
-		if (adj != other.adj)
-			return false;
+		/*if (adj != other.adj)
+			return false;*/
 		return true;
 	}
 

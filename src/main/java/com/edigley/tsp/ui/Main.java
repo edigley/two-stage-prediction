@@ -18,8 +18,8 @@ public class Main {
 		tspCMD = "" 
 		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
 		+ " -c playpen/fire-scenarios/jonquera/ " 
-		+ " -m playpen/farsite_execution_memoization_3600_seconds_with_adj_factor_and_max_simulated_time.txt "  
-		+ " -t 3600 " 
+		+ " -m playpen/farsite_execution_memoization_7200_seconds.txt "  
+		+ " -t 7200 " 
 		+ " -p 1 " 
 		+ " -s 123 ";
 		

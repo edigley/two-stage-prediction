@@ -26,8 +26,8 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	private static final Logger logger = LoggerFactory.getLogger(FarsitePopulationEvaluator.class);
 	private static transient String msg;
 	
-	private static AtomicInteger generationCount = new AtomicInteger(0);
-	private int generation;
+	private static AtomicInteger nOfEvaluationCallsCount = new AtomicInteger(1);
+	private int nOfEvaluationCalls;
 	
 	private static FarsiteExecutionMemoization cache;
 	
@@ -45,7 +45,6 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	}
 	
 	public static void setCache(FarsiteExecutionMemoization theCache) {
-		System.out.println("---> Runtime.getRuntime().availableProcessors(): " + Runtime.getRuntime().availableProcessors());
 		cache = theCache;
 	}
 	
@@ -56,28 +55,28 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	@Override
 	public ISeq<Phenotype<IntegerGene, Double>> eval(Seq<Phenotype<IntegerGene, Double>> population) {
 		
-		generation = generationCount.getAndIncrement();
+		nOfEvaluationCalls = nOfEvaluationCallsCount.getAndIncrement();
 		
-		populationSummary("Start ", generation, population);
+		populationSummary("Start ", nOfEvaluationCalls, population);
 		
-		Long nonEvaluatedPhen = population.stream().filter(p->!p.isEvaluated()).count();
-		CountDownLatch latch = new CountDownLatch(nonEvaluatedPhen.intValue());
+		Long nOfNonEvaluated = population.stream().filter(Phenotype::nonEvaluated).count();
+		CountDownLatch latch = new CountDownLatch(nOfNonEvaluated.intValue());
 		
 		population.stream()
-			.filter(p -> !p.isEvaluated())
+			.filter(Phenotype::nonEvaluated)
 			.forEach(
 				p -> {
 					final String individual = FarsiteIndividual.toStringParams(p.getGenotype());
-					msg = " --> " + individual + " " + p.isEvaluated();
-					logger.debug(msg);
-					executorService.submit(() -> {p.eval(FarsitePopulationEvaluator::eval); latch.countDown();});
+					logger.debug(" ---> " + individual + " " + p.isEvaluated());
+					executorService.submit(() -> { p.eval(FarsitePopulationEvaluator::eval); latch.countDown(); });
 				}
 			);	
 		
 		try {
-			msg = "Going to wait for all the threads in order to finish...";
+			String msg = "Going to wait for all the " + nOfNonEvaluated + " threads in order to finish...";
 			logger.debug(msg);System.out.println(msg);
-			latch.await();
+			latch.await(executor.getTimeout()*3, TimeUnit.SECONDS);
+			//latch.await();
 			msg = "All threads have been finished successfully.";
 			logger.debug(msg);System.out.println(msg);
 		} catch (InterruptedException e) {
@@ -85,23 +84,17 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			logger.error(msg, e);System.err.println(msg + " " + e.getMessage());
 		}
 		
-		ISeq<Phenotype<IntegerGene, Double>> evaluatedPopulation = population.map(p->p.eval(pt -> cache.get(new FarsiteIndividual(pt)).getFireError())).asISeq();
-		populationSummary("Finish", generation, evaluatedPopulation);
+		ISeq<Phenotype<IntegerGene, Double>> evaluatedPopulation = population
+				.map( p -> 
+					p.eval(	pt -> {
+						FarsiteExecution farsiteExecution = cache.get(new FarsiteIndividual(pt));
+						return farsiteExecution != null ? farsiteExecution.getFireError() : null;
+					})
+				)
+				.asISeq();
+		populationSummary("Finish", nOfEvaluationCalls, evaluatedPopulation);
+		System.out.println("");
 		return evaluatedPopulation;
-	}
-
-	private void populationSummary(String position, int generation, Seq<Phenotype<IntegerGene, Double>> population) {
-		
-		long nPhenEvaluated = population.stream().filter(Phenotype::isEvaluated).count();
-		Long maxPhenGeneration = population.stream().mapToLong(Phenotype::getGeneration).max().orElse(0L);
-		int popSize = population.size();
-		
-		String pattern = "Evaluation.%s -->  %s : %s / %s / %s / %s / %s <---------";
-		String header = "#Evaluation Calls / GA.generation / maxPhenGeneration / popSize / nPhenEvaluated";
-		
-		msg = String.format(pattern, position, header, generation, GeneticAlgorithm.generation, maxPhenGeneration, popSize, nPhenEvaluated);
-		
-		logger.debug(msg);System.out.println(msg);
 	}
 
 	private static Double eval(Genotype<IntegerGene> gt) {
@@ -114,13 +107,23 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
      	FarsiteExecution cachedExecution = cache.get(individual);
      	logger.debug(String.format("Cached value for individual %s: %s", individual, cachedExecution));
 		if (cachedExecution != null) {
-			msg = String.format("%2s %3s %s -> [%s] - CACHED", GeneticAlgorithm.generation, id, cachedExecution, currentThread.getName());
-			logger.info(msg);System.out.println(msg);
-     		return cachedExecution.getFireError();
+			Double error = null;
+			if (cachedExecution.getMaxSimulatedTime().equals(Double.valueOf(480))) {
+				String msg = String.format("%2s %3s %s -> [%s] - CACHED", GeneticAlgorithm.generation, id, cachedExecution, currentThread.getName());
+				logger.info(msg);System.out.println(msg);
+				error = cachedExecution.getFireError();
+			} else {
+				String msg = String.format("%2s %3s %s -> [%s] - NaN", GeneticAlgorithm.generation, id, cachedExecution, currentThread.getName());
+				logger.info(msg);System.out.println(msg);
+				error = Double.NaN;
+			}
+			return error;
      	} else {
+     		String msg = String.format("Execution  started: %2s %3s %s -> [%s]", GeneticAlgorithm.generation, id, individual, currentThread.getName());
+     		logger.info(msg);//System.out.println(msg);
 			FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, id, individual);
 			cache.add(execution);
-			msg = String.format("%2s %3s %s -> [%s]", GeneticAlgorithm.generation, id, execution, currentThread.getName());
+			msg = String.format("Execution finished: %2s %3s %s -> [%s]", GeneticAlgorithm.generation, id, execution, currentThread.getName());
 			logger.info(msg);System.out.println(msg);
 	    	return execution.getFireError();
      	}
@@ -140,6 +143,20 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			msg = "Error when trying to shutdown executor service";
 			logger.info(msg, e);System.err.println(msg + " " + e.getMessage());
 		}
+	}
+
+	private void populationSummary(String position, int nOfEvaluationCalls, Seq<Phenotype<IntegerGene, Double>> population) {
+		
+		long nPhenEvaluated = population.stream().filter(Phenotype::isEvaluated).count();
+		Long maxPhenGeneration = population.stream().mapToLong(Phenotype::getGeneration).max().orElse(0L);
+		int popSize = population.size();
+		
+		String pattern = "Evaluation.%s -->  %s : %s / %s / %s / %s / %s <---------";
+		String header = "#Evaluation Calls / GA.generation / maxPhenGeneration / popSize / nPhenEvaluated";
+		
+		msg = String.format(pattern, position, header, nOfEvaluationCalls, GeneticAlgorithm.generation, maxPhenGeneration, popSize, nPhenEvaluated);
+		
+		logger.debug(msg);System.out.println(msg);
 	}
 
 }

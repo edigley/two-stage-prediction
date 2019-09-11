@@ -69,5 +69,9 @@ public class FarsiteExecution {
 		String pattern = "%s  %.6f  %6.0f %6s %6s";
 		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime);
 	}
+
+	public Double getMaxSimulatedTime() {
+		return maxSimulatedTime;
+	}
 	
 }
