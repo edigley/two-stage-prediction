@@ -67,15 +67,15 @@ public class FarsiteExecutor {
 			File gBFile = scenarioProperties.getOutputFile(generation, id);
 			try {
 				Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
-				fireError = Double.parseDouble(String.format("%.6f", _fireError));
+				fireError = Double.parseDouble(String.format("%.6f", _fireError).replace(",", "."));
 			} catch (Exception e) {
-				System.err.printf("Couldn't compare non-finished scenario result for individual %s. Error message: %s\n", individual, e.getMessage());
+				System.err.printf("Couldn't compare non-finished scenario result for individual [ %s ]. Error message: %s\n", individual, e.getMessage());
 				logger.error("Couldn't compare non-finished scenario result", e);
 			}
 		}
 		
 		try {
-			Double maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
+			Long maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
 			execution.setMaxSimulatedTime(maxSimulatedTime);
 		} catch (Exception e) {
 			System.err.printf("Couldn't extract maximum simulated time for individual %s - %s\n", individual, e.getMessage());
@@ -91,32 +91,29 @@ public class FarsiteExecutor {
 	}
 	
 	private Double execute(long generation, long id, FarsiteIndividual individual) throws RuntimeException {
-		String pattern = "%s scenario.ini run %s   %s   %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
-		String command = String.format(pattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout, parallelizationLevel);
-		logger.info("Going to run farsite wrapper with command: " + command);
-		logger.info("Going to run farsite in dir: " + scenarioDir);
+		String commandPattern = "%s scenario.ini run %s   %s   %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
+		String command = String.format(commandPattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout, parallelizationLevel);
+		logger.info(String.format("Going to run farsite wrapper with command < %s > in dir < %s >", command, scenarioDir));
 		String[] args = new String[3];
 		args[0] = "sh";
 		args[1] = "-c";
 		args[2] = command;
-		Process process;
 		try {
-			process = Runtime.getRuntime().exec(args, null, scenarioDir);
+			Process process = Runtime.getRuntime().exec(args, null, scenarioDir);
 			
-			FarsiteExecutionMonitor.monitorFarsiteExecution(generation, id, individual, scenarioProperties);
-			//FarsiteExecutionMonitor.monitorFarsiteExecutionImproved(generation, id, individual, scenarioProperties);
+			FarsiteExecutionMonitor.monitorFarsiteExecution(generation, id, individual, scenarioProperties, process);
 			
 			Double fireError = ProcessUtil.monitorProcessExecution(process, timeout);
 			return fireError;
 		} catch (Exception e) {
-			logger.error("Couldn't run farsite", e);
+			logger.error(String.format("Couldn't run farsite for individual [%s %s] %s", generation, id, individual), e);
 			throw new RuntimeException(e);
 		} finally {
-			args[2] = "rm -rf output/raster_" + generation + "_" + id + ".toa";
+			args[2] = String.format("rm -rf output/raster_%s_%s.toa", generation, id);
 			try {
 				Runtime.getRuntime().exec(args, null, scenarioDir);
 			} catch (IOException e) {
-				logger.error("Couldn't delete output file", e);
+				logger.error(String.format("Couldn't delete output file for individual [%s %s] %s", generation, id, individual), e);
 			}
 		}
 	}
@@ -132,8 +129,8 @@ public class FarsiteExecutor {
 	public static void main(String[] args) throws Exception {
 		
 		//FarsiteIndividual individual = new FarsiteIndividual("   6   4   4  48  83   10  356  34  67  0.1  ");
-		//FarsiteIndividual individual = new FarsiteIndividual("  9  12  14  22  87   65  353  38  65  1.7");
-		FarsiteIndividual individual = new FarsiteIndividual("  8   7   7  21  99    5  347  45  35  0.4");
+		FarsiteIndividual individual = new FarsiteIndividual("  9  12  14  22  87   165  353  38  50  1.7");
+		//FarsiteIndividual individual = new FarsiteIndividual("  8   7   7  21  99    5  347  45  35  0.4");
 		File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
 		//File scenarioDir = new File("playpen/fire-scenarios/jonquera/");
 		File scenarioDir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/");
@@ -142,10 +139,13 @@ public class FarsiteExecutor {
 		executor.setScenarioProperties(scenarioProperties);
 		executor.timeout = 300L;
 		executor.parallelizationLevel = 1L;
-		FarsiteExecution execution = executor.run(3, 3, individual);
+		FarsiteExecution execution = executor.run(9, 9, individual);
 		System.out.println("execution: " + execution);
-		
 		FarsiteExecutionMonitor.release();
+	}
+
+	public Long getSimulatedTime() {
+		return scenarioProperties.getSimulatedTime();
 	}
 	
 }

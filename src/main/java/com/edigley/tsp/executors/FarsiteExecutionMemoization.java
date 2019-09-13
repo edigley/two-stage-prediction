@@ -70,6 +70,10 @@ public class FarsiteExecutionMemoization {
 			e.printStackTrace();
 		}
 	}
+
+	public boolean isCached(FarsiteIndividual individual) {
+		return get(individual) != null;
+	}
 	
 	public static void main(String[] args) {
 		FarsiteExecutionMemoization cache = new FarsiteExecutionMemoization(new File("playpen/farsite_execution_memoization_7200_seconds.txt"));

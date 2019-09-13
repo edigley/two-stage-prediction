@@ -99,35 +99,47 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 
 	private static Double eval(Genotype<IntegerGene> gt) {
 		
-		Thread currentThread = Thread.currentThread();
-		
      	int id = GeneticAlgorithm.atomicCount.incrementAndGet();
+     	
      	FarsiteIndividual individual = new FarsiteIndividual(gt);
-     	logger.debug(String.format("Going to check cached value for individual %s", individual));
-     	FarsiteExecution cachedExecution = cache.get(individual);
-     	logger.debug(String.format("Cached value for individual %s: %s", individual, cachedExecution));
-		if (cachedExecution != null) {
-			Double error = null;
-			if (cachedExecution.getMaxSimulatedTime().equals(Double.valueOf(480))) {
-				String msg = String.format("%2s %3s %s -> [%s] - CACHED", GeneticAlgorithm.generation, id, cachedExecution, currentThread.getName());
-				logger.info(msg);System.out.println(msg);
-				error = cachedExecution.getFireError();
-			} else {
-				String msg = String.format("%2s %3s %s -> [%s] - NaN", GeneticAlgorithm.generation, id, cachedExecution, currentThread.getName());
-				logger.info(msg);System.out.println(msg);
-				error = Double.NaN;
-			}
-			return error;
+     	logger.debug(String.format("Going to evaluate individual: %s", individual));
+     	
+		if (cache.isCached(individual)) {
+			return evaluateCachedExecution(GeneticAlgorithm.generation, id, individual);
      	} else {
-     		String msg = String.format("Execution  started: %2s %3s %s -> [%s]", GeneticAlgorithm.generation, id, individual, currentThread.getName());
-     		logger.info(msg);//System.out.println(msg);
-			FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, id, individual);
-			cache.add(execution);
-			msg = String.format("Execution finished: %2s %3s %s -> [%s]", GeneticAlgorithm.generation, id, execution, currentThread.getName());
-			logger.info(msg);System.out.println(msg);
-	    	return execution.getFireError();
+     		return evaluateNewExecution(GeneticAlgorithm.generation, id, individual);
      	}
     }
+
+	private static Double evaluateNewExecution(long generation, int individualId, FarsiteIndividual individual) {
+		Thread currentThread = Thread.currentThread();
+		
+		String msg = String.format("Execution  started: %2s %3s %s -> [%s]", generation, individualId, individual, currentThread.getName());
+		logger.info(msg);//System.out.println(msg);
+		FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, individualId, individual);
+		cache.add(execution);
+		msg = String.format("Execution finished: %2s %3s %s -> [%s]", generation, individualId, execution, currentThread.getName());
+		logger.info(msg);System.out.println(msg);
+		return execution.getFireError();
+	}
+
+	private static Double evaluateCachedExecution(long generation, int individualId, FarsiteIndividual individual) {
+		Thread currentThread = Thread.currentThread();
+		
+		FarsiteExecution cachedExecution = cache.get(individual);
+		Double error = null;
+		
+		if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
+			String msg = String.format("%2s %3s %s -> [%s] - CACHED", generation, individualId, cachedExecution, currentThread.getName());
+			logger.info(msg);System.out.println(msg);
+			error = cachedExecution.getFireError();
+		} else {
+			String msg = String.format("%2s %3s %s -> [%s] - NaN", generation, individualId, cachedExecution, currentThread.getName());
+			logger.info(msg);System.out.println(msg);
+			error = Double.NaN;
+		}
+		return error;
+	}
 
 	public void release() {
 		msg = "Going to shutdown the thread pool...";

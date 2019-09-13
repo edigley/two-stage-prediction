@@ -80,14 +80,14 @@ public class ScenarioProperties {
 		
 		this.farsiteStartMonth = Integer.valueOf(scenarioProperties.getProperty("StartMonth").trim());
 		this.farsiteStartDay = Integer.valueOf(scenarioProperties.getProperty("StartDay").trim());
-		this.farsiteStartHour = Integer.valueOf(scenarioProperties.getProperty("StartHour").trim());
+		this.farsiteStartHour = Integer.valueOf(scenarioProperties.getProperty("StartHour").trim())/100;
 		this.farsiteStartMin = Integer.valueOf(scenarioProperties.getProperty("StartMin").trim());
 		
 		this.startTime = LocalDateTime.of(2011, farsiteStartMonth, farsiteStartDay, farsiteStartHour, farsiteStartMin);
 		
 		this.farsiteEndMonth = Integer.valueOf(scenarioProperties.getProperty("EndMonth").trim());
 		this.farsiteEndDay = Integer.valueOf(scenarioProperties.getProperty("EndDay").trim());
-		this.farsiteEndHour = Integer.valueOf(scenarioProperties.getProperty("EndHour").trim());
+		this.farsiteEndHour = Integer.valueOf(scenarioProperties.getProperty("EndHour").trim())/100;
 		this.farsiteEndMin = Integer.valueOf(scenarioProperties.getProperty("EndMin").trim());
 		
 		this.endTime = LocalDateTime.of(2011, farsiteEndMonth, farsiteEndDay, farsiteEndHour, farsiteEndMin);

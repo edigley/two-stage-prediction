@@ -21,7 +21,7 @@ public class Main {
 		+ " -m playpen/farsite_execution_memoization_7200_seconds.txt "  
 		+ " -t 7200 " 
 		+ " -p 1 " 
-		+ " -s 123 ";
+		+ " -s 159 ";
 		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);

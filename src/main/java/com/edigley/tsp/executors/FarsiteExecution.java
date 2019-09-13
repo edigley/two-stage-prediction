@@ -12,7 +12,7 @@ public class FarsiteExecution {
 
 	private Double fireError;
 	
-	private Double maxSimulatedTime;
+	private Long maxSimulatedTime;
 	
 	private long parallelizationLevel;
 
@@ -27,7 +27,7 @@ public class FarsiteExecution {
 		assert header.length <= params.length;
 		individual = new FarsiteIndividual(params);
 		fireError = Double.valueOf(params[PARAMS_START_POS]);
-		maxSimulatedTime = Double.valueOf(params[PARAMS_START_POS+1]);
+		maxSimulatedTime = Long.valueOf(params[PARAMS_START_POS+1]);
 		parallelizationLevel = Long.valueOf(params[PARAMS_START_POS+2]);
 		executionTime = Long.valueOf(params[PARAMS_START_POS+3]);
 	}
@@ -48,7 +48,7 @@ public class FarsiteExecution {
 		this.executionTime = executionTime;
 	}
 
-	public void setMaxSimulatedTime(Double maxSimulatedTime) {
+	public void setMaxSimulatedTime(Long maxSimulatedTime) {
 		this.maxSimulatedTime = maxSimulatedTime;
 	}
 	
@@ -66,11 +66,11 @@ public class FarsiteExecution {
 
 	@Override
 	public String toString() {
-		String pattern = "%s  %.6f  %6.0f %6s %6s";
+		String pattern = "%s  %.6f  %6s %6s %6s";
 		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime);
 	}
 
-	public Double getMaxSimulatedTime() {
+	public Long getMaxSimulatedTime() {
 		return maxSimulatedTime;
 	}
 	

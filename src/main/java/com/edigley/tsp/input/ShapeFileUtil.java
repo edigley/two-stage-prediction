@@ -5,17 +5,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
-import javax.xml.transform.stream.StreamSource;
-
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DefaultTransaction;
@@ -125,14 +122,18 @@ public class ShapeFileUtil {
 		return allFeatures.get(0);
 	}
 	
-	public static Double getSimulatedTime(File file) throws Exception {
+	public static Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws Exception {
+		return ImmutablePair.of(getSimulatedTime(fileB), calculatePredictionError(fileA, fileB));
+	}
+	
+	public static Long getSimulatedTime(File file) throws Exception {
 		Feature lastFeature = getLastFeature(file);
 		//properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
 		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi")
 				.stream()
 				.map(p -> Double.valueOf(p.getValue().toString()))
 				.max(Comparator.comparing(Double::doubleValue)).orElseThrow(NoSuchElementException::new);
-		return maxSimulatedTime;
+		return maxSimulatedTime.longValue();
 	}	
 	
 	public static List<Feature> getAllFeatures(File file) throws Exception {
