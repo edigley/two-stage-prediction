@@ -33,7 +33,7 @@ public class CLIUtils {
 
 	public static void showMessageAndExit(String message) {
 		System.err.println(message);
-		System.exit(1);
+		System.exit(ErrorCode.COMMAND_LINE_ARGS_PARSER_ERROR);
 	}
 
 	public static void checkForHelpAsk(Options options, CommandLine cmd, String HELP, String USAGE, String EXECUTION_LINE) {
@@ -45,10 +45,10 @@ public class CLIUtils {
 		} else {
 			return;
 		}
-		System.exit(1);
+		System.exit(ErrorCode.COMMAND_LINE_ARGS_PARSER_ERROR);
 	}
 	
-	public static void assertsFilesExists(File...files) {
+	public static void assertsFilesExist(File...files) {
 		for (File file : files) {
 			if (!file.exists()) {
 				throw new RuntimeException("File doesn't exist: " + file);	

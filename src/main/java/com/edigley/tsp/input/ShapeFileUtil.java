@@ -29,17 +29,14 @@ import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.factory.ReferencingObjectFactory;
-import org.geotools.util.Comparators;
 import org.opengis.feature.Feature;
 import org.opengis.feature.GeometryAttribute;
-import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.calibration.GeneticAlgorithm;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -51,7 +48,7 @@ public class ShapeFileUtil {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ShapeFileUtil.class);
 	
-	public static Geometry getGeometriesPoligon(File file) throws Exception {
+	public static Geometry getGeometriesPoligon(File file) throws IOException {
 		logger.info("getGeometriesPoligon.fileName: " + file.getAbsolutePath());
 		Map<String, String> connect = new HashMap<>();
 		connect.put("url", file.toURI().toString());
@@ -78,22 +75,26 @@ public class ShapeFileUtil {
 			Geometry geometry = gf.createPolygon(
 					((GeometryCollection) it.next().getDefaultGeometryProperty().getValue()).getCoordinates());
 
-			while (it.hasNext()) {
-				nOfFeatures++;
-				Feature feature = it.next();
-				// geometry =
-				// geometry.union(((GeometryCollection)feature.getDefaultGeometryProperty().getValue())).convexHull();
-				GeometryCollection other = (GeometryCollection) feature.getDefaultGeometryProperty().getValue();
-				try {
-					geometry = geometry.union(gf.createPolygon(other.getCoordinates()));
-				} catch (TopologyException e) {
-					logger.warn("Could'not perform union with geometry", e);
+			try {
+				while (it.hasNext()) {
+					nOfFeatures++;
+					Feature feature = it.next();
+					// geometry =
+					// geometry.union(((GeometryCollection)feature.getDefaultGeometryProperty().getValue())).convexHull();
+					GeometryCollection other = (GeometryCollection) feature.getDefaultGeometryProperty().getValue();
+					try {
+						geometry = geometry.union(gf.createPolygon(other.getCoordinates()));
+					} catch (TopologyException | IllegalArgumentException e) {
+						logger.warn(e.getClass().getSimpleName() + ": Could'not perform union with geometry for file: " + file.getAbsolutePath(), e);
+					} catch (Exception e) {
+						logger.warn("Exception: Could'not perform union with geometry for file: " + file.getAbsolutePath(), e);
+					}
 				}
+			} finally {
+				it.close();
 			}
-			it.close();
 
 			logger.info("getGeometriesPoligon.nOfFeatures: " + nOfFeatures);
-
 			return geometry;
 
 		} finally {
@@ -101,7 +102,7 @@ public class ShapeFileUtil {
 		}
 	}
 	
-	public static Object getGeometry(File file) throws Exception {
+	public static Object getGeometry(File file) throws IOException {
 		Feature feature = getLastFeature(file);
 		GeometryAttribute sourceGeometry = feature.getDefaultGeometryProperty();
 		return sourceGeometry.getValue();
@@ -112,7 +113,7 @@ public class ShapeFileUtil {
 		return feature;
 	}
 	
-	public static Feature getLastFeature(File file) throws Exception {
+	public static Feature getLastFeature(File file) throws IOException {
 		List<Feature> allFeatures = getAllFeatures(file);
 		return allFeatures.get(allFeatures.size()-1);
 	}
@@ -122,11 +123,11 @@ public class ShapeFileUtil {
 		return allFeatures.get(0);
 	}
 	
-	public static Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws Exception {
+	public static Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws IOException {
 		return ImmutablePair.of(getSimulatedTime(fileB), calculatePredictionError(fileA, fileB));
 	}
 	
-	public static Long getSimulatedTime(File file) throws Exception {
+	public static Long getSimulatedTime(File file) throws IOException {
 		Feature lastFeature = getLastFeature(file);
 		//properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
 		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi")
@@ -136,7 +137,7 @@ public class ShapeFileUtil {
 		return maxSimulatedTime.longValue();
 	}	
 	
-	public static List<Feature> getAllFeatures(File file) throws Exception {
+	public static List<Feature> getAllFeatures(File file) throws IOException {
 		logger.info("getFirstFeature.fileName: " + file.getAbsolutePath());
 		Map<String, String> connect = new HashMap<>();
 		connect.put("url", file.toURI().toString());
@@ -208,7 +209,7 @@ public class ShapeFileUtil {
 	}
 	
 	public static void save(File file, MultiPolygon multiPolygon, CoordinateReferenceSystem crs)
-			throws Exception, MalformedURLException, IOException {
+			throws MalformedURLException, IOException {
 
 		SimpleFeatureType featureType = createSimpleFeatureType(crs);
 
@@ -226,7 +227,7 @@ public class ShapeFileUtil {
 		// write features to file
 		try {
 			if (!SimpleFeatureStore.class.isInstance(featureSource)) {
-				throw new Exception(typeName + " does not support read/write access");
+				throw new IOException(typeName + " does not support read/write access");
 			} else {
 				SimpleFeatureStore featureStore = (SimpleFeatureStore) featureSource;
 				Transaction transaction = new DefaultTransaction("create");
@@ -235,7 +236,7 @@ public class ShapeFileUtil {
 					featureStore.addFeatures(collection);
 					transaction.commit();
 					transaction.close();
-				} catch (Exception e) {
+				} catch (IOException e) {
 					logger.error("Error when trying to commit/clos the transaction. Going to perform a rollback...", e);
 					transaction.rollback();
 					transaction.close();
@@ -243,7 +244,7 @@ public class ShapeFileUtil {
 					throw e;
 				}
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.error("Error when closing the transaction", e);
 			throw e;
 		} finally {
@@ -272,7 +273,7 @@ public class ShapeFileUtil {
 		return featureType;
 	}
 	
-	public static Double calculatePredictionError(File gAFile, File gBFile) throws Exception {
+	public static Double calculatePredictionError(File gAFile, File gBFile) throws IOException {
 			
 			MultiPolygon pA = (MultiPolygon) ShapeFileUtil.getGeometry(gAFile);
 			logger.info("---> pA.getArea(): " + pA.getArea());
@@ -290,8 +291,12 @@ public class ShapeFileUtil {
 				mpB = (MultiPolygon) ShapeFileUtil.getGeometriesPoligon(gBFile);
 				logger.info("---> mpB.getArea(): " + mpB.getArea());
 			} catch (ClassCastException e) {
-				pB = (Polygon) ShapeFileUtil.getGeometriesPoligon(gBFile);
-				logger.info("---> pB.getArea(): " + pB.getArea());
+				try {
+					pB = (Polygon) ShapeFileUtil.getGeometriesPoligon(gBFile);
+					logger.info("---> pB.getArea(): " + pB.getArea());
+				} catch (ClassCastException e2) {
+					logger.warn("Couldn't cast shape file to Polygon: " + gBFile.getAbsolutePath(), e2);
+				}
 			}
 
 			// GeometryFunction functions = new GeometryFunction();

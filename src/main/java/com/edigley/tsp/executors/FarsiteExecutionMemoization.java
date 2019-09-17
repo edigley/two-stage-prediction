@@ -9,6 +9,8 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.util.ErrorCode;
+
 public class FarsiteExecutionMemoization {
 
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteExecutionMemoization.class);
@@ -31,9 +33,8 @@ public class FarsiteExecutionMemoization {
 				if (!firstLine.equals(FarsiteExecution.header.toString())) {
 					String pattern = "First line from file %s doesn't contain expected header. Expected: %s. Actual: %s";
 					msg = String.format(pattern, file.getAbsolutePath(), FarsiteExecution.header, firstLine);
-					logger.error(msg);
-					System.err.println(msg);
-					System.exit(5);
+					logger.error(msg);System.err.println(msg);
+					System.exit(ErrorCode.UNEXPECTED_MEMOIZATION_FILE_HEADER);
 				}
 				String nextLine;
 				while (sc.hasNextLine() && !(nextLine=sc.nextLine()).trim().isEmpty()) {
@@ -60,6 +61,14 @@ public class FarsiteExecutionMemoization {
 
 	public FarsiteExecution get(FarsiteIndividual individual) {
 		return executions.get(individual);
+	}
+	
+	public Double getFireError(FarsiteIndividual individual) {
+		FarsiteExecution farsiteExecution = executions.get(individual);
+		if (farsiteExecution == null) {
+			logger.warn("Attempt to retrieve fire error for non cached individual: " + individual);
+		}
+		return (farsiteExecution != null) ? farsiteExecution.getFireError() : Double.MAX_VALUE;
 	}
 
 	private void save(FarsiteExecution execution) {

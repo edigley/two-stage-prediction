@@ -13,8 +13,7 @@ public class ProcessUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessUtil.class);
 
-	public static Double monitorProcessExecution(Process process, Long timeOut)
-			throws IOException, FileNotFoundException, RuntimeException {
+	public static Double monitorProcessExecution(Process process, Long timeOut) throws IOException, FileNotFoundException, RuntimeException {
 
 		try {
 			// any error message?
@@ -31,17 +30,16 @@ public class ProcessUtil {
 				if (process.waitFor(timeOut, TimeUnit.SECONDS)) {
 					return processFarsiteExecutionResult(process, errorGobbler, outputGobbler, true);
 				} else {
-					logger.error("Farsite execution has timed out");
-					//System.err.println("Farsite execution has timed out");
+					logger.error("Process execution has timed out");
 					return Double.NaN;
 				}
 			} else {
 				return processFarsiteExecutionResult(process, errorGobbler, outputGobbler, false);
 			}
 		} catch (InterruptedException e) {
-			logger.error("Execução do Process foi interrompida:", e);
-			System.err.println("Execução do Process foi interrompida: " + e.getMessage());
-			throw new RuntimeException("Farsite execution was interrupted", e);
+			logger.error("Process execution was interrupted: ", e);
+			System.err.println("Process execution was interrupted: " + e.getMessage());
+			throw new RuntimeException("Process execution was interrupted", e);
 		}
 	}
 	
@@ -56,26 +54,16 @@ public class ProcessUtil {
 			logger.debug("process.exitValue(): " + process.exitValue());
 			
 			if (process.exitValue()==137) {
-				//try {
-					//killAllDescendants(process);
-					logger.debug("Individual killed with exitValue: " + process.exitValue());
-				//} catch (NoSuchFieldException | SecurityException | IOException | IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-				//}
-				return Double.valueOf(9);
+				logger.debug("Individual killed with exitValue: " + process.exitValue());
+				return Double.MAX_VALUE;
 			} else {
-			
-				//System.out.println("process.exitValue(): " + process.exitValue());
 				processResult = errorGobbler.getContent();
 				logger.debug("Farsite execution has failed: " + processResult);
 				throw new RuntimeException("Farsite execution has failed: " + process.exitValue());
-				
 			}
 		} else {
-			logger.debug("Execution finished.");
 			processResult = outputGobbler.getContent();
-			logger.debug("Process output: \n" + processResult);
+			logger.debug("Process Execution has finished successfully with output: " + processResult);
 			if (processResult != null && !processResult.trim().isEmpty()) {
 				return Double.valueOf(processResult);
 			} else {
@@ -84,32 +72,36 @@ public class ProcessUtil {
 		}
 	}
 
-	public static void killAllDescendants(Process process) throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+	public static void killAllDescendants(Process process) throws IOException, InterruptedException {
 		
-		Class<?> cProcessImpl = process.getClass();
-		Field fPid = cProcessImpl.getDeclaredField("pid");
-		if (!fPid.isAccessible()) {
-			fPid.setAccessible(true);
-		}
-		System.out.println("fPid.getInt(process): " + fPid.getInt(process));
-		//Runtime.getRuntime().exec("kill -9 " + fPid.getInt(process));
-		//Runtime.getRuntime().exec("pkill -KILL -P " + fPid.getInt(process));
-		//Process exec = Runtime.getRuntime().exec("kill -9 $(pstree -p " + fPid.getInt(process) + " | grep -o '([0-9]\\+)' | grep -o '[0-9]\\+')");
+		int processId = extractProcessId(process);
 		
 		String[] args = new String[3];
 		args[0] = "sh";
 		args[1] = "-c";
-		args[2] = "kill -9 $(pstree -p " + fPid.getInt(process) + " | grep -o '([0-9]\\+)' | grep -o '[0-9]\\+')";
-		//System.out.println("Gonna kill with command: " + args[2]);
+		args[2] = String.format("kill -9 $(pstree -p %s | grep -o '([0-9]\\+)' | grep -o '[0-9]\\+')", processId);
 		Process exec = Runtime.getRuntime().exec(args, null, new File("/tmp"));
 		
 		StreamGobbler errorGobbler = new StreamGobbler(exec.getErrorStream());
 		StreamGobbler outputGobbler = new StreamGobbler(exec.getInputStream());
-		int waitFor = exec.waitFor();
-		//System.out.println("Just killed all with result: " + waitFor);
+		if (exec.waitFor()!=0) {
+			logger.error("Error when killing all descendant processes for process with id <" + processId + "> " +  errorGobbler.getContent() + " " + outputGobbler.getContent());
+		}
+	}
 
-		//System.out.println("errorGobbler: " + errorGobbler.getContent());
-		//System.out.println("outputGobbler: " + outputGobbler.getContent());
+	private static int extractProcessId(Process process) {
+		try {
+			Class<?> cProcessImpl = process.getClass();
+			Field fPid = cProcessImpl.getDeclaredField("pid");
+			if (!fPid.isAccessible()) {
+				fPid.setAccessible(true);
+			}
+			return fPid.getInt(process);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			logger.error("Error when trying to retrieve process ID ", e);
+			System.exit(ErrorCode.RUNTIME_ENVIRONMENT_ACCESS_ERROR);
+			return -1;
+		}
 	}
 
 	private static boolean processDoesntExitSuccessfully(Process process, boolean withTimeOut) throws InterruptedException {

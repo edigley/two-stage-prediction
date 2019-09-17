@@ -44,10 +44,8 @@ public class ShapeFile {
 		
 		MultiPolygon shape = (MultiPolygon) ShapeFileUtil.getGeometry(shapePolygonFile);
 		
-		
 		Double Error = ShapeFileUtil.calculatePredictionError(p1File, shapeFile);		
 		System.out.println("Error: " + Error);
-		System.exit(2);
 	}
 	
 	public static void main2(String[] args) throws Exception {

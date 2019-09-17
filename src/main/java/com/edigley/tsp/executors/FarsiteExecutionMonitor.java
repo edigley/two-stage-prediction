@@ -1,6 +1,7 @@
 package com.edigley.tsp.executors;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,23 +39,20 @@ public class FarsiteExecutionMonitor {
 			Double lastFireError = Double.valueOf(fireError);
 			int nOfRepetitionsOfLastFireError = 0;
 			
-			long simulatedTime = scenarioProperties.getSimulatedTime();
-			
-			while (!maxSimulatedTime.equals(simulatedTime) && process.isAlive()) {
-				
-				try {
+			long simulatedTime = scenarioProperties.getSimulatedTime();			
+
+			try {
+				while ( (maxSimulatedTime < simulatedTime) && process.isAlive()) {
 					
 					TimeUnit.SECONDS.sleep(30);
 				
 					File gAFile = scenarioProperties.getPerimeterAtT1();
-					File gBFile = scenarioProperties.getOutputFile(generation, id); 
+					File gBFile = scenarioProperties.getShapeFileOutput(generation, id); 
 					
 					Pair<Long, Double> fireEvolution = ShapeFileUtil.getFireEvolution(gAFile, gBFile);
 					
 					maxSimulatedTime = fireEvolution.getKey();
 					fireError = fireEvolution.getValue();
-					
-					logger.info(String.format("Individual [ %s %s ] -> Fire Evolution [ %s ] repeated < %s > times ", generation, individual, fireEvolution, nOfRepetitionsOfLastFireError));
 					
 					if (fireError.equals(lastFireError)) {
 						nOfRepetitionsOfLastFireError++;
@@ -63,33 +61,49 @@ public class FarsiteExecutionMonitor {
 						lastFireError = Double.valueOf(fireError);
 					}
 					
-					if (Double.compare(fireError, Double.valueOf(1.5)) > 0 || nOfRepetitionsOfLastFireError > 20) {
+					logger.info(String.format("Individual [ %s %s ] %s -> Fire Evolution [ %s ] repeated < %s > times", generation, id, individual, fireEvolution, nOfRepetitionsOfLastFireError));
+					
+					if (mustKillFarsiteIndividual(scenarioProperties, fireError, nOfRepetitionsOfLastFireError)) {
 						ProcessUtil.killAllDescendants(process);
 						process.destroyForcibly();
 					};
-					
-				} catch (Exception e) {
-					logger.warn("Couldn't extract maximum simulated time for inidividual: " + individual, e);
 				}
-			}
-			
-			logger.info(String.format("Finish monitoring for individual [%s] - with maxSimulatedTime = %s, fireError = %s \n", individual, maxSimulatedTime, fireError));
+
+				logger.info(String.format("Finish monitoring for individual [ %s %s ] %s - with maxSimulatedTime = %s, fireError = %s \n", generation, id, individual, maxSimulatedTime, fireError));
+	
+				if (process.isAlive()) {
+					ProcessUtil.killAllDescendants(process);
+					process.destroyForcibly();					
+				}
+			} catch (InterruptedException e) {
+				logger.error(String.format("Couldn't monitor individual [ %s %s ] %s - ", generation, id, individual), e);
+				e.printStackTrace();
+			} catch (IOException e) {
+				logger.warn(String.format("Couldn't [ extract maximum simulated time / calculate fireError ] for individual  [ %s %s ] %s - ", generation, id, individual), e);
+			} 
 
 		});
 	}
 
+	private static boolean mustKillFarsiteIndividual(ScenarioProperties scenarioProperties, Double fireError, int nOfRepetitionsOfLastFireError) {
+		Double maxTolerableFireError = scenarioProperties.getMaxTolerableFireError();
+		Long maxNonProgressingIterations = scenarioProperties.getMaxNonProgressingIterations();
+		return Double.compare(fireError, maxTolerableFireError) > 0 || nOfRepetitionsOfLastFireError > maxNonProgressingIterations;
+	}
+
+	@SuppressWarnings("unused")
 	public static void monitorFarsiteExecutionImproved(long generation, long id, FarsiteIndividual individual, ScenarioProperties scenarioProperties) {
 		
 		Callable<Long> callable = new Callable<Long>() {
 			public Long call() throws Exception {
-				return ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
+				return ShapeFileUtil.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 			}
 		};
 		
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					Long maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
+					Long maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 					System.out.println("---> maxSimulatedTime: " + maxSimulatedTime);
 					logger.info("---> maxSimulatedTime: " + maxSimulatedTime);
 				} catch (Exception e) {

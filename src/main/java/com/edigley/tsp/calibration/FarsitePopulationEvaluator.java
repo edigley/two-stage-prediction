@@ -26,8 +26,10 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	private static final Logger logger = LoggerFactory.getLogger(FarsitePopulationEvaluator.class);
 	private static transient String msg;
 	
-	private static AtomicInteger nOfEvaluationCallsCount = new AtomicInteger(1);
+	private static AtomicInteger nOfEvaluationCallsCount = new AtomicInteger(0);
 	private int nOfEvaluationCalls;
+	
+	private static AtomicInteger executionIdCount = new AtomicInteger(0);
 	
 	private static FarsiteExecutionMemoization cache;
 	
@@ -55,7 +57,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	@Override
 	public ISeq<Phenotype<IntegerGene, Double>> eval(Seq<Phenotype<IntegerGene, Double>> population) {
 		
-		nOfEvaluationCalls = nOfEvaluationCallsCount.getAndIncrement();
+		nOfEvaluationCalls = nOfEvaluationCallsCount.incrementAndGet();
 		
 		populationSummary("Start ", nOfEvaluationCalls, population);
 		
@@ -67,7 +69,6 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			.forEach(
 				p -> {
 					final String individual = FarsiteIndividual.toStringParams(p.getGenotype());
-					logger.debug(" ---> " + individual + " " + p.isEvaluated());
 					executorService.submit(() -> { p.eval(FarsitePopulationEvaluator::eval); latch.countDown(); });
 				}
 			);	
@@ -84,12 +85,11 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			logger.error(msg, e);System.err.println(msg + " " + e.getMessage());
 		}
 		
+		System.out.println("Going to consolidate all fitness results");
+		logger.debug("Going to consolidate all fitness results");
 		ISeq<Phenotype<IntegerGene, Double>> evaluatedPopulation = population
 				.map( p -> 
-					p.eval(	pt -> {
-						FarsiteExecution farsiteExecution = cache.get(new FarsiteIndividual(pt));
-						return farsiteExecution != null ? farsiteExecution.getFireError() : null;
-					})
+					p.eval(	gt -> cache.getFireError(new FarsiteIndividual(gt)) )
 				)
 				.asISeq();
 		populationSummary("Finish", nOfEvaluationCalls, evaluatedPopulation);
@@ -114,11 +114,11 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	private static Double evaluateNewExecution(long generation, int individualId, FarsiteIndividual individual) {
 		Thread currentThread = Thread.currentThread();
 		
-		String msg = String.format("Execution  started: %2s %3s %s -> [%s]", generation, individualId, individual, currentThread.getName());
+		String msg = String.format("Individual  started: [ %2s %3s ] %s -> [%s]", generation, individualId, individual, currentThread.getName());
 		logger.info(msg);//System.out.println(msg);
 		FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, individualId, individual);
 		cache.add(execution);
-		msg = String.format("Execution finished: %2s %3s %s -> [%s]", generation, individualId, execution, currentThread.getName());
+		msg = String.format("%3s -> Individual finished: [ %2s %3s ] %s -> [%s]", executionIdCount.incrementAndGet(), generation, individualId, execution, currentThread.getName());
 		logger.info(msg);System.out.println(msg);
 		return execution.getFireError();
 	}
@@ -129,15 +129,15 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		FarsiteExecution cachedExecution = cache.get(individual);
 		Double error = null;
 		
-		if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
-			String msg = String.format("%2s %3s %s -> [%s] - CACHED", generation, individualId, cachedExecution, currentThread.getName());
+		//if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
+			String msg = String.format("%3s -> Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName());
 			logger.info(msg);System.out.println(msg);
 			error = cachedExecution.getFireError();
-		} else {
+		/*} else {
 			String msg = String.format("%2s %3s %s -> [%s] - NaN", generation, individualId, cachedExecution, currentThread.getName());
 			logger.info(msg);System.out.println(msg);
 			error = Double.NaN;
-		}
+		}*/
 		return error;
 	}
 

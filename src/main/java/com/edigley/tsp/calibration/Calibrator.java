@@ -6,10 +6,11 @@ import static com.edigley.tsp.ui.CLI.MEMOIZATION;
 import static com.edigley.tsp.ui.CLI.TIME_OUT;
 import static com.edigley.tsp.ui.CLI.SEED;
 import static com.edigley.tsp.ui.CLI.PARALLELIZATION_LEVEL;
-import static com.edigley.tsp.util.CLIUtils.assertsFilesExists;
+import static com.edigley.tsp.util.CLIUtils.assertsFilesExist;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.executors.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
+import com.edigley.tsp.executors.FarsiteExecutionMonitor;
 import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.input.ScenarioProperties;
 
@@ -37,7 +39,7 @@ public class Calibrator {
 	
 	private GeneticAlgorithm geneticAlgorithm;
 	
-	private FarsiteExecution result;
+	private List<FarsiteExecution> results;
 
 	// auxiliary flags
 	private boolean prepared = false;
@@ -51,7 +53,7 @@ public class Calibrator {
 		farsiteFile = (File) cmd.getParsedOptionValue(FARSITE);
 		scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
 		
-		assertsFilesExists(farsiteFile, scenarioDir, new File(scenarioDir, ScenarioProperties.SCENARIO_FILE_NAME));
+		assertsFilesExist(farsiteFile, scenarioDir, new File(scenarioDir, ScenarioProperties.SCENARIO_FILE_NAME));
 		
 		scenarioProperties = new ScenarioProperties(scenarioDir);
 
@@ -95,18 +97,19 @@ public class Calibrator {
 			prepare();			
 		}
 		
-		this.result = geneticAlgorithm.run();
+		this.results = geneticAlgorithm.run();
 		
 		finished = true;
 	}
 
 	public void printSummaryStatistics(StopWatch stopWatch) {
-		msg = String.format("Genetic Algorithm - Best Calibrated Result: %s", result);
+		msg = String.format("Genetic Algorithm - Best Calibrated Result: %s", results.get(0));
         logger.info(msg);System.out.println(msg);
 	}
 
 	public void releaseResources() {
 		FarsitePopulationEvaluator.getInstance().release();
+		FarsiteExecutionMonitor.release();
 	}
 
 }

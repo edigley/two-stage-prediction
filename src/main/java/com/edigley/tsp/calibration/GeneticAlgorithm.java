@@ -1,10 +1,13 @@
 package com.edigley.tsp.calibration;
 
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -38,6 +41,7 @@ public class GeneticAlgorithm {
 	
 	private int NUMBER_OF_GENERATIONS;
 	private int POPULATION_SIZE;
+	private int NUMBER_OF_BEST_INDIVIDUALS;
 	private double RECOMBINATION_PROBABILITY;
 	private double MUTATION_PROBABILITY;
 	
@@ -69,6 +73,7 @@ public class GeneticAlgorithm {
 		
 		this.NUMBER_OF_GENERATIONS = this.scenarioProperties.getNumGenerations();
 		this.POPULATION_SIZE = this.scenarioProperties.getPopulationSize();
+		this.NUMBER_OF_BEST_INDIVIDUALS = this.scenarioProperties.getNumberOfBestIndividuals();
 		this.MUTATION_PROBABILITY = this.scenarioProperties.getMutationProbability();
 		this.RECOMBINATION_PROBABILITY = this.scenarioProperties.getCrossoverProbability();
 		
@@ -107,7 +112,7 @@ public class GeneticAlgorithm {
 	    	.build();
 	}
 	
-	public FarsiteExecution run() {
+	public List<FarsiteExecution> run() {
         Phenotype<IntegerGene, Double> bestPhenotype = null; 
         List<EvolutionResult<IntegerGene, Double>> collect = engine.stream(/*population*/)
         	//.limit(Limits.byFitnessThreshold(0.3))
@@ -125,19 +130,30 @@ public class GeneticAlgorithm {
         	//.collect(EvolutionResult.toBestPhenotype());
         
         System.out.println("---> collect.size(): " + collect.size());
-        EvolutionResult<IntegerGene, Double> evolutionResult = collect.get(collect.size()-1);
-        
-        //evolutionResult.
+        EvolutionResult<IntegerGene, Double> lastEvolutionResult = collect.get(collect.size()-1);
         
         System.out.println("Going to perform the last evaluation...");
         
-        FarsitePopulationEvaluator.getInstance().eval(evolutionResult.getPopulation());
+        FarsitePopulationEvaluator.getInstance().eval(lastEvolutionResult.getPopulation());
         
         System.out.println("Last evaluation have been performed.");
         
-        FarsiteIndividual bestIndividual = new FarsiteIndividual(evolutionResult.getBestPhenotype().getGenotype());
+        Set<FarsiteExecution> allIndividuals = new TreeSet<>();
+        collect.forEach(r -> r.getGenotypes().forEach(gt -> {allIndividuals.add(cache.get(new FarsiteIndividual(gt)));}));
+        //Collections.sort(allIndividuals);
+
+        List<FarsiteExecution> bestIndividuals = new ArrayList<>();
         
-        return cache.get(bestIndividual);
+        Iterator<FarsiteExecution> it = allIndividuals.iterator();
+        for (int i = 0; i < NUMBER_OF_BEST_INDIVIDUALS; i++) {
+        	FarsiteExecution individual = it.next();
+        	bestIndividuals.add(individual);
+			System.out.printf("Best Result %s: %s\n", i, individual);
+		}
+        
+        //FarsiteIndividual bestIndividual = new FarsiteIndividual(evolutionResult.getBestPhenotype().getGenotype());
+        //return cache.get(bestIndividual);
+        return bestIndividuals;
 	}
 
     public void setExecutor(FarsiteExecutor executor) {

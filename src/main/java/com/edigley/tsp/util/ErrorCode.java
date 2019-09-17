@@ -1,0 +1,18 @@
+package com.edigley.tsp.util;
+
+public interface ErrorCode {
+
+	int COMMAND_LINE_ARGS_PARSER_ERROR = 1;
+	
+	int NONEXISTENT_SCENARIO_FILE = 2;
+	
+	int NONEXISTENT_LANDSCAPE_FILE = 3;
+	
+	int NONEXISTENT_INPUT_DIR = 4;
+	int NONEXISTENT_OUTPUT_DIR = 5;
+	
+	int UNEXPECTED_MEMOIZATION_FILE_HEADER = 6;
+
+	int RUNTIME_ENVIRONMENT_ACCESS_ERROR = 7;
+	
+}

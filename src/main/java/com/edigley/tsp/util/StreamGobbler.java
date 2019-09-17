@@ -7,8 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class StreamGobbler extends Thread {
 
+	private static final Logger logger = LoggerFactory.getLogger(StreamGobbler.class);
+	
 	private InputStream is;
 
 	private String content = "";
@@ -27,10 +32,12 @@ public class StreamGobbler extends Thread {
 				this.content += line + "\n";
 			}
 		} catch (IOException ioe) {
+			logger.warn("Error when reading input stream with content so far: " + this.content, ioe);
 			ioe.printStackTrace();
 		}
 	}
 
+	@SuppressWarnings({ "unused", "resource" })
 	public static void main(String[] args) throws Exception {
 		// String command = "java -jar extrator-opendap.jar -d
 		// CSMK3_SRA2_1_tasmax-change_2011-2030.nc -p pontos.txt -o
@@ -79,6 +86,7 @@ public class StreamGobbler extends Thread {
 			e.printStackTrace();
 			success = false;
 		}
+		System.out.println("success:" + success);
 	}
 
 	public String getContent() {

@@ -5,16 +5,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.edigley.tsp.util.ErrorCode;
+
 public class ScenarioProperties {
 
+	private static final Logger logger = LoggerFactory.getLogger(ScenarioProperties.class);
+	
 	//defaultValues for properties
 	public static final String SCENARIO_FILE_NAME = "scenario.ini";
 	public static final int NUMBER_OF_GENERATIONS = 10;
 	public static final int POPULATION_SIZE = 25;
+	public static final int NUMBER_OF_BEST_INDIVIDUALS = 10;
 	public static final double RECOMBINATION_PROBABILITY = 0.4;
 	public static final double MUTATION_PROBABILITY = 0.1;
 	
@@ -25,13 +32,12 @@ public class ScenarioProperties {
 	private File landscapeFile;
 	
 	private File perimeterAtT0File;
-	
 	private File perimeterAtT1File;
 	
+	private File inputDir;
 	private File outputDir;
 	
 	private int numGenerations;
-	
 	private int populationSize;
 	
 	private Long farsiteParallelizationLevel;
@@ -56,30 +62,74 @@ public class ScenarioProperties {
 	
 	private long simulatedTime;
 
+	private Double maxTolerableFireError;
+
+	private Long maxNonProgressingIterations;
+
+	private int numberOfBestIndividuals;
+
 	public ScenarioProperties(File scenarioDir) throws FileNotFoundException, IOException {
 		assert scenarioDir.exists();
 		scenarioFile = new File(scenarioDir, SCENARIO_FILE_NAME);
-		assert scenarioFile.exists();
+		assert scenarioFile.exists() : "Scenario file is mandatory: " + scenarioFile.getAbsolutePath();
+		
+		if (!scenarioFile.exists()) {
+			System.err.println("Scenario file doesn't exist: " + scenarioFile.getAbsolutePath());
+			System.exit(ErrorCode.NONEXISTENT_SCENARIO_FILE);
+		}
+		
 		scenarioProperties = new Properties();
 		scenarioProperties.load(new FileInputStream(scenarioFile));
 		
 		this.landscapeFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeFile"));
 		
+		assert landscapeFile.exists() : "Landscape file is mandatory: " + landscapeFile.getAbsolutePath();
+		
+		if (!landscapeFile.exists()) {
+			System.err.println("Landscape file doesn't exist: " + landscapeFile.getAbsolutePath());
+			System.exit(ErrorCode.NONEXISTENT_LANDSCAPE_FILE);
+		}
+		
 		this.perimeterAtT0File = new File(scenarioDir, scenarioProperties.getProperty("ignitionFile"));
 		this.perimeterAtT1File = new File(scenarioDir, scenarioProperties.getProperty("real_fire_map_t1").trim().replace(".asc", ".shp"));
 		
+		this.inputDir = new File(scenarioDir, scenarioProperties.getProperty("input_path").trim());
 		this.outputDir = new File(scenarioDir, scenarioProperties.getProperty("output_path").trim());
+		
+		if (!this.inputDir.exists()) {
+			logger.info("Going to create inputDir: " + this.inputDir.getAbsolutePath());
+			boolean wasCreated = this.inputDir.mkdir();
+			if (!wasCreated) {
+				System.err.println("Input directory didn't exist and couldn't be create: " + inputDir.getAbsolutePath());
+				System.exit(ErrorCode.NONEXISTENT_INPUT_DIR);
+			}
+		}
+		
+		if (!this.outputDir.exists()) {
+			logger.info("Going to create outputDir: " + this.outputDir.getAbsolutePath());
+			boolean wasCreated = this.outputDir.mkdir();
+			if (!wasCreated) {
+				System.err.println("Output directory didn't exist and couldn't be create: " + outputDir.getAbsolutePath());
+				System.exit(ErrorCode.NONEXISTENT_OUTPUT_DIR);
+			}
+		}
 		
 		this.numGenerations = Integer.valueOf(scenarioProperties.getProperty("numGenerations", Integer.toString(NUMBER_OF_GENERATIONS).trim()));
 		this.populationSize = Integer.valueOf(scenarioProperties.getProperty("population_size", Integer.toString(POPULATION_SIZE).trim()));
 		this.crossoverProbability = Double.valueOf(scenarioProperties.getProperty("pCrossover", Double.toString(RECOMBINATION_PROBABILITY).trim()));
 		this.mutationProbability = Double.valueOf(scenarioProperties.getProperty("pMutation", Double.toString(MUTATION_PROBABILITY).trim()));
 		
+		this.numberOfBestIndividuals = Integer.valueOf(scenarioProperties.getProperty("numberOfBestIndividuals", Integer.toString(NUMBER_OF_BEST_INDIVIDUALS)).trim());
+		
+		this.maxTolerableFireError = Double.valueOf(scenarioProperties.getProperty("maxTolerableFireError", "1.5").trim());
+		this.maxNonProgressingIterations = Long.valueOf(scenarioProperties.getProperty("maxNonProgressingIterations", "20").trim());
+		
 		this.farsiteParallelizationLevel = Long.valueOf(scenarioProperties.getProperty("num_threads", "1").trim());
 		this.farsiteExecutionTimeout = Integer.valueOf(scenarioProperties.getProperty("ExecutionLimit").trim());
 		
 		this.farsiteStartMonth = Integer.valueOf(scenarioProperties.getProperty("StartMonth").trim());
 		this.farsiteStartDay = Integer.valueOf(scenarioProperties.getProperty("StartDay").trim());
+		assert scenarioProperties.getProperty("StartHour").trim().length() == 4 : "StartHour should be specified including minutes: P. ex: 1200";
 		this.farsiteStartHour = Integer.valueOf(scenarioProperties.getProperty("StartHour").trim())/100;
 		this.farsiteStartMin = Integer.valueOf(scenarioProperties.getProperty("StartMin").trim());
 		
@@ -87,6 +137,7 @@ public class ScenarioProperties {
 		
 		this.farsiteEndMonth = Integer.valueOf(scenarioProperties.getProperty("EndMonth").trim());
 		this.farsiteEndDay = Integer.valueOf(scenarioProperties.getProperty("EndDay").trim());
+		assert scenarioProperties.getProperty("EndHour").trim().length() == 4 : "EndHour should be specified including minutes: P. ex: 1800";
 		this.farsiteEndHour = Integer.valueOf(scenarioProperties.getProperty("EndHour").trim())/100;
 		this.farsiteEndMin = Integer.valueOf(scenarioProperties.getProperty("EndMin").trim());
 		
@@ -94,28 +145,31 @@ public class ScenarioProperties {
 		
 		this.simulatedTime = Duration.between(startTime, endTime).getSeconds()/60;
 		
-		System.out.println("ScenarioProperties.startTime: " + this.startTime);
-		System.out.println("ScenarioProperties.endTime: " + this.endTime);
-		System.out.println("ScenarioProperties.this.simulatedTime: " + this.simulatedTime);
+		logger.info("ScenarioProperties.startTime                    : " + this.startTime);
+		logger.info("ScenarioProperties.endTime                      : " + this.endTime);
+		logger.info("ScenarioProperties.simulatedTime                : " + this.simulatedTime + " seconds");
 		
-/*
-		StartMonth  = 7
-		StartDay    = 22
-		StartHour   = 1200
-		StartMin    = 00
-		EndMonth    = 7
-		EndDay      = 23
-		EndHour     = 1800
-		EndMin      = 30
-*/
+		logger.info("ScenarioProperties.numGenerations               : " + this.numGenerations);
+		logger.info("ScenarioProperties.populationSize               : " + this.populationSize);
+		logger.info("ScenarioProperties.crossoverProbability         : " + this.crossoverProbability);
+		logger.info("ScenarioProperties.mutationProbability          : " + this.mutationProbability);
+		
+		logger.info("ScenarioProperties.maxTolerableFireError        : " + this.maxTolerableFireError);
+		logger.info("ScenarioProperties.maxNonProgressingIterations  : " + this.maxNonProgressingIterations);
 		
 	}
 	
 	public File getPerimeterAtT1() {
 		return perimeterAtT1File;
 	}
+
+	public File getRasterOutput(long generation, long individual) {
+		assert generation >= 0;
+		assert individual >= 1;
+		return new File(outputDir, String.format("raster_%s_%s.toa", generation, individual));
+	}
 	
-	public File getOutputFile(long generation, long individual) {
+	public File getShapeFileOutput(long generation, long individual) {
 		assert generation >= 0;
 		assert individual >= 1;
 		return new File(outputDir, String.format("shape_%s_%s.shp", generation, individual));
@@ -181,6 +235,18 @@ public class ScenarioProperties {
 
 	public long getSimulatedTime() {
 		return simulatedTime;
+	}
+
+	public Double getMaxTolerableFireError() {
+		return maxTolerableFireError;
+	}
+
+	public Long getMaxNonProgressingIterations() {
+		return maxNonProgressingIterations;
+	}
+
+	public int getNumberOfBestIndividuals() {
+		return numberOfBestIndividuals;
 	}
 
 }

@@ -2,7 +2,7 @@ package com.edigley.tsp.executors;
 
 import com.edigley.tsp.input.FileHeader;
 
-public class FarsiteExecution {
+public class FarsiteExecution implements Comparable<FarsiteExecution> {
 
 	public static final FileHeader header = new FileHeader(FarsiteIndividual.header + " fireError maxSimulatedTime parallelizationLevel executionTime ");
 	
@@ -72,6 +72,11 @@ public class FarsiteExecution {
 
 	public Long getMaxSimulatedTime() {
 		return maxSimulatedTime;
+	}
+
+	@Override
+	public int compareTo(FarsiteExecution o) {
+		return this.fireError.compareTo(o.fireError);
 	}
 	
 }

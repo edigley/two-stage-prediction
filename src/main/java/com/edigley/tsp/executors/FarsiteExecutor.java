@@ -64,10 +64,15 @@ public class FarsiteExecutor {
 			//System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " + fireError + "\n");
 			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
 			File gAFile = scenarioProperties.getPerimeterAtT1();
-			File gBFile = scenarioProperties.getOutputFile(generation, id);
+			File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
 			try {
 				Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
-				fireError = Double.parseDouble(String.format("%.6f", _fireError).replace(",", "."));
+				if (fireError.equals(Double.MAX_VALUE)) {
+					//fireError = (1 + _fireError);
+					fireError = Double.parseDouble(String.format("%.6f", (1 + _fireError)).replace(",", "."));
+				} else {
+					fireError = Double.parseDouble(String.format("%.6f", _fireError).replace(",", "."));
+				}
 			} catch (Exception e) {
 				System.err.printf("Couldn't compare non-finished scenario result for individual [ %s ]. Error message: %s\n", individual, e.getMessage());
 				logger.error("Couldn't compare non-finished scenario result", e);
@@ -75,7 +80,7 @@ public class FarsiteExecutor {
 		}
 		
 		try {
-			Long maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getOutputFile(generation, id));
+			Long maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 			execution.setMaxSimulatedTime(maxSimulatedTime);
 		} catch (Exception e) {
 			System.err.printf("Couldn't extract maximum simulated time for individual %s - %s\n", individual, e.getMessage());
@@ -106,10 +111,11 @@ public class FarsiteExecutor {
 			Double fireError = ProcessUtil.monitorProcessExecution(process, timeout);
 			return fireError;
 		} catch (Exception e) {
-			logger.error(String.format("Couldn't run farsite for individual [%s %s] %s", generation, id, individual), e);
-			throw new RuntimeException(e);
+			String message = String.format("Couldn't run farsite for individual [%s %s] %s", generation, id, individual);
+			logger.error(message, e);
+			throw new RuntimeException(message, e);
 		} finally {
-			args[2] = String.format("rm -rf output/raster_%s_%s.toa", generation, id);
+			args[2] = String.format("rm -f " + scenarioProperties.getRasterOutput(generation, id).getAbsolutePath());
 			try {
 				Runtime.getRuntime().exec(args, null, scenarioDir);
 			} catch (IOException e) {
