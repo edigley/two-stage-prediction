@@ -2,6 +2,7 @@ package com.edigley.tsp.input;
 
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,9 +11,11 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.geometry.primitive.Bearing;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 public class ShapeFile {
 
@@ -30,8 +33,115 @@ public class ShapeFile {
 	public final static double calculateDirection(Point starting, Point destination) {
 		return calculateAngleFrom(starting.getX(), starting.getY(), destination.getX(), destination.getY());
 	}
+
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws IOException {
+		
+		File jonqueraPerimetersDir = new File("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/perimetres/");
+		File dir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/output/");
+		
+		File layerExtentFile = new File(jonqueraPerimetersDir, "jonquera_polygon_from_layer_extent.shp");
+		
+		File shapeInternalPolygonFile = new File(dir, "shape_11_585_polygon.shp");
+		File shapeExternalPolygonFile = new File(dir, "shape_11_587_polygon.shp");
+
+		//System.out.println(ShapeFileUtil.boundariesTouch(shapeInternalPolygonFile, layerExtentFile));
+		//System.out.println(ShapeFileUtil.boundariesTouch(shapeExternalPolygonFile, layerExtentFile));
+		
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_551.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_555.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_562.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_558.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_572.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_571.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_582.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_585.shp"), layerExtentFile));
+		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_587.shp"), layerExtentFile));
+		
+	}
+	
+	public static void main4(String[] args) throws Exception {
+		File jonqueraPerimetersDir = new File("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/perimetres/");
+		File dir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/output/");
+		
+		File layerExtentFile = new File(jonqueraPerimetersDir, "jonquera_polygon_from_layer_extent.shp");
+		
+		File shapeInternalPolygonFile = new File(dir, "shape_11_585_polygon.shp");
+		File shapeExternalPolygonFile = new File(dir, "shape_11_587_polygon.shp");
+		
+		
+		Polygon layerExtent = (Polygon) ShapeFileUtil.getGeometriesPoligon(layerExtentFile);
+		Polygon shapeInternal = (Polygon) ShapeFileUtil.getGeometriesPoligon(shapeInternalPolygonFile);
+		Polygon shapeExternal = (Polygon) ShapeFileUtil.getGeometriesPoligon(shapeExternalPolygonFile);
+		
+		System.out.println("layerExtent.getBoundary().touches(shapeInternal.getBoundary()): " + layerExtent.getBoundary().touches(shapeInternal.getBoundary()));
+		System.out.println("layerExtent.getBoundary().touches(shapeExternal.getBoundary()): " + layerExtent.getBoundary().touches(shapeExternal.getBoundary()));
+
+		System.out.println("layerExtent.touches(shapeInternal): " + layerExtent.touches(shapeInternal));
+		System.out.println("layerExtent.touches(shapeExternal): " + layerExtent.touches(shapeExternal));
+		
+		System.out.println("shapeInternal.touches(shapeExternal): " + shapeInternal.touches(shapeExternal));
+		System.out.println("shapeExternal.touches(shapeInternal): " + shapeExternal.touches(shapeInternal));
+		
+		System.out.println("shapeExternal.intersects(shapeInternal): " + shapeExternal.intersects(shapeInternal));
+		System.out.println("shapeInternal.intersects(shapeExternal): " + shapeInternal.intersects(shapeExternal));
+		
+		System.out.println("layerExtent.intersects(shapeInternal): " + layerExtent.intersects(shapeInternal));
+		System.out.println("layerExtent.intersects(shapeExternal): " + layerExtent.intersects(shapeExternal));
+		
+		System.out.println("layerExtent.getEnvelope().touches(shapeExternal.getEnvelope()): " + layerExtent.getEnvelope().touches(shapeExternal.getEnvelope()));
+		System.out.println("layerExtent.getEnvelope().touches(shapeInternal.getEnvelope()): " + layerExtent.getEnvelope().touches(shapeInternal.getEnvelope()));
+
+		System.out.println("layerExtent.getEnvelope().covers(shapeExternal.getEnvelope()): " + layerExtent.getEnvelope().covers(shapeExternal.getEnvelope()));
+		System.out.println("layerExtent.getEnvelope().covers(shapeInternal.getEnvelope()): " + layerExtent.getEnvelope().covers(shapeInternal.getEnvelope()));
+		
+		System.out.println("shapeExternal.getEnvelope().covers(shapeInternal.getEnvelope()): " + shapeExternal.getEnvelope().covers(shapeInternal.getEnvelope()));
+		
+		System.out.println("layerExtent.getExteriorRing().touches(shapeExternal.getExteriorRing()): " + layerExtent.getExteriorRing().touches(shapeExternal.getExteriorRing()));
+		System.out.println("layerExtent.getExteriorRing().touches(shapeInternal.getExteriorRing()): " + layerExtent.getExteriorRing().touches(shapeInternal.getExteriorRing()));
+
+		System.out.println("layerExtent.getExteriorRing().intersects(shapeExternal.getExteriorRing()): " + layerExtent.getExteriorRing().intersects(shapeExternal.getExteriorRing()));
+		System.out.println("layerExtent.getExteriorRing().intersects(shapeInternal.getExteriorRing()): " + layerExtent.getExteriorRing().intersects(shapeInternal.getExteriorRing()));
+		
+		System.out.println("layerExtent.getExteriorRing().covers(shapeExternal.getExteriorRing()): " + layerExtent.getExteriorRing().covers(shapeExternal.getExteriorRing()));
+		System.out.println("layerExtent.getExteriorRing().covers(shapeInternal.getExteriorRing()): " + layerExtent.getExteriorRing().covers(shapeInternal.getExteriorRing()));
+
+		Polygon differenceExternal = (Polygon) layerExtent.difference(shapeExternal);
+		ShapeFileUtil.save(new File(dir, "15_differenceExternal.shp"), differenceExternal, null);
+		
+		Geometry convexHull = (Polygon)shapeExternal.convexHull();
+		Polygon differenceConvexHull = (Polygon)layerExtent.difference(convexHull);
+		ShapeFileUtil.save(new File(dir, "15_differenceExternal_convex_hull.shp"), differenceConvexHull, null);
+		
+		Polygon differenceInternal = (Polygon) layerExtent.difference(shapeInternal);
+		ShapeFileUtil.save(new File(dir, "15_differenceInternal.shp"), differenceInternal, null);
+		
+		System.out.println(differenceExternal.getNumGeometries());
+		System.out.println(differenceInternal.getNumGeometries());
+		System.out.println(differenceConvexHull.getNumGeometries());
+		System.out.println(layerExtent.touches(convexHull));
+		System.out.println(layerExtent.intersects(convexHull));
+		System.out.println(layerExtent.getEnvelope().touches(convexHull.getEnvelope()));
+		System.out.println(layerExtent.getExteriorRing().isWithinDistance(convexHull, 1));
+		System.out.println(layerExtent.getExteriorRing().isWithinDistance(shapeExternal, 0.01));
+		System.out.println(shapeInternal.getExteriorRing().getLength());
+		System.out.println(layerExtent.getExteriorRing().isWithinDistance(shapeInternal, 1));
+				
+		/*
+		File p1File = new File(jonqueraPerimetersDir, "jonquera_perimeter_1.shp");
+		File shapeFileInternal = new File(dir, "shape_11_585.shp");
+		ShapeFileUtil.saveGeometryPolygon(shapeFile, shapePolygonFile);
+		
+		MultiPolygon shape = (MultiPolygon) ShapeFileUtil.getGeometry(shapePolygonFile);
+		
+		Double Error = ShapeFileUtil.calculatePredictionError(p1File, shapeFile);		
+		System.out.println("Error: " + Error);
+		*/
+	}
+	
+	
+	
+	public static void main3(String[] args) throws Exception {
 		File jonqueraPerimetersDir = new File("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/perimetres/");
 		File dir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/output/");
 		

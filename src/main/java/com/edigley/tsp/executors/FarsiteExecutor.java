@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +67,16 @@ public class FarsiteExecutor {
 			File gAFile = scenarioProperties.getPerimeterAtT1();
 			File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
 			try {
-				Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
+				Pair<Long, Double> fireEvolution = ShapeFileUtil.getFireEvolution(gAFile, gBFile);
+				Long effectivelySimulatedTime = fireEvolution.getKey();
+				Double _fireError = fireEvolution.getValue();
+				Double factor = Math.max(1.0, scenarioProperties.getSimulatedTime()/(effectivelySimulatedTime*1.0));
+				//Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
 				if (fireError.equals(Double.MAX_VALUE)) {
 					//fireError = (1 + _fireError);
-					fireError = Double.parseDouble(String.format("%.6f", (1 + _fireError)).replace(",", "."));
+					fireError = Double.parseDouble(String.format("%.6f", (factor * _fireError)).replace(",", "."));
 				} else {
-					fireError = Double.parseDouble(String.format("%.6f", _fireError).replace(",", "."));
+					fireError = Double.parseDouble(String.format("%.6f", (factor * _fireError)).replace(",", "."));
 				}
 			} catch (Exception e) {
 				System.err.printf("Couldn't compare non-finished scenario result for individual [ %s ]. Error message: %s\n", individual, e.getMessage());

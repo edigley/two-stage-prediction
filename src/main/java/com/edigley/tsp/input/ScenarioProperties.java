@@ -68,6 +68,8 @@ public class ScenarioProperties {
 
 	private int numberOfBestIndividuals;
 
+	private File landscapeLayerExtentFile;
+
 	public ScenarioProperties(File scenarioDir) throws FileNotFoundException, IOException {
 		assert scenarioDir.exists();
 		scenarioFile = new File(scenarioDir, SCENARIO_FILE_NAME);
@@ -82,6 +84,7 @@ public class ScenarioProperties {
 		scenarioProperties.load(new FileInputStream(scenarioFile));
 		
 		this.landscapeFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeFile"));
+		this.landscapeLayerExtentFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeLayerExtentFile"));
 		
 		assert landscapeFile.exists() : "Landscape file is mandatory: " + landscapeFile.getAbsolutePath();
 		
@@ -122,7 +125,7 @@ public class ScenarioProperties {
 		this.numberOfBestIndividuals = Integer.valueOf(scenarioProperties.getProperty("numberOfBestIndividuals", Integer.toString(NUMBER_OF_BEST_INDIVIDUALS)).trim());
 		
 		this.maxTolerableFireError = Double.valueOf(scenarioProperties.getProperty("maxTolerableFireError", "1.5").trim());
-		this.maxNonProgressingIterations = Long.valueOf(scenarioProperties.getProperty("maxNonProgressingIterations", "20").trim());
+		this.maxNonProgressingIterations = Long.valueOf(scenarioProperties.getProperty("maxNonProgressingIterations", "10").trim());
 		
 		this.farsiteParallelizationLevel = Long.valueOf(scenarioProperties.getProperty("num_threads", "1").trim());
 		this.farsiteExecutionTimeout = Integer.valueOf(scenarioProperties.getProperty("ExecutionLimit").trim());
@@ -247,6 +250,10 @@ public class ScenarioProperties {
 
 	public int getNumberOfBestIndividuals() {
 		return numberOfBestIndividuals;
+	}
+
+	public File getLandscapeLayerExtentFile() {
+		return landscapeLayerExtentFile;
 	}
 
 }

@@ -63,7 +63,7 @@ public class FarsiteExecutionMonitor {
 					
 					logger.info(String.format("Individual [ %s %s ] %s -> Fire Evolution [ %s ] repeated < %s > times", generation, id, individual, fireEvolution, nOfRepetitionsOfLastFireError));
 					
-					if (mustKillFarsiteIndividual(scenarioProperties, fireError, nOfRepetitionsOfLastFireError)) {
+					if (mustKillFarsiteIndividual(gBFile, scenarioProperties, fireError, nOfRepetitionsOfLastFireError)) {
 						ProcessUtil.killAllDescendants(process);
 						process.destroyForcibly();
 					};
@@ -85,10 +85,17 @@ public class FarsiteExecutionMonitor {
 		});
 	}
 
-	private static boolean mustKillFarsiteIndividual(ScenarioProperties scenarioProperties, Double fireError, int nOfRepetitionsOfLastFireError) {
+	private static boolean mustKillFarsiteIndividual(File firePerimeter, ScenarioProperties scenarioProperties, Double fireError, int nOfRepetitionsOfLastFireError) throws IOException {
 		Double maxTolerableFireError = scenarioProperties.getMaxTolerableFireError();
 		Long maxNonProgressingIterations = scenarioProperties.getMaxNonProgressingIterations();
-		return Double.compare(fireError, maxTolerableFireError) > 0 || nOfRepetitionsOfLastFireError > maxNonProgressingIterations;
+		return (Double.compare(fireError, maxTolerableFireError) > 0) 
+			|| (nOfRepetitionsOfLastFireError > maxNonProgressingIterations) 
+			|| (firePerimeterReachesLandscapeExtent(firePerimeter, scenarioProperties));
+	}
+
+	private static boolean firePerimeterReachesLandscapeExtent(File firePerimeter, ScenarioProperties scenarioProperties) throws IOException {
+		File layerExtentFile = scenarioProperties.getLandscapeLayerExtentFile();
+		return ShapeFileUtil.boundariesTouch(firePerimeter, layerExtentFile);
 	}
 
 	@SuppressWarnings("unused")

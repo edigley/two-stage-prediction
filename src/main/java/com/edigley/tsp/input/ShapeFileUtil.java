@@ -333,4 +333,33 @@ public class ShapeFileUtil {
 		//ShapeFileUtil.save(outputFile, ShapeFileUtil.getGeometriesPoligon(gFile), crs);
 	}
 
+
+	public static boolean boundariesTouch(File firePerimeter, File layerExtentFile) throws IOException {
+		Polygon layerExtent = (Polygon) ShapeFileUtil.getGeometriesPoligon(layerExtentFile);
+		//Polygon shapeInternal = (Polygon) ShapeFileUtil.getGeometriesPoligon(shapeInternalPolygonFile);
+
+		MultiPolygon mpB = null;
+		Polygon pB = null;
+		
+		try {
+			mpB = (MultiPolygon) ShapeFileUtil.getGeometriesPoligon(firePerimeter);
+			logger.info("---> mpB.getArea(): " + mpB.getArea());
+		} catch (ClassCastException e) {
+			try {
+				pB = (Polygon) ShapeFileUtil.getGeometriesPoligon(firePerimeter);
+				logger.info("---> pB.getArea(): " + pB.getArea());
+			} catch (ClassCastException e2) {
+				logger.warn("Couldn't cast shape file to Polygon: " + firePerimeter.getAbsolutePath(), e2);
+				return false;
+			}
+		}
+		
+		if (mpB != null) {
+			return layerExtent.getExteriorRing().isWithinDistance(mpB, 1);
+		} else {
+			return layerExtent.getExteriorRing().isWithinDistance( pB, 1);
+		}
+		
+	}
+	
 }
