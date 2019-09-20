@@ -30,6 +30,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	private int nOfEvaluationCalls;
 	
 	private static AtomicInteger executionIdCount = new AtomicInteger(0);
+	private static AtomicInteger executionIdPerGenerationCount = new AtomicInteger(0);
 	
 	private static FarsiteExecutionMemoization cache;
 	
@@ -56,6 +57,8 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 	
 	@Override
 	public ISeq<Phenotype<IntegerGene, Double>> eval(Seq<Phenotype<IntegerGene, Double>> population) {
+		
+		executionIdPerGenerationCount.set(0);
 		
 		nOfEvaluationCalls = nOfEvaluationCallsCount.incrementAndGet();
 		
@@ -118,7 +121,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		logger.info(msg);//System.out.println(msg);
 		FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, individualId, individual);
 		cache.add(execution);
-		msg = String.format("%3s -> Individual finished: [ %2s %3s ] %s -> [%s]", executionIdCount.incrementAndGet(), generation, individualId, execution, currentThread.getName());
+		msg = String.format("%3s - %3s ==> Individual finished: [ %2s %3s ] %s -> [%s]", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, execution, currentThread.getName());
 		logger.info(msg);System.out.println(msg);
 		return execution.getFireError();
 	}
@@ -130,7 +133,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		Double error = null;
 		
 		//if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
-			String msg = String.format("%3s -> Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName());
+			String msg = String.format("%3s - %3s ==> Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName());
 			logger.info(msg);System.out.println(msg);
 			error = cachedExecution.getFireError();
 		/*} else {

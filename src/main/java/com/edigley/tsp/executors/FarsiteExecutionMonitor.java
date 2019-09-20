@@ -45,6 +45,10 @@ public class FarsiteExecutionMonitor {
 				while ( (maxSimulatedTime < simulatedTime) && process.isAlive()) {
 					
 					TimeUnit.SECONDS.sleep(30);
+					
+					if (!process.isAlive()) {
+						break;
+					}
 				
 					File gAFile = scenarioProperties.getPerimeterAtT1();
 					File gBFile = scenarioProperties.getShapeFileOutput(generation, id); 
@@ -76,10 +80,10 @@ public class FarsiteExecutionMonitor {
 					process.destroyForcibly();					
 				}
 			} catch (InterruptedException e) {
-				logger.error(String.format("Couldn't monitor individual [ %s %s ] %s - ", generation, id, individual), e);
+				logger.error(String.format("Couldn't monitor individual [ %2s %3s ] %s - ", generation, id, individual), e);
 				e.printStackTrace();
 			} catch (IOException e) {
-				logger.warn(String.format("Couldn't [ extract maximum simulated time / calculate fireError ] for individual  [ %s %s ] %s - ", generation, id, individual), e);
+				logger.warn(String.format("Couldn't [ extract maximum simulated time / calculate fireError ] for individual  [ %2s %3s ] %s - ", generation, id, individual), e);
 			} 
 
 		});

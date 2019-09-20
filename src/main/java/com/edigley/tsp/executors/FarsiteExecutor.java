@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.exceptions.TSPFarsiteExecutionException;
 import com.edigley.tsp.input.ScenarioProperties;
 import com.edigley.tsp.input.ShapeFileUtil;
 import com.edigley.tsp.util.ProcessUtil;
@@ -59,7 +60,14 @@ public class FarsiteExecutor {
 		
 		FarsiteExecution execution = new FarsiteExecution(individual);
 		execution.setParallelizationLevel(parallelizationLevel);
-		Double fireError = execute(generation, id, individual);
+		
+		Double fireError = Double.NaN;
+		
+		try {
+			fireError = execute(generation, id, individual);
+		} catch (TSPFarsiteExecutionException e) {
+			logger.error("There was an error when trying to execute individual: " + e.getMessage(), e);
+		}
 		
 		if (fireError.equals(Double.NaN) || fireError > 9999) {
 			//System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " + fireError + "\n");
@@ -100,7 +108,7 @@ public class FarsiteExecutor {
 		return execution;
 	}
 	
-	private Double execute(long generation, long id, FarsiteIndividual individual) throws RuntimeException {
+	private Double execute(long generation, long id, FarsiteIndividual individual) throws TSPFarsiteExecutionException {
 		String commandPattern = "%s scenario.ini run %s   %s   %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
 		String command = String.format(commandPattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout, parallelizationLevel);
 		logger.info(String.format("Going to run farsite wrapper with command < %s > in dir < %s >", command, scenarioDir));
@@ -116,15 +124,15 @@ public class FarsiteExecutor {
 			Double fireError = ProcessUtil.monitorProcessExecution(process, timeout);
 			return fireError;
 		} catch (Exception e) {
-			String message = String.format("Couldn't run farsite for individual [%s %s] %s", generation, id, individual);
+			String message = String.format("Couldn't run farsite for individual [ %2s %3s ] %s -> %s", generation, id, individual, e.getMessage());
 			logger.error(message, e);
-			throw new RuntimeException(message, e);
+			throw new TSPFarsiteExecutionException(message, e);
 		} finally {
 			args[2] = String.format("rm -f " + scenarioProperties.getRasterOutput(generation, id).getAbsolutePath());
 			try {
 				Runtime.getRuntime().exec(args, null, scenarioDir);
 			} catch (IOException e) {
-				logger.error(String.format("Couldn't delete output file for individual [%s %s] %s", generation, id, individual), e);
+				logger.error(String.format("Couldn't delete output file for individual [ %2s %3s ] %s", generation, id, individual), e);
 			}
 		}
 	}

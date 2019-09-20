@@ -63,11 +63,11 @@ public class ProcessUtil {
 			}
 		} else {
 			processResult = outputGobbler.getContent();
-			logger.debug("Process Execution has finished successfully with output: " + processResult);
+			logger.debug("Process Execution has finished successfully with output: \"" + processResult + "\"");
 			if (processResult != null && !processResult.trim().isEmpty()) {
 				return Double.valueOf(processResult);
 			} else {
-				throw new RuntimeException("Couldn't parse fireError result: " + processResult);
+				throw new RuntimeException("Couldn't parse fireError result: \"" + processResult + "\"");
 			}
 		}
 	}
