@@ -79,12 +79,11 @@ public class FarsiteExecutionMonitor {
 					ProcessUtil.killAllDescendants(process);
 					process.destroyForcibly();					
 				}
-			} catch (InterruptedException e) {
-				logger.error(String.format("Couldn't monitor individual [ %2s %3s ] %s - ", generation, id, individual), e);
-				e.printStackTrace();
+			} catch (InterruptedException | RuntimeException e) {
+				logger.error(String.format("Couldn't monitor individual [ %2s %3s ] %s - %s", generation, id, individual, e.getMessage()), e);
 			} catch (IOException e) {
 				logger.warn(String.format("Couldn't [ extract maximum simulated time / calculate fireError ] for individual  [ %2s %3s ] %s - ", generation, id, individual), e);
-			} 
+			}
 
 		});
 	}

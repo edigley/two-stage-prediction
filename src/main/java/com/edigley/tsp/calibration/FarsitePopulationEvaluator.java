@@ -72,7 +72,16 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			.forEach(
 				p -> {
 					final String individual = FarsiteIndividual.toStringParams(p.getGenotype());
-					executorService.submit(() -> { p.eval(FarsitePopulationEvaluator::eval); latch.countDown(); });
+					executorService.submit(() -> {
+						try {
+							p.eval(FarsitePopulationEvaluator::eval); 
+						} catch (Exception e) { 
+							String msg = String.format("Individual evalualtion failed -> %s -> %s", individual, e.getMessage());
+							logger.error(msg, e);System.err.println(msg); 
+						} finally {
+							latch.countDown();
+						}
+					});
 				}
 			);	
 		
@@ -121,8 +130,9 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		logger.info(msg);//System.out.println(msg);
 		FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, individualId, individual);
 		cache.add(execution);
-		msg = String.format("%3s - %3s ==> Individual finished: [ %2s %3s ] %s -> [%s]", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, execution, currentThread.getName());
-		logger.info(msg);System.out.println(msg);
+		msg = String.format(       "Individual finished: [ %2s %3s ] %s -> [%s]", generation, individualId, execution, currentThread.getName());
+		logger.info(msg);
+		System.out.println(String.format(" %3s - %3s ==> [ %2s %3s ] %s -> [%s]", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, execution, currentThread.getName()));
 		return execution.getFireError();
 	}
 
@@ -133,8 +143,9 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		Double error = null;
 		
 		//if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
-			String msg = String.format("%3s - %3s ==> Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName());
-			logger.info(msg);System.out.println(msg);
+			String msg = String.format("Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", generation, individualId, cachedExecution, currentThread.getName());
+			logger.info(msg);//System.out.println(msg);
+			System.out.println(String.format(" %3s - %3s ==> [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName()));
 			error = cachedExecution.getFireError();
 		/*} else {
 			String msg = String.format("%2s %3s %s -> [%s] - NaN", generation, individualId, cachedExecution, currentThread.getName());
@@ -160,6 +171,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		}
 	}
 
+	
 	private void populationSummary(String position, int nOfEvaluationCalls, Seq<Phenotype<IntegerGene, Double>> population) {
 		
 		long nPhenEvaluated = population.stream().filter(Phenotype::isEvaluated).count();

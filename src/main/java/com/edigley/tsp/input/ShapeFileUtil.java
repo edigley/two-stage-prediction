@@ -167,8 +167,8 @@ public class ShapeFileUtil {
 			it.close();
 			logger.info("getFirstFeature.nOfFeatures: " + nOfFeatures);
 			return allFeatures;
-		} catch (Exception e) {
-			logger.error("Error when getting all features from file " + file.getAbsolutePath(), e);
+		} catch (IOException e) {
+			logger.error("Error when getting all features from file " + file.getAbsolutePath() + ": " + e.getMessage(), e);
 			throw e;
 		} finally {
 			dataStore.dispose();
