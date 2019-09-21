@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven 3.0.5
+Built-By: edigley
+Build-Jdk: 12.0.2
+Class-Path: dependency-jars/prngine-1.0.1.jar dependency-jars/slf4j-api-
+ 1.7.26.jar dependency-jars/logback-core-1.2.3.jar dependency-jars/logba
+ ck-classic-1.2.3.jar dependency-jars/commons-lang3-3.9.jar dependency-j
+ ars/commons-cli-1.4.jar dependency-jars/commons-lang-2.6.jar dependency
+ -jars/gt-main-15.2.jar dependency-jars/gt-api-15.2.jar dependency-jars/
+ jts-1.13.jar dependency-jars/jdom-1.1.3.jar dependency-jars/jai_core-1.
+ 1.3.jar dependency-jars/gt-shapefile-15.2.jar dependency-jars/gt-data-1
+ 5.2.jar dependency-jars/gt-epsg-hsql-15.2.jar dependency-jars/gt-refere
+ ncing-15.2.jar dependency-jars/core-0.26.jar dependency-jars/commons-po
+ ol-1.5.4.jar dependency-jars/gt-metadata-15.2.jar dependency-jars/gt-op
+ engis-15.2.jar dependency-jars/jsr-275-1.0-beta-2.jar dependency-jars/j
+ gridshift-1.0.jar dependency-jars/GeographicLib-Java-1.44.jar dependenc
+ y-jars/hsqldb-2.3.0.jar dependency-jars/jenetics-5.0.1.jar
+Main-Class: com.edigley.tsp.ui.CLI
+

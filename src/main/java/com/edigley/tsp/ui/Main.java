@@ -21,7 +21,7 @@ public class Main {
 		+ " -m playpen/farsite_execution_memoization_7200_seconds_with_fire_error_adjustment_factor_and_sensible_to_layer_extent.txt "  
 		+ " -t 7200 " 
 		+ " -p 1 " 
-		+ " -s 59873423 ";// 98075 47334  9876 720 123 321 159
+		+ " -s 16 ";// 59873423 98075 47334  9876 720 123 321 159
 		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);

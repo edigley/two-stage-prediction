@@ -39,11 +39,12 @@
 				<version>2.4</version>
 				<configuration>
 					<archive>
-						<manifest>
+						<manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+						<!--manifest>
 							<addClasspath>true</addClasspath>
 							<mainClass>com.edigley.tsp.ui.CLI</mainClass>
 							<classpathPrefix>dependency-jars/</classpathPrefix>
-						</manifest>
+						</manifest-->
 					</archive>
 				</configuration>
 			</plugin>
@@ -149,7 +150,9 @@
 	<dependency>
 	    <groupId>io.jenetics</groupId>
 	    <artifactId>jenetics</artifactId>
-	    <version>5.0.0</version>
+	    <version>5.0.1</version>
+		<scope>system</scope>
+		<systemPath>${basedir}/lib/jenetics-5.0.1.jar</systemPath>
 	</dependency>
 	<dependency>
 	    <groupId>io.jenetics</groupId>
