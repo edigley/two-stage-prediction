@@ -74,6 +74,8 @@ public class FarsiteExecutor {
 			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
 			File gAFile = scenarioProperties.getPerimeterAtT1();
 			File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
+			fireError = ShapeFileUtil.calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
+			/*
 			try {
 				Pair<Long, Double> fireEvolution = ShapeFileUtil.getFireEvolution(gAFile, gBFile);
 				Long effectivelySimulatedTime = fireEvolution.getKey();
@@ -90,6 +92,7 @@ public class FarsiteExecutor {
 				System.err.printf("Couldn't compare non-finished scenario result for individual [ %s ]. Error message: %s\n", individual, e.getMessage());
 				logger.error("Couldn't compare non-finished scenario result", e);
 			}
+			*/
 		}
 		
 		try {

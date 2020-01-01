@@ -129,7 +129,7 @@ public class GeneticAlgorithm {
         	*/.collect(Collectors.toList());
         	//.collect(EvolutionResult.toBestPhenotype());
         
-        System.out.println("---> collect.size(): " + collect.size());
+        //System.out.println("---> collect.size(): " + collect.size());
         EvolutionResult<IntegerGene, Double> lastEvolutionResult = collect.get(collect.size()-1);
         
         System.out.println("Going to perform the last evaluation...");

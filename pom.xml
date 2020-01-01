@@ -20,6 +20,7 @@
 		<stack.protector.option />
 		<subsystem.option />
 		<maven.antrun.version>1.8</maven.antrun.version>
+		<geotools.version>19.3</geotools.version>
 	</properties>
 	
 	<build>
@@ -40,11 +41,13 @@
 				<configuration>
 					<archive>
 						<manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-						<!--manifest>
+						<!-- 
+						<manifest>
 							<addClasspath>true</addClasspath>
 							<mainClass>com.edigley.tsp.ui.CLI</mainClass>
 							<classpathPrefix>dependency-jars/</classpathPrefix>
-						</manifest-->
+						</manifest>
+						-->
 					</archive>
 				</configuration>
 			</plugin>
@@ -131,22 +134,23 @@
 			<name>OpenGeo Maven Repository</name>
 			<url>http://repo.opengeo.org</url>
 		</repository>
-      <repository>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-        <id>boundless</id>
-        <name>Boundless Maven Repository</name>
-        <url>http://repo.boundlessgeo.com/main</url>
-      </repository>
-      <repository>
-          <id>maven2-repository.dev.java.net</id>
-          <name>Java.net repository</name>
-          <url>http://download.java.net/maven/2</url>
-      </repository>
+		<repository>
+		  <snapshots>
+		    <enabled>true</enabled>
+		  </snapshots>
+		  <id>boundless</id>
+		  <name>Boundless Maven Repository</name>
+		  <url>http://repo.boundlessgeo.com/main</url>
+		</repository>
+		<repository>
+		    <id>maven2-repository.dev.java.net</id>
+		    <name>Java.net repository</name>
+		    <url>http://download.java.net/maven/2</url>
+		</repository>
 	</repositories>
 	
   <dependencies>
+  	<!-- jenetics artifacts -->
 	<dependency>
 	    <groupId>io.jenetics</groupId>
 	    <artifactId>jenetics</artifactId>
@@ -159,6 +163,7 @@
 	    <artifactId>prngine</artifactId>
 	    <version>1.0.1</version>
 	</dependency>
+	<!-- Log utilities -->
 	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-api</artifactId>
@@ -174,6 +179,7 @@
 	    <artifactId>logback-classic</artifactId>
 	    <version>1.2.3</version>
 	</dependency>
+	<!-- Commons utilities -->
 	<dependency>
 	    <groupId>org.apache.commons</groupId>
 	    <artifactId>commons-lang3</artifactId>
@@ -189,33 +195,33 @@
 		<artifactId>commons-lang</artifactId>
 		<version>2.6</version>
 	</dependency>
+	<!-- Geotools artifacts -->
 	<dependency>
 		<groupId>org.geotools</groupId>
 		<artifactId>gt-main</artifactId>
-		<version>15.2</version>
+		<version>${geotools.version}</version>
 	</dependency>
 	<dependency>
 		<groupId>org.geotools</groupId>
+		<artifactId>gt-data</artifactId>
+		<version>${geotools.version}</version>
+	</dependency>
+	<dependency>	
+		<groupId>org.geotools</groupId>
 		<artifactId>gt-shapefile</artifactId>
-		<version>15.2</version>
+		<version>${geotools.version}</version>
 	</dependency>
 	<dependency>
 		<groupId>org.geotools</groupId>
 		<artifactId>gt-epsg-hsql</artifactId>
-		<version>15.2</version>
-	</dependency>
-	<!-- 
-	<dependency>
-		<groupId>org.geotools</groupId>
-		<artifactId>gt-swing</artifactId>
-		<version>15.2</version>
+		<version>${geotools.version}</version>
 	</dependency>
 	<dependency>
-		<groupId>org.geotools</groupId>
-		<artifactId>gt-process-geometry</artifactId>
-		<version>15.2</version>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.8.1</version>
+		<scope>test</scope>
 	</dependency>
-	 -->
   </dependencies> 
   
 </project>
