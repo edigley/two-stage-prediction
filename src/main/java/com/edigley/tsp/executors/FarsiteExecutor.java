@@ -27,7 +27,7 @@ public class FarsiteExecutor {
 	
 	private Long timeout;
 	
-	private Long parallelizationLevel;
+	private Long parallelizationLevel = 1L;
 
 	public FarsiteExecutor(File farsiteFile, File scenarioDir, Long timeout, Long parallelizationLevel) {
 		this.farsiteFile = farsiteFile;
@@ -70,29 +70,10 @@ public class FarsiteExecutor {
 		}
 		
 		if (fireError.equals(Double.NaN) || fireError > 9999) {
-			//System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " + fireError + "\n");
 			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
 			File gAFile = scenarioProperties.getPerimeterAtT1();
 			File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
 			fireError = ShapeFileUtil.calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
-			/*
-			try {
-				Pair<Long, Double> fireEvolution = ShapeFileUtil.getFireEvolution(gAFile, gBFile);
-				Long effectivelySimulatedTime = fireEvolution.getKey();
-				Double _fireError = fireEvolution.getValue();
-				Double factor = Math.max(1.0, scenarioProperties.getSimulatedTime()/(effectivelySimulatedTime*1.0));
-				//Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
-				if (fireError.equals(Double.MAX_VALUE)) {
-					//fireError = (1 + _fireError);
-					fireError = Double.parseDouble(String.format("%.6f", (factor * _fireError)).replace(",", "."));
-				} else {
-					fireError = Double.parseDouble(String.format("%.6f", (factor * _fireError)).replace(",", "."));
-				}
-			} catch (Exception e) {
-				System.err.printf("Couldn't compare non-finished scenario result for individual [ %s ]. Error message: %s\n", individual, e.getMessage());
-				logger.error("Couldn't compare non-finished scenario result", e);
-			}
-			*/
 		}
 		
 		try {
@@ -148,26 +129,49 @@ public class FarsiteExecutor {
 		return timeout;
 	}
 
+	public Long getSimulatedTime() {
+		return scenarioProperties.getSimulatedTime();
+	}
+
 	public static void main(String[] args) throws Exception {
 		
 		//FarsiteIndividual individual = new FarsiteIndividual("   6   4   4  48  83   10  356  34  67  0.1  ");
-		FarsiteIndividual individual = new FarsiteIndividual("  9  12  14  22  87   165  353  38  50  1.7");
 		//FarsiteIndividual individual = new FarsiteIndividual("  8   7   7  21  99    5  347  45  35  0.4");
-		File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
 		//File scenarioDir = new File("playpen/fire-scenarios/jonquera/");
+		
+		FarsiteIndividual individual = new FarsiteIndividual("  9  12  14  22  87   165  353  38  50  1.7");
+		
+		File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
 		File scenarioDir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/");
+		
 		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
+		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir);
 		executor.setScenarioProperties(scenarioProperties);
 		executor.timeout = 300L;
 		executor.parallelizationLevel = 1L;
-		FarsiteExecution execution = executor.run(9, 9, individual);
-		System.out.println("execution: " + execution);
-		FarsiteExecutionMonitor.release();
-	}
 
-	public Long getSimulatedTime() {
-		return scenarioProperties.getSimulatedTime();
+		long generation = 9;
+		long individualId = 9;
+		FarsiteExecution execution = executor.run(generation, individualId, individual);
+		
+		FarsiteExecutionMonitor.release();
+		
+		File perimeter1File = scenarioProperties.getPerimeterAtT1();
+		
+		File shapeFile = scenarioProperties.getShapeFileOutput(generation, individualId);
+		
+		Pair<Long, Double> fireEvolution = ShapeFileUtil.getFireEvolution(perimeter1File, shapeFile);
+		Long simulatedTime = fireEvolution.getLeft();
+		Double error = fireEvolution.getRight();
+		
+		long timeToBeSimulated = scenarioProperties.getSimulatedTime();
+		Double weightedError = ShapeFileUtil.calculateWeightedPredictionError(perimeter1File, shapeFile, timeToBeSimulated);
+				
+		System.out.printf("Header:     %s error weightedError simulatedTime timeToBeSimulated \n", FarsiteExecution.header);
+		System.out.printf("Execution: %s %s %s %s %s \n", execution, error, simulatedTime, timeToBeSimulated, weightedError);
+
+		
 	}
 	
 }
