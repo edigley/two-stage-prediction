@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.io.output.FarsiteOutputProcessor;
-import com.edigley.tsp.util.shapefile.ShapeFileUtil;
 
 public class FarsiteExecutorTest {
 
