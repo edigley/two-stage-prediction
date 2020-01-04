@@ -11,6 +11,9 @@ import org.opengis.feature.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.fitness.IndividualEvaluator;
+import com.edigley.tsp.fitness.NormalizedSymmetricDifferenceEvaluator;
+import com.edigley.tsp.util.ParserUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -18,14 +21,31 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class FarsiteOutputProcessor {
 
+	private static FarsiteOutputProcessor instance = null;
+	
+	private IndividualEvaluator evaluator = null;
+	
+	private FarsiteOutputProcessor(IndividualEvaluator evaluator) {
+		this.evaluator = evaluator;
+	}
+	
+	public static FarsiteOutputProcessor getInstance() {
+		if (instance == null) {
+			instance = new FarsiteOutputProcessor(new NormalizedSymmetricDifferenceEvaluator());
+		}
+		return instance;
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteOutputProcessor.class);
 
-	public static Double calculateNormalizedSymmetricDifference(String gAFilePath, String gBFilePath)
+	@Deprecated
+	private static Double calculateNormalizedSymmetricDifference(String gAFilePath, String gBFilePath)
 			throws IOException {
 		return calculateNormalizedSymmetricDifference(new File(gAFilePath), new File(gBFilePath));
 	}
 
-	public static Double calculateNormalizedSymmetricDifference(File gAFile, File gBFile) throws IOException {
+	@Deprecated
+	private static Double calculateNormalizedSymmetricDifference(File gAFile, File gBFile) throws IOException {
 
 		MultiPolygon pA = (MultiPolygon) ShapeFileReader.getGeometry(gAFile);
 		logger.info("---> pA.getArea(): " + pA.getArea());
@@ -64,38 +84,36 @@ public class FarsiteOutputProcessor {
 
 	}
 	
-	public static Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws IOException {
-		return ImmutablePair.of(getSimulatedTime(fileB), calculateNormalizedSymmetricDifference(fileA, fileB));
+	public Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws IOException {
+		return ImmutablePair.of(getSimulatedTime(fileB), this.evaluator.evaluate(fileA, fileB));
 	}
 
-	public static Long getSimulatedTime(File file) throws IOException {
+	public Long getSimulatedTime(File file) throws IOException {
 		Feature lastFeature = ShapeFileReader.getLastFeature(file);
 		// properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
-		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi").stream()
-				.map(p -> Double.valueOf(p.getValue().toString())).max(Comparator.comparing(Double::doubleValue))
+		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi")
+				.stream()
+				.map(p -> Double.valueOf(p.getValue().toString()))
+				.max(Comparator.comparing(Double::doubleValue))
 				.orElseThrow(NoSuchElementException::new);
 		return maxSimulatedTime.longValue();
 	}
 
-	public static Double calculateWeightedPredictionError(File gAFile, File gBFile, Long simulationTime) {
-		// System.err.printf("fireError.equals(Double.NaN) or fireError > 9999: " +
-		// fireError + "\n");
+	public Double calculateWeightedPredictionError(File gAFile, File gBFile, Long expectedSimulatedTime) {
+		
 		Double fireError = Double.NaN;
-		logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
-		// File gAFile = scenarioProperties.getPerimeterAtT1();
-		// File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
+		
 		try {
-			Pair<Long, Double> fireEvolution = getFireEvolution(gAFile, gBFile);
+			
+			Pair<Long, Double> fireEvolution = this.getFireEvolution(gAFile, gBFile);
+			
 			Long effectivelySimulatedTime = fireEvolution.getKey();
-			Double _fireError = fireEvolution.getValue();
-			Double factor = Math.max(1.0, simulationTime / (effectivelySimulatedTime * 1.0));
-			// Double _fireError = ShapeFileUtil.calculatePredictionError(gAFile, gBFile);
-			if (fireError.equals(Double.MAX_VALUE)) {
-				// fireError = (1 + _fireError);
-				fireError = Double.parseDouble(String.format("%.6f", (factor * _fireError)).replace(",", "."));
-			} else {
-				fireError = Double.parseDouble(String.format("%.6f", (factor * _fireError)).replace(",", "."));
-			}
+			Double normalizedSymmetricDifference = fireEvolution.getValue();
+			
+			Double factor = Math.max(1.0, expectedSimulatedTime / (effectivelySimulatedTime * 1.0));
+			
+			fireError = ParserUtil.parseDouble(factor * normalizedSymmetricDifference);
+				
 		} catch (Exception e) {
 			System.err.printf("Couldn't compare non-finished scenario result for individual. Error message: %s\n",
 					e.getMessage());

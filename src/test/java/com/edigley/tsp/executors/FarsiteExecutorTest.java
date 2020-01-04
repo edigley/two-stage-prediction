@@ -7,6 +7,8 @@ import java.io.File;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
+import com.edigley.tsp.entity.FarsiteExecution;
+import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 
@@ -41,12 +43,12 @@ public class FarsiteExecutorTest {
 		
 		File shapeFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		
-		Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getFireEvolution(perimeter1File, shapeFile);
+		Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(perimeter1File, shapeFile);
 		Long simulatedTime = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
 		
 		long timeToBeSimulated = scenarioProperties.getSimulatedTime();
-		Double weightedError = FarsiteOutputProcessor.calculateWeightedPredictionError(perimeter1File, shapeFile, timeToBeSimulated);
+		Double weightedError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(perimeter1File, shapeFile, timeToBeSimulated);
 				
 		String output = String.format("%s %s %s ", execution, timeToBeSimulated, expectedNormalizedSymmetricDifference);
 		

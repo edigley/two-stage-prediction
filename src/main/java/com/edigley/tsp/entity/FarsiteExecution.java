@@ -1,4 +1,4 @@
-package com.edigley.tsp.executors;
+package com.edigley.tsp.entity;
 
 import com.edigley.tsp.io.FileHeader;
 

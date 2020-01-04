@@ -9,10 +9,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.executors.FarsiteExecution;
+import com.edigley.tsp.entity.FarsiteExecution;
+import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
-import com.edigley.tsp.executors.FarsiteIndividual;
 
 import io.jenetics.Genotype;
 import io.jenetics.IntegerGene;
@@ -170,7 +170,6 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			logger.info(msg, e);System.err.println(msg + " " + e.getMessage());
 		}
 	}
-
 	
 	private void populationSummary(String position, int nOfEvaluationCalls, Seq<Phenotype<IntegerGene, Double>> population) {
 		

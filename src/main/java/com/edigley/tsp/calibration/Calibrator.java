@@ -1,11 +1,11 @@
 package com.edigley.tsp.calibration;
 
 import static com.edigley.tsp.ui.CLI.FARSITE;
-import static com.edigley.tsp.ui.CLI.SCENARIO_CONFIGURATION;
 import static com.edigley.tsp.ui.CLI.MEMOIZATION;
-import static com.edigley.tsp.ui.CLI.TIME_OUT;
-import static com.edigley.tsp.ui.CLI.SEED;
 import static com.edigley.tsp.ui.CLI.PARALLELIZATION_LEVEL;
+import static com.edigley.tsp.ui.CLI.SCENARIO_CONFIGURATION;
+import static com.edigley.tsp.ui.CLI.SEED;
+import static com.edigley.tsp.ui.CLI.TIME_OUT;
 import static com.edigley.tsp.util.CLIUtils.assertsFilesExist;
 
 import java.io.File;
@@ -18,7 +18,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.executors.FarsiteExecution;
+import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutionMonitor;
 import com.edigley.tsp.executors.FarsiteExecutor;

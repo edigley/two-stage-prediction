@@ -24,6 +24,11 @@ public class ScenarioProperties {
 	public static final int NUMBER_OF_BEST_INDIVIDUALS = 10;
 	public static final double RECOMBINATION_PROBABILITY = 0.4;
 	public static final double MUTATION_PROBABILITY = 0.1;
+
+	//CoordinateReferenceSystem
+	public static final String CRS = "EPSG:4326";
+
+	public static final Long DEFAULT_EXPECTED_SIMULATED_TIME = 480L;
 	
 	private Properties scenarioProperties;
 

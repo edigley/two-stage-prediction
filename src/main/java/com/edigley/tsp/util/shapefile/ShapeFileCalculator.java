@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.geotools.data.shapefile.shp.ShapefileWriter;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.slf4j.Logger;
@@ -137,14 +139,14 @@ public class ShapeFileCalculator {
 		System.out.println("layerExtent.getExteriorRing().covers(shapeInternal.getExteriorRing()): " + layerExtent.getExteriorRing().covers(shapeInternal.getExteriorRing()));
 
 		Polygon differenceExternal = (Polygon) layerExtent.difference(shapeExternal);
-		ShapeFileUtil.save(new File(dir, "15_differenceExternal.shp"), differenceExternal, null);
+		ShapeFileWriter.save(new File(dir, "15_differenceExternal.shp"), differenceExternal, null);
 		
 		Geometry convexHull = (Polygon)shapeExternal.convexHull();
 		Polygon differenceConvexHull = (Polygon)layerExtent.difference(convexHull);
-		ShapeFileUtil.save(new File(dir, "15_differenceExternal_convex_hull.shp"), differenceConvexHull, null);
+		ShapeFileWriter.save(new File(dir, "15_differenceExternal_convex_hull.shp"), differenceConvexHull, null);
 		
 		Polygon differenceInternal = (Polygon) layerExtent.difference(shapeInternal);
-		ShapeFileUtil.save(new File(dir, "15_differenceInternal.shp"), differenceInternal, null);
+		ShapeFileWriter.save(new File(dir, "15_differenceInternal.shp"), differenceInternal, null);
 		
 		System.out.println(differenceExternal.getNumGeometries());
 		System.out.println(differenceInternal.getNumGeometries());
@@ -182,7 +184,8 @@ public class ShapeFileCalculator {
 		
 		MultiPolygon shape = (MultiPolygon) ShapeFileReader.getGeometry(shapePolygonFile);
 		
-		Double Error = FarsiteOutputProcessor.calculateNormalizedSymmetricDifference(p1File, shapeFile);		
+		Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(p1File, shapeFile);
+		Double Error = fireEvolution.getRight();
 		System.out.println("Error: " + Error);
 	}
 	
@@ -275,7 +278,8 @@ public class ShapeFileCalculator {
 
 			ShapeFileWriter.saveGeometryPolygon(p2File, p2PolygonFile);
 
-			Double predictionError = FarsiteOutputProcessor.calculateNormalizedSymmetricDifference(p1File, p2File);
+			Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(p1File, p2File);
+			Double predictionError = fireEvolution.getRight();
 
 			System.out.printf("(%s E %s) = %s \n", p1File.getName(), p2File.getName(), predictionError);
 

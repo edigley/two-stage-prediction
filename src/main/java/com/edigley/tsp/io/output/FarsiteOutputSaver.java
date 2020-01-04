@@ -34,6 +34,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 
 public class FarsiteOutputSaver {
@@ -82,23 +83,26 @@ public class FarsiteOutputSaver {
 			map.addLayer(layer3);
 
 			// Step 2: Set projection
-			CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+			CoordinateReferenceSystem crs = CRS.decode(ScenarioProperties.CRS);
 			MapViewport vp = map.getViewport();
 			vp.setCoordinateReferenceSystem(crs);
 
-			Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getFireEvolution(perimeterFile, predictionFile);
+			Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(perimeterFile, predictionFile);
 			Long simulatedTime = fireEvolution.getLeft();
 			Double normalizedSymmetricDifference = fireEvolution.getRight();
-			Double weightedPredictionError = FarsiteOutputProcessor.calculateWeightedPredictionError(perimeterFile, predictionFile, 480L);
+			Double weightedPredictionError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(perimeterFile, predictionFile, ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME);
 			String[] textToImage = { 
 				"File: " + predictionFile.getName(), 
 				"Simulated Time: " + simulatedTime,
+				"Expected Simulated Time: " + ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME,
 				"Normalized Symmetric Difference: " + normalizedSymmetricDifference,
 				"Fitness: " + weightedPredictionError 
 			};
 
 			// Step 3: Save image
 			saveAsJPG(map, predictionFile.getName().replace(".shp", ".jpg"), 800, textToImage);
+			
+			map.dispose();
 
 		} finally {
 			dataStore1.dispose();

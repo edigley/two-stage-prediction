@@ -2,7 +2,6 @@ package com.edigley.tsp.calibration;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -13,10 +12,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.executors.FarsiteExecution;
+import com.edigley.tsp.entity.FarsiteExecution;
+import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
-import com.edigley.tsp.executors.FarsiteIndividual;
 import com.edigley.tsp.io.input.ScenarioProperties;
 
 import io.jenetics.Genotype;
@@ -28,7 +27,6 @@ import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
-import io.jenetics.engine.Limits;
 import io.jenetics.prngine.LCG64ShiftRandom;
 import io.jenetics.util.RandomRegistry;
 
