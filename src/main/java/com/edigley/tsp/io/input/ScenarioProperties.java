@@ -1,4 +1,4 @@
-package com.edigley.tsp.input;
+package com.edigley.tsp.io.input;
 
 import java.io.File;
 import java.io.FileInputStream;

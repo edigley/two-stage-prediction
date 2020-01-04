@@ -1,4 +1,4 @@
-package com.edigley.tsp.input;
+package com.edigley.tsp.io;
 
 import java.util.HashMap;
 import java.util.Map;

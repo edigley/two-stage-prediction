@@ -17,7 +17,7 @@ import com.edigley.tsp.executors.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.executors.FarsiteIndividual;
-import com.edigley.tsp.input.ScenarioProperties;
+import com.edigley.tsp.io.input.ScenarioProperties;
 
 import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;

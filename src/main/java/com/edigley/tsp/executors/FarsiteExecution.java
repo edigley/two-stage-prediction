@@ -1,6 +1,6 @@
 package com.edigley.tsp.executors;
 
-import com.edigley.tsp.input.FileHeader;
+import com.edigley.tsp.io.FileHeader;
 
 public class FarsiteExecution implements Comparable<FarsiteExecution> {
 

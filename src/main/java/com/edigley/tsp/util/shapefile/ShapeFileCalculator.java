@@ -1,24 +1,26 @@
-package com.edigley.tsp.input;
+package com.edigley.tsp.util.shapefile;
 
-import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import org.geotools.referencing.GeodeticCalculator;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
-import org.opengis.geometry.primitive.Bearing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-public class ShapeFile {
+public class ShapeFileCalculator {
 
+	private static final Logger logger = LoggerFactory.getLogger(ShapeFileCalculator.class);
+	
 	public final static double calculateAngleFrom(double obj1X, double obj1Y, double obj2X, double obj2Y) {
 		double angleTarget = (double) Math.toDegrees(Math.atan2(obj2Y - obj1Y, obj2X - obj1X));
 		if (angleTarget < 0) {
@@ -33,9 +35,37 @@ public class ShapeFile {
 	public final static double calculateDirection(Point starting, Point destination) {
 		return calculateAngleFrom(starting.getX(), starting.getY(), destination.getX(), destination.getY());
 	}
-
 	
-	public static void main(String[] args) throws IOException {
+	public static boolean boundariesTouch(File firePerimeter, File layerExtentFile) throws IOException {
+		Polygon layerExtent = (Polygon) ShapeFileReader.getGeometriesPoligon(layerExtentFile);
+		// Polygon shapeInternal = (Polygon)
+		// ShapeFileUtil.getGeometriesPoligon(shapeInternalPolygonFile);
+
+		MultiPolygon mpB = null;
+		Polygon pB = null;
+
+		try {
+			mpB = (MultiPolygon) ShapeFileReader.getGeometriesPoligon(firePerimeter);
+			logger.info("---> mpB.getArea(): " + mpB.getArea());
+		} catch (ClassCastException e) {
+			try {
+				pB = (Polygon) ShapeFileReader.getGeometriesPoligon(firePerimeter);
+				logger.info("---> pB.getArea(): " + pB.getArea());
+			} catch (ClassCastException e2) {
+				logger.warn("Couldn't cast shape file to Polygon: " + firePerimeter.getAbsolutePath(), e2);
+				return false;
+			}
+		}
+
+		if (mpB != null) {
+			return layerExtent.getExteriorRing().isWithinDistance(mpB, 1);
+		} else {
+			return layerExtent.getExteriorRing().isWithinDistance(pB, 1);
+		}
+
+	}
+	
+	public static void main0(String[] args) throws IOException {
 		
 		File jonqueraPerimetersDir = new File("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/perimetres/");
 		File dir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/output/");
@@ -48,15 +78,15 @@ public class ShapeFile {
 		//System.out.println(ShapeFileUtil.boundariesTouch(shapeInternalPolygonFile, layerExtentFile));
 		//System.out.println(ShapeFileUtil.boundariesTouch(shapeExternalPolygonFile, layerExtentFile));
 		
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_551.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_555.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_562.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_558.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_572.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_571.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_582.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_585.shp"), layerExtentFile));
-		System.out.println(ShapeFileUtil.boundariesTouch(new File(dir, "shape_11_587.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_551.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_555.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_562.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_558.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_572.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_571.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_582.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_585.shp"), layerExtentFile));
+		System.out.println(ShapeFileCalculator.boundariesTouch(new File(dir, "shape_11_587.shp"), layerExtentFile));
 		
 	}
 	
@@ -70,9 +100,9 @@ public class ShapeFile {
 		File shapeExternalPolygonFile = new File(dir, "shape_11_587_polygon.shp");
 		
 		
-		Polygon layerExtent = (Polygon) ShapeFileUtil.getGeometriesPoligon(layerExtentFile);
-		Polygon shapeInternal = (Polygon) ShapeFileUtil.getGeometriesPoligon(shapeInternalPolygonFile);
-		Polygon shapeExternal = (Polygon) ShapeFileUtil.getGeometriesPoligon(shapeExternalPolygonFile);
+		Polygon layerExtent = (Polygon) ShapeFileReader.getGeometriesPoligon(layerExtentFile);
+		Polygon shapeInternal = (Polygon) ShapeFileReader.getGeometriesPoligon(shapeInternalPolygonFile);
+		Polygon shapeExternal = (Polygon) ShapeFileReader.getGeometriesPoligon(shapeExternalPolygonFile);
 		
 		System.out.println("layerExtent.getBoundary().touches(shapeInternal.getBoundary()): " + layerExtent.getBoundary().touches(shapeInternal.getBoundary()));
 		System.out.println("layerExtent.getBoundary().touches(shapeExternal.getBoundary()): " + layerExtent.getBoundary().touches(shapeExternal.getBoundary()));
@@ -139,22 +169,20 @@ public class ShapeFile {
 		*/
 	}
 	
-	
-	
-	public static void main3(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		File jonqueraPerimetersDir = new File("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/perimetres/");
 		File dir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/output/");
 		
 		File p1File = new File(jonqueraPerimetersDir, "jonquera_perimeter_1.shp");
-		File shapeFile = new File(dir, "shape_3_124.shp");
+		File shapeFile = new File(dir, "shape_1_1.shp");
 		
-		File shapePolygonFile = new File(dir, "shape_3_124_polygon.shp");
+		File shapePolygonFile = new File(dir, "shape_1_1_polygon.shp");
 		
-		ShapeFileUtil.saveGeometryPolygon(shapeFile, shapePolygonFile);
+		ShapeFileWriter.saveGeometryPolygon(shapeFile, shapePolygonFile);
 		
-		MultiPolygon shape = (MultiPolygon) ShapeFileUtil.getGeometry(shapePolygonFile);
+		MultiPolygon shape = (MultiPolygon) ShapeFileReader.getGeometry(shapePolygonFile);
 		
-		Double Error = ShapeFileUtil.calculatePredictionError(p1File, shapeFile);		
+		Double Error = FarsiteOutputProcessor.calculateNormalizedSymmetricDifference(p1File, shapeFile);		
 		System.out.println("Error: " + Error);
 	}
 	
@@ -166,11 +194,11 @@ public class ShapeFile {
 		
 		File p0File = new File(jonqueraPerimetersDir, "jonquera_ignition.shp");
 		
-		Point p0 = (Point) ShapeFileUtil.getGeometry(p0File);
+		Point p0 = (Point) ShapeFileReader.getGeometry(p0File);
 		
 		File p1File = new File(jonqueraPerimetersDir, "jonquera_perimeter_1.shp");
 		
-		MultiPolygon pA = (MultiPolygon) ShapeFileUtil.getGeometry(p1File);
+		MultiPolygon pA = (MultiPolygon) ShapeFileReader.getGeometry(p1File);
 		Point pACentroid = printCentroidStuffs(pA);
 		
 		String pBShapeName = "shape_1_41";
@@ -188,12 +216,12 @@ public class ShapeFile {
 		pBShapeName = "shape_1_51"; // 348.08190867538417
 		File pBFile = new File(jonqueraOutpursDir, pBShapeName + ".shp");
 		File pBPolygonFile = new File(desktop, pBShapeName + "_polygon.shp");
-		ShapeFileUtil.saveGeometryPolygon(pBFile, pBPolygonFile);
+		ShapeFileWriter.saveGeometryPolygon(pBFile, pBPolygonFile);
 		
-		MultiLineString pBShape = (MultiLineString) ShapeFileUtil.getGeometry(pBFile);
+		MultiLineString pBShape = (MultiLineString) ShapeFileReader.getGeometry(pBFile);
 		System.out.println("pBShape.getDimension(): " + pBShape.getDimension());
-		Feature pBFeature = (Feature) ShapeFileUtil.getFeature(pBFile);
-		List<Feature> allFeatures = ShapeFileUtil.getAllFeatures(pBFile);
+		Feature pBFeature = (Feature) ShapeFileReader.getFeature(pBFile);
+		List<Feature> allFeatures = ShapeFileReader.getAllFeatures(pBFile);
 		System.out.println("pBFeature.getUserData(): " + pBFeature.getUserData());
 		System.out.println("pBFeature.getProperties(): " + pBFeature.getProperties());
 		
@@ -218,7 +246,7 @@ public class ShapeFile {
 		
 		System.exit(1);
 		
-		MultiPolygon pB = (MultiPolygon) ShapeFileUtil.getGeometry(pBPolygonFile);
+		MultiPolygon pB = (MultiPolygon) ShapeFileReader.getGeometry(pBPolygonFile);
 		Point pBCentroid = printCentroidStuffs(pB);
 		
 		
@@ -245,9 +273,9 @@ public class ShapeFile {
 			File p2File = new File(jonqueraOutpursDir, p2ShapeName + ".shp");
 			File p2PolygonFile = new File(desktop, p2ShapeName + "_polygon.shp");
 
-			ShapeFileUtil.saveGeometryPolygon(p2File, p2PolygonFile);
+			ShapeFileWriter.saveGeometryPolygon(p2File, p2PolygonFile);
 
-			Double predictionError = ShapeFileUtil.calculatePredictionError(p1File, p2File);
+			Double predictionError = FarsiteOutputProcessor.calculateNormalizedSymmetricDifference(p1File, p2File);
 
 			System.out.printf("(%s E %s) = %s \n", p1File.getName(), p2File.getName(), predictionError);
 

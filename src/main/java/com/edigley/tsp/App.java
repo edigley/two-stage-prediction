@@ -6,13 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import org.geotools.data.DataStore;
-import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.factory.CommonFactoryFinder;
@@ -26,7 +22,6 @@ import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
 import org.geotools.map.MapViewport;
 import org.geotools.referencing.CRS;
-import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
@@ -37,7 +32,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.edigley.tsp.input.ShapeFileUtil;
+import com.edigley.tsp.io.output.FarsiteOutputSaver;
+import com.edigley.tsp.util.shapefile.ShapeFileReader;
 
 /**
  * Hello world!
@@ -55,7 +51,7 @@ public class App {
 
 		for (int i = 1; i <= 85; i++) {
 			File shapeFile = new File(farsiteOutputDir, "shape_1_" + i + ".shp");
-			ShapeFileUtil.saveFarsiteResultAsJPG(p1File, shapeFile, layerExtentFile);			
+			FarsiteOutputSaver.saveAsJPG(p1File, shapeFile, layerExtentFile);			
 		}
 		
 	}
@@ -74,7 +70,7 @@ public class App {
 		map.setTitle("World");
 		
 		Style style = SLD.createLineStyle(Color.BLACK, 1);
-		Layer layer = new FeatureLayer(ShapeFileUtil.getFeatureSource(p1File), style);
+		Layer layer = new FeatureLayer(ShapeFileReader.getFeatureSource(p1File), style);
 	    layer.setTitle("jonquera_perimeter_1.shp");
 		
 		map.addLayer(layer);
@@ -85,7 +81,7 @@ public class App {
 		vp.setCoordinateReferenceSystem(crs);
 
 		//Step 4: Save image
-		ShapeFileUtil.saveAsJPG(map, "graticules.jpg", 800, new String[] {"BLA"});
+		FarsiteOutputSaver.saveAsJPG(map, "graticules.jpg", 800, new String[] {"BLA"});
 	}
 	
     public static void main2(String[] args) throws Exception {

@@ -13,9 +13,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.input.ScenarioProperties;
-import com.edigley.tsp.input.ShapeFileUtil;
+import com.edigley.tsp.io.input.ScenarioProperties;
+import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 import com.edigley.tsp.util.ProcessUtil;
+import com.edigley.tsp.util.shapefile.ShapeFileCalculator;
+import com.edigley.tsp.util.shapefile.ShapeFileUtil;
 
 public class FarsiteExecutionMonitor {
 	
@@ -53,7 +55,7 @@ public class FarsiteExecutionMonitor {
 					File gAFile = scenarioProperties.getPerimeterAtT1();
 					File gBFile = scenarioProperties.getShapeFileOutput(generation, id); 
 					
-					Pair<Long, Double> fireEvolution = ShapeFileUtil.getFireEvolution(gAFile, gBFile);
+					Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getFireEvolution(gAFile, gBFile);
 					
 					maxSimulatedTime = fireEvolution.getKey();
 					fireError = fireEvolution.getValue();
@@ -98,7 +100,7 @@ public class FarsiteExecutionMonitor {
 
 	private static boolean firePerimeterReachesLandscapeExtent(File firePerimeter, ScenarioProperties scenarioProperties) throws IOException {
 		File layerExtentFile = scenarioProperties.getLandscapeLayerExtentFile();
-		return ShapeFileUtil.boundariesTouch(firePerimeter, layerExtentFile);
+		return ShapeFileCalculator.boundariesTouch(firePerimeter, layerExtentFile);
 	}
 
 	@SuppressWarnings("unused")
@@ -106,14 +108,14 @@ public class FarsiteExecutionMonitor {
 		
 		Callable<Long> callable = new Callable<Long>() {
 			public Long call() throws Exception {
-				return ShapeFileUtil.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+				return FarsiteOutputProcessor.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 			}
 		};
 		
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					Long maxSimulatedTime = ShapeFileUtil.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+					Long maxSimulatedTime = FarsiteOutputProcessor.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 					System.out.println("---> maxSimulatedTime: " + maxSimulatedTime);
 					logger.info("---> maxSimulatedTime: " + maxSimulatedTime);
 				} catch (Exception e) {
