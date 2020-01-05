@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
+import com.edigley.tsp.util.shapefile.ShapeFileUtil;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
@@ -22,20 +23,9 @@ public class NormalizedSymmetricDifferenceEvaluator implements IndividualEvaluat
 	public Double evaluate(File gAFile, File gBFile) throws IOException {
 		MultiPolygon polygonA = (MultiPolygon) ShapeFileReader.getGeometry(gAFile);
 
-		MultiPolygon multiPolygonB = null;
-		Polygon polygonB = null;
-
-		try {
-			multiPolygonB = (MultiPolygon) ShapeFileReader.getGeometriesPoligon(gBFile);
-		} catch (ClassCastException e) {
-			try {
-				polygonB = (Polygon) ShapeFileReader.getGeometriesPoligon(gBFile);
-			} catch (ClassCastException e2) {
-				logger.warn("Couldn't cast shape file to Polygon: " + gBFile.getAbsolutePath(), e2);
-			}
-		}
-
-		Geometry symmetricDifference = polygonA.symDifference((multiPolygonB != null) ? multiPolygonB : polygonB);
+		MultiPolygon multiPolygonB = ShapeFileUtil.toMultiPolygon(gBFile);
+		
+		Geometry symmetricDifference = polygonA.symDifference(multiPolygonB);
 		
 		//normalizes the symmetric difference
 		double symmetricDifferenceArea = symmetricDifference.getArea();

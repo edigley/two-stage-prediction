@@ -61,12 +61,7 @@ public class ShapeFileWriter {
 	public static void save(File file, Polygon polygon, CoordinateReferenceSystem crs)
 			throws Exception, MalformedURLException, IOException {
 
-		GeometryFactory gf = new GeometryFactory();
-
-		Polygon[] polys = new Polygon[1];
-		polys[0] = polygon;
-
-		MultiPolygon multiPolygon = gf.createMultiPolygon(polys);
+		MultiPolygon multiPolygon = ShapeFileUtil.wrapInAMultiPolygon(polygon);
 
 		save(file, multiPolygon, crs);
 	}
@@ -134,6 +129,11 @@ public class ShapeFileWriter {
 		typeBuilder.add("the_geom", MultiPolygon.class);
 		SimpleFeatureType featureType = typeBuilder.buildFeatureType();
 		return featureType;
+	}
+
+	public static void saveAsPolygon(File file, Polygon polygonA, CoordinateReferenceSystem decode) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
