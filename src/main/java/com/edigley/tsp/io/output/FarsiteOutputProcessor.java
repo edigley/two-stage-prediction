@@ -83,9 +83,10 @@ public class FarsiteOutputProcessor {
 		return predictionError;
 
 	}
-	
-	public Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws IOException {
-		return ImmutablePair.of(getSimulatedTime(fileB), this.comparator.compare(fileA, fileB));
+
+	/*
+	public Pair<Long, Double> getFireEvolution(File perimeterFile, File predictionFile) throws IOException {
+		return ImmutablePair.of(getSimulatedTime(predictionFile), this.comparator.compare(perimeterFile, predictionFile));
 	}
 
 	public Long getSimulatedTime(File file) throws IOException {
@@ -98,7 +99,7 @@ public class FarsiteOutputProcessor {
 				.orElseThrow(NoSuchElementException::new);
 		return maxSimulatedTime.longValue();
 	}
-
+	
 	public Double calculateWeightedPredictionError(File gAFile, File gBFile, Long expectedSimulatedTime) {
 		
 		Double fireError = Double.NaN;
@@ -122,5 +123,7 @@ public class FarsiteOutputProcessor {
 
 		return fireError;
 	}
+
+	*/
 	
 }

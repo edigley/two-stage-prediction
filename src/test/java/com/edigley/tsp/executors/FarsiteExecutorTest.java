@@ -48,14 +48,14 @@ public class FarsiteExecutorTest {
 		
 		File perimeter1File = scenarioProperties.getPerimeterAtT1();
 		
-		File shapeFile = scenarioProperties.getShapeFileOutput(generation, individualId);
+		File predictionFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		
-		Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(perimeter1File, shapeFile);
+		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(predictionFile, perimeter1File);
 		Long simulatedTime = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
 		
-		long timeToBeSimulated = scenarioProperties.getSimulatedTime();
-		Double weightedError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(perimeter1File, shapeFile, timeToBeSimulated);
+		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
+		Double weightedError = FarsiteIndividualEvaluator.getInstance().calculateWeightedPredictionError(predictionFile, perimeter1File, timeToBeSimulated);
 				
 		String output = String.format("%s %s %s ", execution, timeToBeSimulated, expectedNormalizedSymmetricDifference);
 		

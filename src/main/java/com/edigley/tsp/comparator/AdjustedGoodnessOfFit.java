@@ -28,8 +28,8 @@ public class AdjustedGoodnessOfFit extends GoodnessOfFit {
 		//Polygon polygonOutOfPrediction = toPolygon(toPolygon(polygonB.difference(polygonA)).intersection(polygonB));
 		Polygon map1DifferenceMap2 = toPolygon(map1.difference(map2));
 		//Polygon polygonOutOfPrediction = toPolygon(map1DifferenceMap2.intersection(map2));
-		//Polygon polygonOutOfPrediction = toPolygon(map1DifferenceMap2.intersection(map1));
-		Polygon polygonOutOfPrediction = map1DifferenceMap2;
+		Polygon polygonOutOfPrediction = toPolygon(map1DifferenceMap2.intersection(map1));
+		//Polygon polygonOutOfPrediction = map1DifferenceMap2;
 		
 		/*
 		try {
@@ -42,13 +42,14 @@ public class AdjustedGoodnessOfFit extends GoodnessOfFit {
 		}
 		*/
 		
-		Double insideness = (1 - polygonOutOfPrediction.getArea()/polygonB.getArea());
+		Double insidenessInitial = (1 - polygonOutOfPrediction.getArea()/polygonB.getArea());
+		Double insideness = Math.min(1, Math.abs(insidenessInitial));
 		
-		System.out.println("Proportion of insideness: " + insideness);
+		System.out.println("Proportion of insideness: " + insidenessInitial + " -> " + insideness);
 		
 		Double gof = ( c/(b+c) ) * ( c/(a+c) ) * insideness;
 		
-		System.out.println("-------------------->");
+		System.out.println("--------------------> gof: " + gof);
 		
 		return gof;		
 	}

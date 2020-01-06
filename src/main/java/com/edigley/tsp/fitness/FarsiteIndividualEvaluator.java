@@ -35,10 +35,14 @@ public class FarsiteIndividualEvaluator {
 		return instance;
 	}
 	
-	public Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws IOException {
-		return ImmutablePair.of(getSimulatedTime(fileB), this.comparator.compare(fileA, fileB));
+	public Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile) throws IOException {
+		return ImmutablePair.of(getSimulatedTime(predictionFile), this.comparator.compare(predictionFile, perimeterFile));
 	}
 
+	public Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile, ComparisonMethod comparator) throws IOException {
+		return ImmutablePair.of(getSimulatedTime(predictionFile), comparator.compare(predictionFile, perimeterFile));
+	}
+	
 	public Long getSimulatedTime(File file) throws IOException {
 		Feature lastFeature = ShapeFileReader.getLastFeature(file);
 		// properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
@@ -50,13 +54,13 @@ public class FarsiteIndividualEvaluator {
 		return maxSimulatedTime.longValue();
 	}
 
-	public Double calculateWeightedPredictionError(File gAFile, File gBFile, Long expectedSimulatedTime) {
+	public Double calculateWeightedPredictionError(File predictionFile, File perimeterFile, Long expectedSimulatedTime) {
 		
 		Double fireError = Double.NaN;
 		
 		try {
 			
-			Pair<Long, Double> fireEvolution = this.getFireEvolution(gAFile, gBFile);
+			Pair<Long, Double> fireEvolution = this.getFireEvolution(predictionFile, perimeterFile);
 			
 			Long effectivelySimulatedTime = fireEvolution.getKey();
 			Double normalizedSymmetricDifference = fireEvolution.getValue();

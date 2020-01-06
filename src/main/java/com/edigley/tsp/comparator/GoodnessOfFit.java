@@ -19,12 +19,12 @@ public class GoodnessOfFit implements ComparisonMethod {
 
 	private static final Logger logger = LoggerFactory.getLogger(GoodnessOfFit.class);
 	
-	public Double compare(String gAFilePath, String gBFilePath) throws IOException {
-		return compare(new File(gAFilePath), new File(gBFilePath));
+	public Double compare(String predictionFile, String perimeterFile) throws IOException {
+		return compare(new File(predictionFile), new File(perimeterFile));
 	}
 	
-	public Double compare(File gAFile, File gBFile) throws IOException {
-		return calculateGoodnessOfFit(gBFile, gAFile);
+	public Double compare(File predictionFile, File perimeterFile) throws IOException {
+		return calculateGoodnessOfFit(predictionFile, perimeterFile);
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -65,12 +65,12 @@ public class GoodnessOfFit implements ComparisonMethod {
 		 */
 	}
 
-	private Double calculateGoodnessOfFit(File map1File, File map2File) throws IOException {
+	private Double calculateGoodnessOfFit(File predictionFile, File perimeterFile) throws IOException {
 		
-		Polygon map1 = ShapeFileUtil.toPolygon(ShapeFileReader.getGeometriesPoligon(map1File));
-		Polygon map2 = ShapeFileUtil.toPolygon(ShapeFileReader.getGeometriesPoligon(map2File));
+		Polygon predictionMap = ShapeFileUtil.toPolygon(ShapeFileReader.getGeometriesPoligon(predictionFile));
+		Polygon perimeterMap = ShapeFileUtil.toPolygon(ShapeFileReader.getGeometriesPoligon(perimeterFile));
 		
-		Double gof = calculateGoodnessOfFit(map1, map2);
+		Double gof = calculateGoodnessOfFit(predictionMap, perimeterMap);
 		return gof;
 	}
 	

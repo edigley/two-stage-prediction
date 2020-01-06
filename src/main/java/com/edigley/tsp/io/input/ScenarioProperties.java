@@ -65,7 +65,7 @@ public class ScenarioProperties {
 	private Integer farsiteEndMin;
 	private LocalDateTime endTime;
 	
-	private long simulatedTime;
+	private long timeToBeSimulated;
 
 	private Double maxTolerableFireError;
 
@@ -151,11 +151,11 @@ public class ScenarioProperties {
 		
 		this.endTime = LocalDateTime.of(2011, farsiteEndMonth, farsiteEndDay, farsiteEndHour, farsiteEndMin);
 		
-		this.simulatedTime = Duration.between(startTime, endTime).getSeconds()/60;
+		this.timeToBeSimulated = Duration.between(startTime, endTime).getSeconds()/60;
 		
 		logger.info("ScenarioProperties.startTime                    : " + this.startTime);
 		logger.info("ScenarioProperties.endTime                      : " + this.endTime);
-		logger.info("ScenarioProperties.simulatedTime                : " + this.simulatedTime + " seconds");
+		logger.info("ScenarioProperties.simulatedTime                : " + this.timeToBeSimulated + " seconds");
 		
 		logger.info("ScenarioProperties.numGenerations               : " + this.numGenerations);
 		logger.info("ScenarioProperties.populationSize               : " + this.populationSize);
@@ -241,8 +241,8 @@ public class ScenarioProperties {
 		return perimeterAtT0File;
 	}
 
-	public long getSimulatedTime() {
-		return simulatedTime;
+	public long getTimeToBeSimulated() {
+		return timeToBeSimulated;
 	}
 
 	public Double getMaxTolerableFireError() {

@@ -76,14 +76,14 @@ public class FarsiteExecutor {
 		
 		if (fireError.equals(Double.NaN) || fireError > 9999) {
 			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
-			File gAFile = scenarioProperties.getPerimeterAtT1();
-			File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
+			File perimeterFile = scenarioProperties.getPerimeterAtT1();
+			File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
 			//fireError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
-			fireError = evaluator.calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
+			fireError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, scenarioProperties.getTimeToBeSimulated());
 		}
 		
 		try {
-			Long maxSimulatedTime = FarsiteOutputProcessor.getInstance().getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+			Long maxSimulatedTime = evaluator.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 			execution.setMaxSimulatedTime(maxSimulatedTime);
 		} catch (Exception e) {
 			System.err.printf("Couldn't extract maximum simulated time for individual %s - %s\n", individual, e.getMessage());
@@ -140,7 +140,7 @@ public class FarsiteExecutor {
 	}
 
 	public Long getSimulatedTime() {
-		return scenarioProperties.getSimulatedTime();
+		return scenarioProperties.getTimeToBeSimulated();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -171,12 +171,12 @@ public class FarsiteExecutor {
 		
 		File shapeFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		
-		Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(perimeter1File, shapeFile);
+		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(shapeFile, perimeter1File);
 		Long simulatedTime = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
 		
-		long timeToBeSimulated = scenarioProperties.getSimulatedTime();
-		Double weightedError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(perimeter1File, shapeFile, timeToBeSimulated);
+		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
+		Double weightedError = FarsiteIndividualEvaluator.getInstance().calculateWeightedPredictionError(shapeFile, perimeter1File, timeToBeSimulated);
 				
 		System.out.printf("Header:     %s error weightedError simulatedTime timeToBeSimulated \n", FarsiteExecution.header);
 		System.out.printf("Execution: %s %s %s %s %s \n", execution, error, simulatedTime, timeToBeSimulated, weightedError);

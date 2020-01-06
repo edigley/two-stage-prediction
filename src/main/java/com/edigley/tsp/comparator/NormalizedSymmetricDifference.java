@@ -15,20 +15,20 @@ public class NormalizedSymmetricDifference implements ComparisonMethod {
 
 	private static final Logger logger = LoggerFactory.getLogger(NormalizedSymmetricDifference.class);
 	
-	public Double compare(String gAFilePath, String gBFilePath) throws IOException {
-		return compare(new File(gAFilePath), new File(gBFilePath));
+	public Double compare(String predictionFilePath, String perimeterFilePath) throws IOException {
+		return compare(new File(predictionFilePath), new File(perimeterFilePath));
 	}
 	
-	public Double compare(File gAFile, File gBFile) throws IOException {
-		MultiPolygon polygonA = (MultiPolygon) ShapeFileReader.getGeometry(gAFile);
+	public Double compare(File predictionFile, File perimeterFile) throws IOException {
+		MultiPolygon mpA = ShapeFileUtil.toMultiPolygon(perimeterFile);
 
-		MultiPolygon multiPolygonB = ShapeFileUtil.toMultiPolygon(gBFile);
+		MultiPolygon mpB = ShapeFileUtil.toMultiPolygon(predictionFile);
 		
-		Geometry symmetricDifference = polygonA.symDifference(multiPolygonB);
+		Geometry symmetricDifference = mpA.symDifference(mpB);
 		
 		//normalizes the symmetric difference
 		double symmetricDifferenceArea = symmetricDifference.getArea();
-		double normalizedSymmetricDifference = symmetricDifferenceArea / polygonA.getArea();
+		double normalizedSymmetricDifference = symmetricDifferenceArea / mpA.getArea();
 		
 		return normalizedSymmetricDifference;
 	}

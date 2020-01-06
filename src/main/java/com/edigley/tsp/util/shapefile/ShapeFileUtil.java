@@ -80,19 +80,23 @@ public class ShapeFileUtil {
 		}
 	}
 
-	public static MultiPolygon toMultiPolygon(File gBFile) throws IOException {
-		MultiPolygon multiPolygonB = null;
+	public static MultiPolygon toMultiPolygon(File shapeFile) throws IOException {
+		Geometry geometry = (Geometry) ShapeFileReader.getGeometriesPoligon(shapeFile);
+		Polygon polygon = toPolygon(geometry);
+		MultiPolygon multiPolygonB = wrapInAMultiPolygon(polygon);
 
+		/*
 		try {
-			multiPolygonB = (MultiPolygon) ShapeFileReader.getGeometriesPoligon(gBFile);
+			multiPolygonB = (MultiPolygon) ShapeFileReader.getGeometriesPoligon(shapeFile);
 		} catch (ClassCastException e) {
 			try {
-				Polygon polygonB = (Polygon) ShapeFileReader.getGeometriesPoligon(gBFile);
+				Polygon polygonB = (Polygon) ShapeFileReader.getGeometriesPoligon(shapeFile);
 				multiPolygonB = wrapInAMultiPolygon(polygonB);
 			} catch (ClassCastException e2) {
-				logger.warn("Couldn't cast shape file to Polygon: " + gBFile.getAbsolutePath(), e2);
+				logger.warn("Couldn't cast shape file to Polygon: " + shapeFile.getAbsolutePath(), e2);
 			}
 		}
+		*/
 		return multiPolygonB;
 	}
 

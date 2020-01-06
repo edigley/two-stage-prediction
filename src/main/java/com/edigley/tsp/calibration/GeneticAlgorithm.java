@@ -23,6 +23,7 @@ import io.jenetics.IntegerChromosome;
 import io.jenetics.IntegerGene;
 import io.jenetics.MultiPointCrossover;
 import io.jenetics.Mutator;
+import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -56,6 +57,8 @@ public class GeneticAlgorithm {
     private Engine<IntegerGene, Double> engine;
 
     private final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
+	
+    private Optimize optimizationStrategy = Optimize.MAXIMUM;
 	
 	public GeneticAlgorithm(ScenarioProperties scenarioProperties) {
 		this(scenarioProperties, null);
@@ -101,7 +104,8 @@ public class GeneticAlgorithm {
 			.Builder<IntegerGene, Double>(FarsitePopulationEvaluator.getInstance(), genotypeFactory)
 		    .executor(FarsitePopulationEvaluator.executorService)
 	    	.populationSize(POPULATION_SIZE)
-	    	.minimizing()
+	    	//.minimizing()
+	    	.optimize(this.optimizationStrategy)
 	    	.alterers(
 	    		new MultiPointCrossover<>(RECOMBINATION_PROBABILITY), 
 	    		new Mutator<>(MUTATION_PROBABILITY)
@@ -163,5 +167,9 @@ public class GeneticAlgorithm {
     	FarsitePopulationEvaluator.setCache(cache);
     	FarsitePopulationEvaluator.setFarsiteExecutor(executor);
     }
+
+	public void setOptimizationStrategy(Optimize optimizationStrategy) {
+		this.optimizationStrategy = optimizationStrategy;
+	}
    
 }

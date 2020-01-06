@@ -20,6 +20,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.comparator.AdjustedGoodnessOfFit;
 import com.edigley.tsp.comparator.ComparisonMethod;
 import com.edigley.tsp.comparator.GoodnessOfFit;
 import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
@@ -29,6 +30,8 @@ import com.edigley.tsp.executors.FarsiteExecutionMonitor;
 import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
+
+import io.jenetics.Optimize;
 
 public class Calibrator {
 
@@ -80,17 +83,22 @@ public class Calibrator {
 		}
 		
 		ComparisonMethod comparator = null;
+		Optimize optimizationStrategy = Optimize.MAXIMUM;
 		if (cmd.hasOption(EVALUATION_FUNCTION)) {
 			String evaluationFunction = cmd.getOptionValue(EVALUATION_FUNCTION);
 			if (evaluationFunction.equals("gof")) {
 				comparator = new GoodnessOfFit();
+			} else if (evaluationFunction.equals("agof")) {
+				comparator = new AdjustedGoodnessOfFit();
 			} else if (evaluationFunction.equals("nsd")) {
 				comparator = new NormalizedSymmetricDifference();
+				optimizationStrategy = Optimize.MINIMUM;
 			} else {
-				throw new NoSuchAlgorithmException("There was no evaluator for + '" + evaluationFunction + "'");
+				throw new NoSuchAlgorithmException("There was no evaluator for '" + evaluationFunction + "'.");
 			}
 		} else {
 			comparator = new NormalizedSymmetricDifference();
+			optimizationStrategy = Optimize.MINIMUM;
 		}
 		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut, farsiteExecutionParallelizationLevel);
@@ -99,6 +107,7 @@ public class Calibrator {
 		evaluator.setComparator(comparator);
 		executor.setFitnessEvaluator(evaluator);
 		geneticAlgorithm.setExecutor(executor);
+		geneticAlgorithm.setOptimizationStrategy(optimizationStrategy);
 		
 		FarsiteExecutionMemoization cache;
 		if (cmd.hasOption(MEMOIZATION)) {
