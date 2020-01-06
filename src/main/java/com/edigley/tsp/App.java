@@ -50,11 +50,14 @@ public class App {
 		File layerExtentFile = new File(jonqueraPerimetersDir, "jonquera_polygon_from_layer_extent.shp");
 
 		for (int i = 1; i <= 85; i++) {
+		//int theI=5; for (int i = theI; i <= theI; i++) {
 			try {
 				File shapeFile = new File(farsiteOutputDir, "shape_1_" + i + ".shp");
 				FarsiteOutputSaver.saveAsJPG(p1File, shapeFile, layerExtentFile);
 				System.out.println("Successfully generated for: " + "shape_1_" + i + ".shp");
 			} catch (Exception e) {
+				System.err.println("Failed for: " + "shape_1_" + i + ".shp");
+				e.printStackTrace();
 			}
 		}
 		

@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.fitness.GoodnessOfFitEvaluator;
+import com.edigley.tsp.fitness.AdjustedGoodnessOfFitEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 
@@ -96,12 +97,16 @@ public class FarsiteOutputSaver {
 			GoodnessOfFitEvaluator gofEvaluator = new GoodnessOfFitEvaluator();
 			Double gof = gofEvaluator.evaluate(predictionFile, perimeterFile);
 			
+			GoodnessOfFitEvaluator insGofEvaluator = new AdjustedGoodnessOfFitEvaluator();
+			Double adjGof = insGofEvaluator.evaluate(predictionFile, perimeterFile);
+			
 			String[] textToImage = { 
 				"File: " + predictionFile.getName(), 
 				"Simulated Time: " + simulatedTime,
 				"Expected Simulated Time: " + ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME,
 				"Normalized Symmetric Difference: " + normalizedSymmetricDifference,
 				"Goodness of Fitness: " + gof,
+				"Adjusted Goodness of Fitness: " + adjGof,
 				"Fitness: " + weightedPredictionError 
 			};
 

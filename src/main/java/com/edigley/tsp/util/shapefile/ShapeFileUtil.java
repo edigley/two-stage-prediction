@@ -15,12 +15,13 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class ShapeFileUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(ShapeFileUtil.class);
-	
+
 	public static void describe(File file) throws Exception {
 		logger.info("describe.fileName: " + file.getAbsolutePath());
 
@@ -52,7 +53,7 @@ public class ShapeFileUtil {
 		MultiPolygon multiPolygon = gf.createMultiPolygon(polys);
 		return multiPolygon;
 	}
-	
+
 	public static Polygon toPolygon(Geometry geometry) {
 		try {
 			return (Polygon) geometry;
@@ -61,17 +62,20 @@ public class ShapeFileUtil {
 				MultiLineString mls = (MultiLineString) geometry;
 				return (Polygon) mls.convexHull();
 			} catch (ClassCastException e2) {
-				MultiPolygon mp = (MultiPolygon) geometry;
-				int numGeometries = mp.getNumGeometries();
-				List<Geometry> geometries = new ArrayList<Geometry>(numGeometries);
-				for (int i = 0; i < numGeometries; i++) {
-					geometries.add(mp.getGeometryN(i));
+				try {
+					MultiPolygon mp = (MultiPolygon) geometry;
+					int numGeometries = mp.getNumGeometries();
+					List<Geometry> geometries = new ArrayList<Geometry>(numGeometries);
+					for (int i = 0; i < numGeometries; i++) {
+						geometries.add(mp.getGeometryN(i));
+					}
+					Geometry biggestGeometry = geometries.stream()
+							.sorted(Comparator.comparingDouble(Geometry::getArea).reversed()).findFirst().get();
+					return (Polygon) biggestGeometry;
+				} catch (ClassCastException e3) {
+					Point p = (Point) geometry;
+					return (Polygon)p.buffer(0.0000001);
 				}
-				Geometry biggestGeometry = geometries.stream()
-						.sorted(Comparator.comparingDouble(Geometry::getArea).reversed())
-						.findFirst()
-						.get();
-				return (Polygon) biggestGeometry; 
 			}
 		}
 	}
