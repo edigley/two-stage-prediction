@@ -27,6 +27,8 @@ public class CLI {
 	public static final String TIME_OUT = "t";
 	
 	public static final String PARALLELIZATION_LEVEL = "p";
+	
+	public static final String EVALUATION_FUNCTION = "e";
 
 	public static final String SEED = "s";
 
@@ -66,6 +68,7 @@ public class CLI {
 		Option timeOut = new Option(TIME_OUT, "timeout", true, "Timeout for each individual execution");
 		Option seed = new Option(SEED, "seed", true, "Seed to be used when generating the initial population");
 		Option parallelizationLevel = new Option(PARALLELIZATION_LEVEL, "parallelization_level", true, "Set the nivel of parallelization in number of threads of an individual execution");
+		Option evaluationFunction = new Option(EVALUATION_FUNCTION, "evaluation_function", true, "Evaluation Function");
 		
 		executable.setRequired(true);
 		scenario.setRequired(true);
@@ -73,6 +76,7 @@ public class CLI {
 		timeOut.setRequired(false);
 		seed.setRequired(false);
 		parallelizationLevel.setRequired(false);
+		evaluationFunction.setRequired(false);
 		
 		executable.setType(File.class);
 		scenario.setType(File.class);
@@ -80,6 +84,7 @@ public class CLI {
 		timeOut.setType(Number.class);
 		seed.setType(Number.class);
 		parallelizationLevel.setType(Number.class);
+		evaluationFunction.setType(String.class);
 		
 		options.addOption(executable);
 		options.addOption(scenario);
@@ -87,6 +92,7 @@ public class CLI {
 		options.addOption(timeOut);
 		options.addOption(seed);
 		options.addOption(parallelizationLevel);
+		options.addOption(evaluationFunction);
 		return options;
 	}
 

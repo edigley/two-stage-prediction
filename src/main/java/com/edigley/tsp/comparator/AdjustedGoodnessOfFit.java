@@ -1,4 +1,4 @@
-package com.edigley.tsp.fitness;
+package com.edigley.tsp.comparator;
 
 import java.io.File;
 
@@ -12,9 +12,9 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import static com.edigley.tsp.util.shapefile.ShapeFileUtil.toPolygon;
 
-public class AdjustedGoodnessOfFitEvaluator extends GoodnessOfFitEvaluator {
+public class AdjustedGoodnessOfFit extends GoodnessOfFit {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdjustedGoodnessOfFitEvaluator.class);
+	private static final Logger logger = LoggerFactory.getLogger(AdjustedGoodnessOfFit.class);
 	
 	public Double calculateGoodnessOfFit(Polygon map1, Polygon map2) {
 		Polygon polygonC = toPolygon(map1.intersection(map2));

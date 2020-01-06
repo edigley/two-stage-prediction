@@ -1,5 +1,6 @@
 package com.edigley.tsp.calibration;
 
+import static com.edigley.tsp.ui.CLI.EVALUATION_FUNCTION;
 import static com.edigley.tsp.ui.CLI.FARSITE;
 import static com.edigley.tsp.ui.CLI.MEMOIZATION;
 import static com.edigley.tsp.ui.CLI.PARALLELIZATION_LEVEL;
@@ -10,6 +11,7 @@ import static com.edigley.tsp.util.CLIUtils.assertsFilesExist;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -18,10 +20,14 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.comparator.ComparisonMethod;
+import com.edigley.tsp.comparator.GoodnessOfFit;
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutionMonitor;
 import com.edigley.tsp.executors.FarsiteExecutor;
+import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 
 public class Calibrator {
@@ -49,7 +55,7 @@ public class Calibrator {
 		this.cmd = cmd;
 	}
 
-	public void prepare() throws java.text.ParseException, IOException, ParseException {
+	public void prepare() throws java.text.ParseException, IOException, ParseException, NoSuchAlgorithmException {
 		farsiteFile = (File) cmd.getParsedOptionValue(FARSITE);
 		scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
 		
@@ -73,8 +79,25 @@ public class Calibrator {
 			farsiteExecutionParallelizationLevel = scenarioProperties.getFarsiteParallelizationLevel();
 		}
 		
+		ComparisonMethod comparator = null;
+		if (cmd.hasOption(EVALUATION_FUNCTION)) {
+			String evaluationFunction = cmd.getOptionValue(EVALUATION_FUNCTION);
+			if (evaluationFunction.equals("gof")) {
+				comparator = new GoodnessOfFit();
+			} else if (evaluationFunction.equals("nsd")) {
+				comparator = new NormalizedSymmetricDifference();
+			} else {
+				throw new NoSuchAlgorithmException("There was no evaluator for + '" + evaluationFunction + "'");
+			}
+		} else {
+			comparator = new NormalizedSymmetricDifference();
+		}
+		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut, farsiteExecutionParallelizationLevel);
 		executor.setScenarioProperties(scenarioProperties);
+		FarsiteIndividualEvaluator evaluator = FarsiteIndividualEvaluator.getInstance();
+		evaluator.setComparator(comparator);
+		executor.setFitnessEvaluator(evaluator);
 		geneticAlgorithm.setExecutor(executor);
 		
 		FarsiteExecutionMemoization cache;
@@ -90,7 +113,7 @@ public class Calibrator {
 		
 	}
 	
-	public void run() throws java.text.ParseException, IOException, ParseException {
+	public void run() throws java.text.ParseException, IOException, ParseException, NoSuchAlgorithmException {
 		assert !finished;
 		
 		if (!prepared) {

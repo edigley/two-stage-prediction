@@ -49,8 +49,10 @@ public class App {
 		File p1File = new File(jonqueraPerimetersDir, "jonquera_perimeter_1.shp");
 		File layerExtentFile = new File(jonqueraPerimetersDir, "jonquera_polygon_from_layer_extent.shp");
 
-		for (int i = 1; i <= 85; i++) {
-		//int theI=5; for (int i = theI; i <= theI; i++) {
+		Integer[] representatives = new Integer[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 20, 29, 30, 38, 40, 46, 49, 53, 54, 55, 56, 57, 58, 62, 67, 70, 72, 81, 82, 83, 84, 85};
+		
+		//for (int i = 1; i <= 85; i++) {
+		for (Integer i: representatives) {
 			try {
 				File shapeFile = new File(farsiteOutputDir, "shape_1_" + i + ".shp");
 				FarsiteOutputSaver.saveAsJPG(p1File, shapeFile, layerExtentFile);

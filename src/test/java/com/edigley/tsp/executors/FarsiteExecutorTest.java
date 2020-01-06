@@ -7,8 +7,11 @@ import java.io.File;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
+import com.edigley.tsp.comparator.ComparisonMethod;
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
+import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 
@@ -32,6 +35,10 @@ public class FarsiteExecutorTest {
 		Long parallelizationLevel = 1L;
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, timeout, parallelizationLevel);
 		executor.setScenarioProperties(scenarioProperties);
+		FarsiteIndividualEvaluator evaluator = FarsiteIndividualEvaluator.getInstance();
+		ComparisonMethod comparator = new NormalizedSymmetricDifference();
+		evaluator.setComparator(comparator);
+		executor.setFitnessEvaluator(evaluator);
 
 		long generation = 9;
 		long individualId = 9;

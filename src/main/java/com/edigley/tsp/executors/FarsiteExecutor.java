@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.exceptions.TSPFarsiteExecutionException;
+import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 import com.edigley.tsp.util.ProcessUtil;
@@ -30,7 +31,9 @@ public class FarsiteExecutor {
 	private Long timeout;
 	
 	private Long parallelizationLevel = 1L;
-
+	
+	private FarsiteIndividualEvaluator evaluator;
+	
 	public FarsiteExecutor(File farsiteFile, File scenarioDir, Long timeout, Long parallelizationLevel) {
 		this.farsiteFile = farsiteFile;
 		this.scenarioDir = scenarioDir;
@@ -75,7 +78,8 @@ public class FarsiteExecutor {
 			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
 			File gAFile = scenarioProperties.getPerimeterAtT1();
 			File gBFile = scenarioProperties.getShapeFileOutput(generation, id);
-			fireError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
+			//fireError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
+			fireError = evaluator.calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
 		}
 		
 		try {
@@ -126,6 +130,10 @@ public class FarsiteExecutor {
 	public void setScenarioProperties(ScenarioProperties scenarioProperties) {
 		this.scenarioProperties = scenarioProperties;
 	}
+	
+	public void setFitnessEvaluator(FarsiteIndividualEvaluator evaluator) {
+		this.evaluator = evaluator;
+	}
 
 	public Long getTimeout() {
 		return timeout;
@@ -173,7 +181,6 @@ public class FarsiteExecutor {
 		System.out.printf("Header:     %s error weightedError simulatedTime timeToBeSimulated \n", FarsiteExecution.header);
 		System.out.printf("Execution: %s %s %s %s %s \n", execution, error, simulatedTime, timeToBeSimulated, weightedError);
 
-		
 	}
 	
 }

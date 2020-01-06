@@ -34,8 +34,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.fitness.GoodnessOfFitEvaluator;
-import com.edigley.tsp.fitness.AdjustedGoodnessOfFitEvaluator;
+import com.edigley.tsp.comparator.AdjustedGoodnessOfFit;
+import com.edigley.tsp.comparator.GoodnessOfFit;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 
@@ -94,19 +94,19 @@ public class FarsiteOutputSaver {
 			Double normalizedSymmetricDifference = fireEvolution.getRight();
 			Double weightedPredictionError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(perimeterFile, predictionFile, ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME);
 			
-			GoodnessOfFitEvaluator gofEvaluator = new GoodnessOfFitEvaluator();
-			Double gof = gofEvaluator.evaluate(predictionFile, perimeterFile);
+			GoodnessOfFit gofComparator = new GoodnessOfFit();
+			Double gof = gofComparator.compare(predictionFile, perimeterFile);
 			
-			GoodnessOfFitEvaluator insGofEvaluator = new AdjustedGoodnessOfFitEvaluator();
-			Double adjGof = insGofEvaluator.evaluate(predictionFile, perimeterFile);
+			GoodnessOfFit insGofComparator = new AdjustedGoodnessOfFit();
+			Double adjGof = insGofComparator.compare(predictionFile, perimeterFile);
 			
 			String[] textToImage = { 
 				"File: " + predictionFile.getName(), 
 				"Simulated Time: " + simulatedTime,
 				"Expected Simulated Time: " + ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME,
 				"Normalized Symmetric Difference: " + normalizedSymmetricDifference,
-				"Goodness of Fitness: " + gof,
-				"Adjusted Goodness of Fitness: " + adjGof,
+				"Goodness of Fit: " + gof,
+				"Adjusted Goodness of Fit: " + adjGof,
 				"Fitness: " + weightedPredictionError 
 			};
 

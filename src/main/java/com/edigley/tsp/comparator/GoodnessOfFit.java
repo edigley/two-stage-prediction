@@ -1,4 +1,4 @@
-package com.edigley.tsp.fitness;
+package com.edigley.tsp.comparator;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,19 +15,20 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
-public class GoodnessOfFitEvaluator implements IndividualEvaluator{
+public class GoodnessOfFit implements ComparisonMethod {
 
-	private static final Logger logger = LoggerFactory.getLogger(GoodnessOfFitEvaluator.class);
+	private static final Logger logger = LoggerFactory.getLogger(GoodnessOfFit.class);
 	
-	public Double evaluate(String gAFilePath, String gBFilePath) throws IOException {
-		return evaluate(new File(gAFilePath), new File(gBFilePath));
+	public Double compare(String gAFilePath, String gBFilePath) throws IOException {
+		return compare(new File(gAFilePath), new File(gBFilePath));
 	}
 	
-	public Double evaluate(File gAFile, File gBFile) throws IOException {
+	public Double compare(File gAFile, File gBFile) throws IOException {
 		return calculateGoodnessOfFit(gBFile, gAFile);
 	}
 	
 	public static void main(String[] args) throws Exception {
+		GoodnessOfFit gofEvaluator = new GoodnessOfFit();
 		File resourcesDir = new File("src/test/resources/");
 		File perimeter1File = new File(resourcesDir, "jonquera_perimeter_1.shp");
 		
@@ -44,7 +45,7 @@ public class GoodnessOfFitEvaluator implements IndividualEvaluator{
 		File mapBFile = new File("b.shp");
 		File mapCFile = new File("c.shp");
 
-		System.out.println(calculateGoodnessOfFit(shapeFile, perimeter1File));		
+		System.out.println(gofEvaluator.calculateGoodnessOfFit(shapeFile, perimeter1File));		
 		
 		/*
 		System.out.println(calculateGoodnessOfFit(map1File, map2File));		
@@ -64,7 +65,7 @@ public class GoodnessOfFitEvaluator implements IndividualEvaluator{
 		 */
 	}
 
-	private static Double calculateGoodnessOfFit(File map1File, File map2File) throws IOException {
+	private Double calculateGoodnessOfFit(File map1File, File map2File) throws IOException {
 		
 		Polygon map1 = ShapeFileUtil.toPolygon(ShapeFileReader.getGeometriesPoligon(map1File));
 		Polygon map2 = ShapeFileUtil.toPolygon(ShapeFileReader.getGeometriesPoligon(map2File));
@@ -73,7 +74,7 @@ public class GoodnessOfFitEvaluator implements IndividualEvaluator{
 		return gof;
 	}
 	
-	public static Double calculateGoodnessOfFit(Polygon map1, Polygon map2) {
+	public Double calculateGoodnessOfFit(Polygon map1, Polygon map2) {
 		Polygon polygonC = ShapeFileUtil.toPolygon(map1.intersection(map2));
 		Double c = polygonC.getArea();
 		

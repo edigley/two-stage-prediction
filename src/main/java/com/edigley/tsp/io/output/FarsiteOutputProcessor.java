@@ -11,8 +11,8 @@ import org.opengis.feature.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.fitness.IndividualEvaluator;
-import com.edigley.tsp.fitness.NormalizedSymmetricDifferenceEvaluator;
+import com.edigley.tsp.comparator.ComparisonMethod;
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.util.ParserUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 import com.vividsolutions.jts.geom.Geometry;
@@ -23,15 +23,15 @@ public class FarsiteOutputProcessor {
 
 	private static FarsiteOutputProcessor instance = null;
 	
-	private IndividualEvaluator evaluator = null;
+	private ComparisonMethod comparator = null;
 	
-	private FarsiteOutputProcessor(IndividualEvaluator evaluator) {
-		this.evaluator = evaluator;
+	private FarsiteOutputProcessor(ComparisonMethod comparator) {
+		this.comparator = comparator;
 	}
 	
 	public static FarsiteOutputProcessor getInstance() {
 		if (instance == null) {
-			instance = new FarsiteOutputProcessor(new NormalizedSymmetricDifferenceEvaluator());
+			instance = new FarsiteOutputProcessor(new NormalizedSymmetricDifference());
 		}
 		return instance;
 	}
@@ -85,7 +85,7 @@ public class FarsiteOutputProcessor {
 	}
 	
 	public Pair<Long, Double> getFireEvolution(File fileA, File fileB) throws IOException {
-		return ImmutablePair.of(getSimulatedTime(fileB), this.evaluator.evaluate(fileA, fileB));
+		return ImmutablePair.of(getSimulatedTime(fileB), this.comparator.compare(fileA, fileB));
 	}
 
 	public Long getSimulatedTime(File file) throws IOException {
