@@ -34,6 +34,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.fitness.GoodnessOfFitEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 
@@ -91,11 +92,16 @@ public class FarsiteOutputSaver {
 			Long simulatedTime = fireEvolution.getLeft();
 			Double normalizedSymmetricDifference = fireEvolution.getRight();
 			Double weightedPredictionError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(perimeterFile, predictionFile, ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME);
+			
+			GoodnessOfFitEvaluator gofEvaluator = new GoodnessOfFitEvaluator();
+			Double gof = gofEvaluator.evaluate(predictionFile, perimeterFile);
+			
 			String[] textToImage = { 
 				"File: " + predictionFile.getName(), 
 				"Simulated Time: " + simulatedTime,
 				"Expected Simulated Time: " + ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME,
 				"Normalized Symmetric Difference: " + normalizedSymmetricDifference,
+				"Goodness of Fitness: " + gof,
 				"Fitness: " + weightedPredictionError 
 			};
 
