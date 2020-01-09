@@ -7,19 +7,18 @@ import java.io.File;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
-import com.edigley.tsp.comparator.ComparisonMethod;
 import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
-import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 
 public class FarsiteExecutorTest {
 
 	@Test
 	public void testRunFarsiteIndividual() throws Exception {
-		assertFarsiteExecution("  9  12  14  22  87   165  353  38  50  1.7 ", 210, 0.9184562678635393, 2.099329);
+		assertFarsiteExecution("  9  12  14  22  87   165  353  38  50  1.7 ", 180, 0.9184562678635393, 2.099329);
+		assertFarsiteExecution("  6   7  14  37  79    53  350  31  96  1.5 ", 180, 0.9184562678635393, 2.439559);
 	}
 	
 	private static void assertFarsiteExecution(String individualAsString, int expectedSimulatedTime, Double expectedNormalizedSymmetricDifference, Double expectedWeightedError) throws Exception {
@@ -35,9 +34,7 @@ public class FarsiteExecutorTest {
 		Long parallelizationLevel = 1L;
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, timeout, parallelizationLevel);
 		executor.setScenarioProperties(scenarioProperties);
-		FarsiteIndividualEvaluator evaluator = FarsiteIndividualEvaluator.getInstance();
-		ComparisonMethod comparator = new NormalizedSymmetricDifference();
-		evaluator.setComparator(comparator);
+		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
 		executor.setFitnessEvaluator(evaluator);
 
 		long generation = 9;
@@ -50,12 +47,12 @@ public class FarsiteExecutorTest {
 		
 		File predictionFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		
-		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(predictionFile, perimeter1File);
+		Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeter1File);
 		Long simulatedTime = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
 		
 		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
-		Double weightedError = FarsiteIndividualEvaluator.getInstance().calculateWeightedPredictionError(predictionFile, perimeter1File, timeToBeSimulated);
+		Double weightedError = evaluator.calculateWeightedPredictionError(predictionFile, perimeter1File, timeToBeSimulated);
 				
 		String output = String.format("%s %s %s ", execution, timeToBeSimulated, expectedNormalizedSymmetricDifference);
 		

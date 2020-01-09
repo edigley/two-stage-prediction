@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.comparator.AdjustedGoodnessOfFit;
 import com.edigley.tsp.comparator.GoodnessOfFit;
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
@@ -90,10 +91,11 @@ public class FarsiteOutputSaver {
 			MapViewport vp = map.getViewport();
 			vp.setCoordinateReferenceSystem(crs);
 
-			Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(predictionFile, perimeterFile);
+			FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
+			Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeterFile);
 			Long simulatedTime = fireEvolution.getLeft();
 			Double normalizedSymmetricDifference = fireEvolution.getRight();
-			Double weightedPredictionError = FarsiteIndividualEvaluator.getInstance().calculateWeightedPredictionError(predictionFile, perimeterFile, ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME);
+			Double weightedPredictionError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME);
 			
 			GoodnessOfFit gofComparator = new GoodnessOfFit();
 			Double gof = gofComparator.compare(predictionFile, perimeterFile);

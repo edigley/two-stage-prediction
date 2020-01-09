@@ -12,6 +12,7 @@ import org.opengis.feature.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 import com.vividsolutions.jts.geom.Geometry;
@@ -185,7 +186,8 @@ public class ShapeFileCalculator {
 		
 		MultiPolygon shape = (MultiPolygon) ShapeFileReader.getGeometry(shapePolygonFile);
 		
-		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(shapeFile, p1File);
+		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
+		Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(shapeFile, p1File);
 		Double Error = fireEvolution.getRight();
 		System.out.println("Error: " + Error);
 	}
@@ -279,7 +281,8 @@ public class ShapeFileCalculator {
 
 			ShapeFileWriter.saveGeometryPolygon(p2File, p2PolygonFile);
 
-			Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(p2File, p1File);
+			FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
+			Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(p2File, p1File);
 			Double predictionError = fireEvolution.getRight();
 
 			System.out.printf("(%s E %s) = %s \n", p1File.getName(), p2File.getName(), predictionError);

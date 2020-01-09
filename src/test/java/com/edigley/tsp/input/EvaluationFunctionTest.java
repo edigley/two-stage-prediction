@@ -8,12 +8,14 @@ import java.io.IOException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
-import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 
 public class EvaluationFunctionTest {
 
 	private File resourcesDir = new File("src/test/resources/");
+	
+	private FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
 	
 	@Test
 	public void testCalculatePredictionError() throws Exception {
@@ -120,7 +122,7 @@ public class EvaluationFunctionTest {
 	private void assertFireEvolution(String shapeFilePath, int simulationTime, double predictionError) throws IOException {
 		File perimeter1File = new File(resourcesDir, "jonquera_perimeter_1.shp");
 		File shapeFile = new File(resourcesDir, shapeFilePath);
-		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(shapeFile, perimeter1File);
+		Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(shapeFile, perimeter1File);
 		//System.out.printf("%s Error: %s \n", shapeFilePath, Error);
 		Long time = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
@@ -131,7 +133,7 @@ public class EvaluationFunctionTest {
 	private void assertPredictionError(String shapeFilePath, double predictionError) throws IOException {
 		File perimeter1File = new File(resourcesDir, "jonquera_perimeter_1.shp");
 		File shapeFile = new File(resourcesDir, shapeFilePath);
-		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(shapeFile, perimeter1File);
+		Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(shapeFile, perimeter1File);
 		Double Error = fireEvolution.getRight();
 		//System.out.printf("%s Error: %s \n", shapeFilePath, Error);
 		assertEquals(Double.valueOf(predictionError), Error);
@@ -140,15 +142,17 @@ public class EvaluationFunctionTest {
 	private void assertPredictionError(String shapeFilePath, int simulationTime, double predictionError, int totalSimulationTime, double fitnessEvaluation) throws IOException {
 		File perimeter1File = new File(resourcesDir, "jonquera_perimeter_1.shp");
 		File shapeFile = new File(resourcesDir, shapeFilePath);
-		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(shapeFile, perimeter1File);
+		Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(shapeFile, perimeter1File);
 		//System.out.printf("%s Error: %s \n", shapeFilePath, Error);
 		Long time = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
 		assertEquals(Long.valueOf(simulationTime), time);
 		assertEquals(Double.valueOf(predictionError), error);
-		Double weightedError = FarsiteIndividualEvaluator.getInstance().calculateWeightedPredictionError(shapeFile, perimeter1File, Long.valueOf(totalSimulationTime));
+		Double weightedError = evaluator.calculateWeightedPredictionError(shapeFile, perimeter1File, Long.valueOf(totalSimulationTime));
 		//System.out.printf("%s Weighted Error: %s \n", shapeFilePath, weightedError);
 		assertEquals(Double.valueOf(fitnessEvaluation), weightedError);
 	}
+	
+
 	
 }

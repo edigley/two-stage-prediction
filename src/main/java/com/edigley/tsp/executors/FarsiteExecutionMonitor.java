@@ -17,7 +17,6 @@ import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
-import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 import com.edigley.tsp.util.ProcessUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileCalculator;
 
@@ -29,7 +28,7 @@ public class FarsiteExecutionMonitor {
 	
 	private static final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
 	
-	private static final FarsiteIndividualEvaluator evaluator = FarsiteIndividualEvaluator.getInstance();
+	private static final FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
 	
 	private static final NormalizedSymmetricDifference comparator = new NormalizedSymmetricDifference();
 	
@@ -115,14 +114,14 @@ public class FarsiteExecutionMonitor {
 		
 		Callable<Long> callable = new Callable<Long>() {
 			public Long call() throws Exception {
-				return FarsiteIndividualEvaluator.getInstance().getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+				return new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference()).getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 			}
 		};
 		
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					Long maxSimulatedTime = FarsiteIndividualEvaluator.getInstance().getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+					Long maxSimulatedTime = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference()).getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 					System.out.println("---> maxSimulatedTime: " + maxSimulatedTime);
 					logger.info("---> maxSimulatedTime: " + maxSimulatedTime);
 				} catch (Exception e) {

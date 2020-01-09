@@ -25,12 +25,9 @@ public class AdjustedGoodnessOfFit extends GoodnessOfFit {
 		Polygon polygonB = toPolygon(map2.difference(polygonC));
 		Double b = polygonB.getArea();
 
-		//Polygon polygonOutOfPrediction = toPolygon(toPolygon(polygonB.difference(polygonA)).intersection(polygonB));
-		Polygon map1DifferenceMap2 = toPolygon(map1.difference(map2));
-		//Polygon polygonOutOfPrediction = toPolygon(map1DifferenceMap2.intersection(map2));
-		Polygon polygonOutOfPrediction = toPolygon(map1DifferenceMap2.intersection(map1));
-		//Polygon polygonOutOfPrediction = map1DifferenceMap2;
-		
+		Polygon map1DifferenceMap2 = toPolygon(map2.difference(map1));
+		Polygon polygonOutOfPrediction = toPolygon(map1DifferenceMap2.intersection(map2));
+
 		/*
 		try {
 			ShapeFileWriter.save(new File("a_map1.shp"), map1, CRS.decode(ScenarioProperties.CRS));
@@ -42,7 +39,9 @@ public class AdjustedGoodnessOfFit extends GoodnessOfFit {
 		}
 		*/
 		
-		Double insidenessInitial = (1 - polygonOutOfPrediction.getArea()/polygonB.getArea());
+		
+		double outsideness = polygonOutOfPrediction.getArea()/map2.getArea();
+		Double insidenessInitial = (1 - outsideness);
 		Double insideness = Math.min(1, Math.abs(insidenessInitial));
 		
 		System.out.println("Proportion of insideness: " + insidenessInitial + " -> " + insideness);

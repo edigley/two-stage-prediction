@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.comparator.ComparisonMethod;
-import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.util.ParserUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 
@@ -20,19 +19,10 @@ public class FarsiteIndividualEvaluator {
 
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteIndividualEvaluator.class);
 	
-	private static FarsiteIndividualEvaluator instance = null;
-	
 	private ComparisonMethod comparator = null;
 	
-	private FarsiteIndividualEvaluator(ComparisonMethod comparator) {
+	public FarsiteIndividualEvaluator(ComparisonMethod comparator) {
 		this.comparator = comparator;
-	}
-	
-	public static FarsiteIndividualEvaluator getInstance() {
-		if (instance == null) {
-			instance = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
-		}
-		return instance;
 	}
 	
 	public Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile) throws IOException {
@@ -65,7 +55,7 @@ public class FarsiteIndividualEvaluator {
 			Long effectivelySimulatedTime = fireEvolution.getKey();
 			Double normalizedSymmetricDifference = fireEvolution.getValue();
 			
-			Double factor = Math.max(1.0, expectedSimulatedTime / (effectivelySimulatedTime * 1.0));
+			Double factor = comparator.defineAdjustmentFactor(effectivelySimulatedTime, expectedSimulatedTime);
 			
 			fireError = ParserUtil.parseDouble(factor * normalizedSymmetricDifference);
 				

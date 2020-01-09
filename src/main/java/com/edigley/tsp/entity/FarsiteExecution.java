@@ -1,5 +1,8 @@
 package com.edigley.tsp.entity;
 
+import java.io.File;
+
+import com.edigley.tsp.comparator.ComparisonMethod;
 import com.edigley.tsp.io.FileHeader;
 
 public class FarsiteExecution implements Comparable<FarsiteExecution> {
@@ -9,6 +12,8 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 	public static final int PARAMS_START_POS = FarsiteIndividual.header.length;
 	
 	private FarsiteIndividual individual;
+	
+	private ComparisonMethod comparator;
 
 	private Double fireError;
 	
@@ -17,6 +22,8 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 	private long parallelizationLevel;
 
 	private long executionTime;
+	
+	private File predictionFile;
 	
 	public FarsiteExecution(FarsiteIndividual individual) {
 		this.individual = individual;
@@ -76,7 +83,22 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 
 	@Override
 	public int compareTo(FarsiteExecution o) {
-		return this.fireError.compareTo(o.fireError);
+		if (this.comparator != null) {
+			return this.comparator.compare(this, o);
+		}
+		return - this.fireError.compareTo(o.fireError);
+	}
+
+	public File getPredictionFile() {
+		return predictionFile;
+	}
+
+	public void setPredictionFile(File predictionFile) {
+		this.predictionFile = predictionFile;
+	}
+
+	public void setComparator(ComparisonMethod comparator) {
+		this.comparator = comparator;
 	}
 	
 }

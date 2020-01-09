@@ -8,12 +8,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.exceptions.TSPFarsiteExecutionException;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
-import com.edigley.tsp.io.output.FarsiteOutputProcessor;
 import com.edigley.tsp.util.ProcessUtil;
 
 import io.jenetics.Genotype;
@@ -74,16 +74,16 @@ public class FarsiteExecutor {
 			logger.error("There was an error when trying to execute individual: " + e.getMessage(), e);
 		}
 		
-		if (fireError.equals(Double.NaN) || fireError > 9999) {
-			logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
+		//if (fireError.equals(Double.NaN) || fireError > 9999) {
+		//	logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
 			File perimeterFile = scenarioProperties.getPerimeterAtT1();
 			File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
-			//fireError = FarsiteOutputProcessor.getInstance().calculateWeightedPredictionError(gAFile, gBFile, scenarioProperties.getSimulatedTime());
 			fireError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, scenarioProperties.getTimeToBeSimulated());
-		}
+		//}
 		
 		try {
-			Long maxSimulatedTime = evaluator.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+			//Long maxSimulatedTime = evaluator.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+			Long maxSimulatedTime = evaluator.getSimulatedTime(predictionFile);
 			execution.setMaxSimulatedTime(maxSimulatedTime);
 		} catch (Exception e) {
 			System.err.printf("Couldn't extract maximum simulated time for individual %s - %s\n", individual, e.getMessage());
@@ -94,6 +94,9 @@ public class FarsiteExecutor {
 		long executionTime = Math.round(stopWatch.getTime()/1000.0);
 		execution.setFireError(fireError);
 		execution.setExecutionTime(executionTime);
+		execution.setPredictionFile(scenarioProperties.getShapeFileOutput(generation, id));
+		
+		logger.info(String.format("Finished execution for individual [ %s %s ] %s", generation, id, individual));
 		
 		return execution;
 	}
@@ -171,12 +174,13 @@ public class FarsiteExecutor {
 		
 		File shapeFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		
-		Pair<Long, Double> fireEvolution = FarsiteIndividualEvaluator.getInstance().getFireEvolution(shapeFile, perimeter1File);
+		FarsiteIndividualEvaluator evaluator2 = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
+		Pair<Long, Double> fireEvolution = evaluator2.getFireEvolution(shapeFile, perimeter1File);
 		Long simulatedTime = fireEvolution.getLeft();
 		Double error = fireEvolution.getRight();
 		
 		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
-		Double weightedError = FarsiteIndividualEvaluator.getInstance().calculateWeightedPredictionError(shapeFile, perimeter1File, timeToBeSimulated);
+		Double weightedError = evaluator2.calculateWeightedPredictionError(shapeFile, perimeter1File, timeToBeSimulated);
 				
 		System.out.printf("Header:     %s error weightedError simulatedTime timeToBeSimulated \n", FarsiteExecution.header);
 		System.out.printf("Execution: %s %s %s %s %s \n", execution, error, simulatedTime, timeToBeSimulated, weightedError);
