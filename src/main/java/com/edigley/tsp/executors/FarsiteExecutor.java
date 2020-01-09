@@ -95,6 +95,7 @@ public class FarsiteExecutor {
 		execution.setFireError(fireError);
 		execution.setExecutionTime(executionTime);
 		execution.setPredictionFile(scenarioProperties.getShapeFileOutput(generation, id));
+		execution.setComparator(evaluator.getComparator());
 		
 		logger.info(String.format("Finished execution for individual [ %s %s ] %s", generation, id, individual));
 		

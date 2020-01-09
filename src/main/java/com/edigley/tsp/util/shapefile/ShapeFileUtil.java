@@ -54,7 +54,7 @@ public class ShapeFileUtil {
 		return multiPolygon;
 	}
 
-	public static Polygon toPolygon(Geometry geometry) {
+	public static Polygon toPolygonBKP(Geometry geometry) {
 		try {
 			return (Polygon) geometry;
 		} catch (ClassCastException e) {
@@ -80,10 +80,31 @@ public class ShapeFileUtil {
 		}
 	}
 
+	public static MultiPolygon toMultiPolygon(Geometry geometry) {
+		try {
+			return wrapInAMultiPolygon((Polygon) geometry);
+		} catch (ClassCastException e) {
+			try {
+				MultiLineString mls = (MultiLineString) geometry;
+				return wrapInAMultiPolygon((Polygon) mls.convexHull());
+			} catch (ClassCastException e2) {
+				try {
+					MultiPolygon mp = (MultiPolygon) geometry;
+					return mp;
+				} catch (ClassCastException e3) {
+					Point p = (Point) geometry;
+					return wrapInAMultiPolygon((Polygon)p.buffer(0.0000001));
+				}
+			}
+		}
+	}
+	
 	public static MultiPolygon toMultiPolygon(File shapeFile) throws IOException {
 		Geometry geometry = (Geometry) ShapeFileReader.getGeometriesPoligon(shapeFile);
-		Polygon polygon = toPolygon(geometry);
-		MultiPolygon multiPolygonB = wrapInAMultiPolygon(polygon);
+		//Polygon polygon = toPolygon(geometry);
+		//MultiPolygon multiPolygonB = wrapInAMultiPolygon(polygon);
+		MultiPolygon multiPolygonB = toMultiPolygon(geometry);
+		return multiPolygonB;
 
 		/*
 		try {
@@ -97,7 +118,6 @@ public class ShapeFileUtil {
 			}
 		}
 		*/
-		return multiPolygonB;
 	}
 
 }

@@ -17,7 +17,7 @@ public class FarsiteExecutorTest {
 
 	@Test
 	public void testRunFarsiteIndividual() throws Exception {
-		assertFarsiteExecution("  9  12  14  22  87   165  353  38  50  1.7 ", 180, 0.9184562678635393, 2.099329);
+		//assertFarsiteExecution("  9  12  14  22  87   165  353  38  50  1.7 ", 180, 0.9184562678635393, 2.099329);
 		assertFarsiteExecution("  6   7  14  37  79    53  350  31  96  1.5 ", 180, 0.9184562678635393, 2.439559);
 	}
 	

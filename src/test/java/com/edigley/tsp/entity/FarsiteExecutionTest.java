@@ -46,8 +46,8 @@ public class FarsiteExecutionTest {
 		
 		execution2.setFireError(2.0);
 		
-		assertEquals(execution1.compareTo(execution2), 1);
-		assertEquals(execution2.compareTo(execution1), -1);
+		assertEquals(execution1.compareTo(execution2), -1);
+		assertEquals(execution2.compareTo(execution1), 1);
 		assertEquals(execution1.compareTo(execution1), 0);
 		assertEquals(execution2.compareTo(execution2), 0);
 		
@@ -70,6 +70,17 @@ public class FarsiteExecutionTest {
 		assertEquals(execution1.compareTo(execution1), 0);
 		assertEquals(execution2.compareTo(execution2), 0);
 		
+	}
+	
+	@Test
+	public void testToString() throws Exception {
+		execution1.setParallelizationLevel(1);
+		execution1.setExecutionTime(59);
+		execution1.setFireError(3.9);
+		execution1.setMaxSimulatedTime(480L);
+		File shapeFile1 = new File(resourcesDir, "shape_1_1.shp");
+		execution1.setPredictionFile(shapeFile1);
+		assertEquals("  9  12  14  22  87  165  353  38  50  1,7  3,900000     480      1     59 shape_1_1.shp", execution1.toString());
 	}
 	
 }

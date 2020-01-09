@@ -1,28 +1,27 @@
 package com.edigley.tsp.comparator;
 
-import static com.edigley.tsp.util.shapefile.ShapeFileUtil.toMultiPolygon;
+import static com.edigley.tsp.util.shapefile.ShapeFileUtil.toPolygonBKP;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
-public class AdjustedGoodnessOfFit extends GoodnessOfFit {
+public class AdjustedGoodnessOfFitForSimplePolygon extends GoodnessOfFit {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdjustedGoodnessOfFit.class);
+	private static final Logger logger = LoggerFactory.getLogger(AdjustedGoodnessOfFitForSimplePolygon.class);
 	
 	public Double calculateGoodnessOfFit(Polygon map1, Polygon map2) {
-		MultiPolygon polygonC = toMultiPolygon(map1.intersection(map2));
+		Polygon polygonC = toPolygonBKP(map1.intersection(map2));
 		Double c = polygonC.getArea();
 		
-		MultiPolygon polygonA = toMultiPolygon(map1.difference(polygonC));
+		Polygon polygonA = toPolygonBKP(map1.difference(polygonC));
 		Double a = polygonA.getArea();
-		MultiPolygon polygonB = toMultiPolygon(map2.difference(polygonC));
+		Polygon polygonB = toPolygonBKP(map2.difference(polygonC));
 		Double b = polygonB.getArea();
 
-		MultiPolygon map1DifferenceMap2 = toMultiPolygon(map2.difference(map1));
-		MultiPolygon polygonOutOfPrediction = toMultiPolygon(map1DifferenceMap2.intersection(map2));
+		Polygon map1DifferenceMap2 = toPolygonBKP(map2.difference(map1));
+		Polygon polygonOutOfPrediction = toPolygonBKP(map1DifferenceMap2.intersection(map2));
 
 		/*
 		try {

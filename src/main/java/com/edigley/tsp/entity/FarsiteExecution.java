@@ -73,8 +73,9 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 
 	@Override
 	public String toString() {
-		String pattern = "%s  %.6f  %6s %6s %6s";
-		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime);
+		String pattern = "%s  %.6f  %6s %6s %6s %s";
+		String name = (predictionFile != null) ? predictionFile.getName() : null;
+		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime, name);
 	}
 
 	public Long getMaxSimulatedTime() {
@@ -86,7 +87,7 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 		if (this.comparator != null) {
 			return this.comparator.compare(this, o);
 		}
-		return - this.fireError.compareTo(o.fireError);
+		return this.fireError.compareTo(o.fireError);
 	}
 
 	public File getPredictionFile() {

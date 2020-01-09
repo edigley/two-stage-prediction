@@ -71,5 +71,9 @@ public class FarsiteIndividualEvaluator {
 	public void setComparator(ComparisonMethod comparator) {
 		this.comparator = comparator;
 	}
+
+	public ComparisonMethod getComparator() {
+		return comparator;
+	}
 	
 }

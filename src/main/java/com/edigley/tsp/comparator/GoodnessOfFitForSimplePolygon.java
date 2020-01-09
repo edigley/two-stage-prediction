@@ -12,11 +12,11 @@ import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 import com.edigley.tsp.util.shapefile.ShapeFileUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileWriter;
-import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
-public class GoodnessOfFit implements ComparisonMethod {
+public class GoodnessOfFitForSimplePolygon implements ComparisonMethod {
 
-	private static final Logger logger = LoggerFactory.getLogger(GoodnessOfFit.class);
+	private static final Logger logger = LoggerFactory.getLogger(GoodnessOfFitForSimplePolygon.class);
 	
 	public Double compare(String predictionFile, String perimeterFile) throws IOException {
 		return compare(new File(predictionFile), new File(perimeterFile));
@@ -34,30 +34,30 @@ public class GoodnessOfFit implements ComparisonMethod {
 	
 	Double calculateGoodnessOfFit(File predictionFile, File perimeterFile) throws IOException {
 		
-		MultiPolygon predictionMap = ShapeFileUtil.toMultiPolygon(ShapeFileReader.getGeometriesPoligon(predictionFile));
-		MultiPolygon perimeterMap = ShapeFileUtil.toMultiPolygon(ShapeFileReader.getGeometriesPoligon(perimeterFile));
+		Polygon predictionMap = ShapeFileUtil.toPolygonBKP(ShapeFileReader.getGeometriesPoligon(predictionFile));
+		Polygon perimeterMap = ShapeFileUtil.toPolygonBKP(ShapeFileReader.getGeometriesPoligon(perimeterFile));
 		
 		Double gof = calculateGoodnessOfFit(predictionMap, perimeterMap);
 		return gof;
 	}
 	
-	public Double calculateGoodnessOfFit(MultiPolygon map1, MultiPolygon map2) {
-		MultiPolygon polygonC = ShapeFileUtil.toMultiPolygon(map1.intersection(map2));
+	public Double calculateGoodnessOfFit(Polygon map1, Polygon map2) {
+		Polygon polygonC = ShapeFileUtil.toPolygonBKP(map1.intersection(map2));
 		Double c = polygonC.getArea();
 		
-		MultiPolygon polygonA = ShapeFileUtil.toMultiPolygon(map1.difference(polygonC));
+		Polygon polygonA = ShapeFileUtil.toPolygonBKP(map1.difference(polygonC));
 		Double a = polygonA.getArea();
-		MultiPolygon polygonB = ShapeFileUtil.toMultiPolygon(map2.difference(polygonC));
+		Polygon polygonB = ShapeFileUtil.toPolygonBKP(map2.difference(polygonC));
 		Double b = polygonB.getArea();
 
-		//saveIntermediatePolygons(polygonA, polygonB, polygonC);
+		saveIntermediatePolygons(polygonA, polygonB, polygonC);
 		
 		Double gof = ( c/(b+c) ) * ( c/(a+c) );
 		
 		return gof;		
 	}
 
-	private void saveIntermediatePolygons(MultiPolygon polygonA, MultiPolygon polygonB, MultiPolygon polygonC) {
+	private void saveIntermediatePolygons(Polygon polygonA, Polygon polygonB, Polygon polygonC) {
 		try {
 			File outputDir = new File("/home/edigley/git/two-stage-prediction/playpen/fire-scenarios/jonquera/output");
 			ShapeFileWriter.save(new File(outputDir, "a.shp"), polygonA, CRS.decode(ScenarioProperties.CRS));

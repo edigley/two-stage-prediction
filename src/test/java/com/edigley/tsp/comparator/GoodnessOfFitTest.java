@@ -19,8 +19,8 @@ public class GoodnessOfFitTest {
 
 	@Test
 	public void testCalculatePredictionGoF() throws Exception {
-		assertPredictionGoF("shape_1_1.shp", 180, 0.3232708194146624,  480, 0.121227);
-		assertPredictionGoF("shape_1_3.shp", 180, 0.46540004589820144, 480, 0.174525);
+		assertPredictionGoF("shape_1_1.shp", 180, 0.27865477309465514, 480, 0.104496);
+		assertPredictionGoF("shape_1_3.shp", 180, 0.3851732212437519,  480, 0.14444);
 	}
 
 	private void assertPredictionGoF(String shapeFilePath, int simulationTime, double gof,
