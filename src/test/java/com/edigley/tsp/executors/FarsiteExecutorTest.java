@@ -3,10 +3,15 @@ package com.edigley.tsp.executors;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.edigley.tsp.comparator.ComparisonMethod;
+import com.edigley.tsp.comparator.GoodnessOfFit;
 import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
@@ -15,33 +20,43 @@ import com.edigley.tsp.io.input.ScenarioProperties;
 
 public class FarsiteExecutorTest {
 
-	@Test
-	public void testRunFarsiteIndividual() throws Exception {
-		//assertFarsiteExecution("  9  12  14  22  87   165  353  38  50  1.7 ", 180, 0.9184562678635393, 2.099329);
-		assertFarsiteExecution("  6   7  14  37  79    53  350  31  96  1.5 ", 180, 0.9184562678635393, 2.439559);
+	private File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
+	private File scenarioDir = new File("playpen/fire-scenarios/jonquera/");
+	private long generation = 9;
+	private Long timeout = 300L;
+	private Long parallelizationLevel = 1L;
+	private ScenarioProperties scenarioProperties;
+	private FarsiteExecutor executor;
+	
+	@Before
+	public void setUp() throws FileNotFoundException, IOException {
+		scenarioProperties = new ScenarioProperties(scenarioDir);
+		executor = new FarsiteExecutor(farsiteFile, scenarioDir, timeout, parallelizationLevel);
+		executor.setScenarioProperties(scenarioProperties);
 	}
 	
-	private static void assertFarsiteExecution(String individualAsString, int expectedSimulatedTime, Double expectedNormalizedSymmetricDifference, Double expectedWeightedError) throws Exception {
+	@Test
+	public void testRunFarsiteIndividualForNSD() throws Exception {
+		NormalizedSymmetricDifference nsdComparator = new NormalizedSymmetricDifference();
+		assertFarsiteExecution(nsdComparator, 10, "  9  12  14  22  87   165  353  38  50  1.7 ", 210, 0.9184562678635393, 2.099329);
+		assertFarsiteExecution(nsdComparator, 11, "  6   7  14  37  79    53  350  31  96  1.5 ", 180, 0.9184562678635393, 2.439559);
+	}
+
+	@Test
+	public void testRunFarsiteIndividualForGoF() throws Exception {
+		GoodnessOfFit gofComparator = new GoodnessOfFit();
+		assertFarsiteExecution(gofComparator, 20, "  15   5  13  51  93   10  354  37 100  0.7 ", 480, 0.325292, 0.325292);
+		assertFarsiteExecution(gofComparator, 21, "  15  14   9  59  93   10  354  34 100  0.7 ", 480, 0.203161, 0.203161);
+	}
+	
+	private void assertFarsiteExecution(ComparisonMethod comparator, int individualId, String individualAsString, int expectedSimulatedTime, Double expectedDifference, Double expectedWeightedError) throws Exception {
 		
 		FarsiteIndividual individual = new FarsiteIndividual(individualAsString);
 		
-		File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
-		File scenarioDir = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/");
-		
-		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
-		
-		Long timeout = 300L;
-		Long parallelizationLevel = 1L;
-		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, timeout, parallelizationLevel);
-		executor.setScenarioProperties(scenarioProperties);
-		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
+		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(comparator);
 		executor.setFitnessEvaluator(evaluator);
 
-		long generation = 9;
-		long individualId = 9;
 		FarsiteExecution execution = executor.run(generation, individualId, individual);
-		
-		FarsiteExecutionMonitor.release();
 		
 		File perimeter1File = scenarioProperties.getPerimeterAtT1();
 		
@@ -54,15 +69,20 @@ public class FarsiteExecutorTest {
 		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
 		Double weightedError = evaluator.calculateWeightedPredictionError(predictionFile, perimeter1File, timeToBeSimulated);
 				
-		String output = String.format("%s %s %s ", execution, timeToBeSimulated, expectedNormalizedSymmetricDifference);
+		String output = String.format("%s %s %s ", execution, timeToBeSimulated, expectedDifference);
 		
-		//1 t10 t100 t1000 t10000 ws wd th hh adj fireError maxSimulatedTime parallelizationLevel executionTime timeToBeSimulated, expectedNormalizedSymmetricDifference
-		System.out.printf("Header:     %s timeToBeSimulated  expectedNormalizedSymmetricDifference \n", FarsiteExecution.header);
-		System.out.printf("Execution: %s \n", output);
+		String expectedOutput = String.format("%s %s %s %s %s %s %s %s ", 
+				individualAsString, 
+				expectedWeightedError, 
+				expectedSimulatedTime, 
+				parallelizationLevel,
+				execution.getExecutionTime(), 
+				predictionFile.getName(),
+				timeToBeSimulated, 
+				expectedDifference);
 		
-		String expectedOutput = String.format("%s %s %s 1 %s shape_9_9.shp %s %s ", individualAsString, expectedWeightedError, expectedSimulatedTime, execution.getExecutionTime(), timeToBeSimulated, expectedNormalizedSymmetricDifference);
-		assertEquals(removeDoubleSpaces(output), removeDoubleSpaces(expectedOutput));
-
+		assertEquals(removeDoubleSpaces(expectedOutput), removeDoubleSpaces(output));
+		
 	}
 	
 	private static String removeDoubleSpaces(String s) {
