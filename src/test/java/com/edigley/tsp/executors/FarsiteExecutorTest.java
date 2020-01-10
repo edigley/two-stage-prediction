@@ -60,7 +60,7 @@ public class FarsiteExecutorTest {
 		System.out.printf("Header:     %s timeToBeSimulated  expectedNormalizedSymmetricDifference \n", FarsiteExecution.header);
 		System.out.printf("Execution: %s \n", output);
 		
-		String expectedOutput = String.format("%s %s %s 1 %s %s %s ", individualAsString, expectedWeightedError, expectedSimulatedTime, execution.getExecutionTime(), timeToBeSimulated, expectedNormalizedSymmetricDifference);
+		String expectedOutput = String.format("%s %s %s 1 %s shape_9_9.shp %s %s ", individualAsString, expectedWeightedError, expectedSimulatedTime, execution.getExecutionTime(), timeToBeSimulated, expectedNormalizedSymmetricDifference);
 		assertEquals(removeDoubleSpaces(output), removeDoubleSpaces(expectedOutput));
 
 	}
