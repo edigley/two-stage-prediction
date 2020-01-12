@@ -1,45 +1,26 @@
 package com.edigley.tsp.comparator;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
-import java.io.IOException;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.util.shapefile.ShapeFileWriter;
 
-public class GoodnessOfFitTest {
+public class GoodnessOfFitTest extends ComparisonMethodTest {
 
-	private File resourcesDir = new File("src/test/resources/");
-
-	private FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new GoodnessOfFit());
-
-	@Test
-	public void testCalculatePredictionGoF() throws Exception {
-		assertPredictionGoF("shape_1_1.shp", 180, 0.27865477309465514, 480, 0.104496);
-		assertPredictionGoF("shape_1_3.shp", 180, 0.3851732212437519,  480, 0.14444);
-	}
-
-	private void assertPredictionGoF(String shapeFilePath, int simulationTime, double gof,
-			int totalSimulationTime, double fitnessEvaluation) throws IOException {
-		File perimeter1File = new File(resourcesDir, "jonquera_perimeter_1.shp");
-		File shapeFile = new File(resourcesDir, shapeFilePath);
-
-		Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(shapeFile, perimeter1File);
-
-		Long simulatedTime = fireEvolution.getLeft();
-		Double predictionFitness = fireEvolution.getRight();
-
-		assertEquals(Long.valueOf(simulationTime), simulatedTime);
-		assertEquals(Double.valueOf(gof), predictionFitness);
-
-		Double weightedError = evaluator.calculateWeightedPredictionError(shapeFile, perimeter1File, Long.valueOf(totalSimulationTime));
-		assertEquals(Double.valueOf(fitnessEvaluation), weightedError);
+	@Before
+	public void setUp( ) {
+		 comparator = new GoodnessOfFit();
 	}
 	
+	@Test
+	public void testCalculateGoF() throws Exception {
+		assertComparison("jonquera_ignition_buffers/jonquera_ignition_buffer_100.shp", "jonquera_ignition_buffers/jonquera_ignition_buffer_200.shp", 0.25000000000031897);
+		assertComparison("shape_1_1.shp", "jonquera_perimeter_1.shp", 0.27865477309465514);
+		assertComparison("shape_1_3.shp", "jonquera_perimeter_1.shp", 0.3851732212437519);
+	}
+
 	public static void main(String[] args) throws Exception {
 		GoodnessOfFit gofEvaluator = new GoodnessOfFit();
 		File resourcesDir = new File("src/test/resources/");
