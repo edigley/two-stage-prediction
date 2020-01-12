@@ -1,6 +1,7 @@
 package com.edigley.tsp.comparator;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,9 +10,28 @@ import com.edigley.tsp.util.shapefile.ShapeFileWriter;
 
 public class GoodnessOfFitTest extends ComparisonMethodTest {
 
+	String shapeFile = null;
+	
 	@Before
 	public void setUp( ) {
 		 comparator = new GoodnessOfFit();
+	}
+	
+	void assertComparisonBetweenTheSameShape(String shapeFilePath) throws IOException {
+		assertComparison(shapeFilePath, shapeFilePath, 1.0);
+	}
+	
+	@Test
+	public void testCalculateGoFForTheSameFile() throws Exception {
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_100.shp"); 
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_200.shp");
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_500.shp"); 
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_1000.shp");
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_2000.shp");
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_3000.shp");
+		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_4000.shp");
+		assertComparisonBetweenTheSameShape("shape_1_1.shp");
+		assertComparisonBetweenTheSameShape("shape_1_3.shp");
 	}
 	
 	@Test
