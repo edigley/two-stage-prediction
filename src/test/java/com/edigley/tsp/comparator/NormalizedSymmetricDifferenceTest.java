@@ -53,6 +53,31 @@ public class NormalizedSymmetricDifferenceTest extends ComparisonMethodTest {
 		assertComparisonBetweenConcentricCircles(400, 100, 15.000000000005896);
 		assertComparisonBetweenConcentricCircles(500, 100, 23.999999999996422);
 
+		// prediction ranging from smaller to larger perimeters
+		assertComparisonBetweenConcentricCircles(100,  1000,  0.9899999999999964);
+		assertComparisonBetweenConcentricCircles(200,  1000,  0.9600000000000367);
+		assertComparisonBetweenConcentricCircles(300,  1000,  0.9100000000000443);
+		assertComparisonBetweenConcentricCircles(400,  1000,  0.8399999999998837);
+		assertComparisonBetweenConcentricCircles(500,  1000,  0.749999999999946);
+		assertComparisonBetweenConcentricCircles(600,  1000,  0.6400000000001542);
+		assertComparisonBetweenConcentricCircles(700,  1000,  0.5099999999999092);
+		assertComparisonBetweenConcentricCircles(800,  1000,  0.3600000000000233);
+		assertComparisonBetweenConcentricCircles(900,  1000,  0.19000000000036707);
+		assertComparisonBetweenConcentricCircles(1000, 1000,  0.0);
+		assertComparisonBetweenConcentricCircles(1100, 1000,  0.21000000000001284);
+		assertComparisonBetweenConcentricCircles(1200, 1000,  0.44000000000028494);
+		assertComparisonBetweenConcentricCircles(1300, 1000,  0.6899999999998485);
+		assertComparisonBetweenConcentricCircles(1400, 1000,  0.9599999999998867);
+		assertComparisonBetweenConcentricCircles(1500, 1000,  1.250000000000174);
+		assertComparisonBetweenConcentricCircles(1600, 1000,  1.5599999999995717);
+		assertComparisonBetweenConcentricCircles(1700, 1000,  1.890000000000273);
+		assertComparisonBetweenConcentricCircles(1800, 1000,  2.239999999999964);
+		assertComparisonBetweenConcentricCircles(1900, 1000,  2.6100000000000403);
+		assertComparisonBetweenConcentricCircles(2000, 1000,  3.0000000000000258);
+		assertComparisonBetweenConcentricCircles(3000, 1000,  7.9999999999993925);
+		assertComparisonBetweenConcentricCircles(4000, 1000, 14.999999999999496);
+		assertComparisonBetweenConcentricCircles(5000, 1000, 23.99999999999938);
+		
 	}
 
 	@Test

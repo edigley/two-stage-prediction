@@ -21,6 +21,12 @@ public class GoodnessOfFitTest extends ComparisonMethodTest {
 		assertComparison(shapeFilePath, shapeFilePath, 1.0);
 	}
 	
+	void assertComparisonBetweenConcentricCircles(int predictionRadius, int perimeterRadius, double gof) throws IOException {
+		String prediction = "jonquera_ignition_buffers/jonquera_ignition_buffer_" + predictionRadius + ".shp";
+		String perimeter = "jonquera_ignition_buffers/jonquera_ignition_buffer_" + perimeterRadius + ".shp";
+		assertComparison(prediction, perimeter, gof);
+	}
+	
 	@Test
 	public void testCalculateGoFForTheSameFile() throws Exception {
 		assertComparisonBetweenTheSameShape("jonquera_ignition_buffers/jonquera_ignition_buffer_100.shp"); 
@@ -33,10 +39,56 @@ public class GoodnessOfFitTest extends ComparisonMethodTest {
 		assertComparisonBetweenTheSameShape("shape_1_1.shp");
 		assertComparisonBetweenTheSameShape("shape_1_3.shp");
 	}
-	
+
 	@Test
-	public void testCalculateGoF() throws Exception {
-		assertComparison("jonquera_ignition_buffers/jonquera_ignition_buffer_100.shp", "jonquera_ignition_buffers/jonquera_ignition_buffer_200.shp", 0.25000000000031897);
+	public void testCalculateGoGForConcentricCircles() throws Exception {
+		
+		//assertComparison("jonquera_ignition_buffers/jonquera_ignition_buffer_100.shp", "jonquera_ignition_buffers/jonquera_ignition_buffer_200.shp", 0.25000000000031897);
+		
+		// prediction equals to the real perimeter
+		assertComparisonBetweenConcentricCircles(100, 100, 1.0);
+		
+		// prediction smaller than the real perimeter
+		assertComparisonBetweenConcentricCircles(100, 200, 0.25000000000031897);
+		assertComparisonBetweenConcentricCircles(100, 300, 0.11111111111120561);
+		assertComparisonBetweenConcentricCircles(100, 400, 0.06249999999997697);
+		assertComparisonBetweenConcentricCircles(100, 500, 0.04000000000000573);
+		
+		// prediction larger than the real perimeter
+		assertComparisonBetweenConcentricCircles(200, 100, 0.25000000000031897);
+		assertComparisonBetweenConcentricCircles(300, 100, 0.11111111111120561);
+		assertComparisonBetweenConcentricCircles(400, 100, 0.06249999999997697);
+		assertComparisonBetweenConcentricCircles(500, 100, 0.04000000000000573);
+
+		// prediction ranging from smaller to larger perimeters
+		assertComparisonBetweenConcentricCircles(100,  1000,  0.010000000000003588);
+		assertComparisonBetweenConcentricCircles(200,  1000,  0.039999999999963315);
+		assertComparisonBetweenConcentricCircles(300,  1000,  0.08999999999995574);
+		assertComparisonBetweenConcentricCircles(400,  1000,  0.16000000000011635);
+		assertComparisonBetweenConcentricCircles(500,  1000,  0.25000000000005385);
+		assertComparisonBetweenConcentricCircles(600,  1000,  0.3599999999998458);
+		assertComparisonBetweenConcentricCircles(700,  1000,  0.49000000000009075);
+		assertComparisonBetweenConcentricCircles(800,  1000,  0.6399999999999768);
+		assertComparisonBetweenConcentricCircles(900,  1000,  0.8099999999996329);
+		assertComparisonBetweenConcentricCircles(1000, 1000,  1.0);
+		assertComparisonBetweenConcentricCircles(1100, 1000,  0.8264462809917268);
+		assertComparisonBetweenConcentricCircles(1200, 1000,  0.6944444444443071);
+		assertComparisonBetweenConcentricCircles(1300, 1000,  0.591715976331414);
+		assertComparisonBetweenConcentricCircles(1400, 1000,  0.5102040816326825);
+		assertComparisonBetweenConcentricCircles(1500, 1000,  0.44444444444441006);
+		assertComparisonBetweenConcentricCircles(1600, 1000,  0.39062500000006534);
+		assertComparisonBetweenConcentricCircles(1700, 1000,  0.3460207612456421);
+		assertComparisonBetweenConcentricCircles(1800, 1000,  0.3086419753086454);
+		assertComparisonBetweenConcentricCircles(1900, 1000,  0.2770083102493044);
+		assertComparisonBetweenConcentricCircles(2000, 1000,  0.2499999999999984);
+		assertComparisonBetweenConcentricCircles(3000, 1000,  0.11111111111111861);
+		assertComparisonBetweenConcentricCircles(4000, 1000,  0.06250000000000197);
+		assertComparisonBetweenConcentricCircles(5000, 1000,  0.04000000000000099);
+		
+	}
+
+	@Test
+	public void testCalculateGoFForRealFirePerimeters() throws Exception {
 		assertComparison("shape_1_1.shp", "jonquera_perimeter_1.shp", 0.27865477309465514);
 		assertComparison("shape_1_3.shp", "jonquera_perimeter_1.shp", 0.3851732212437519);
 	}
