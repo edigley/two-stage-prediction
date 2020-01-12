@@ -143,9 +143,31 @@ nsd 4000 14.999999999999496
 nsd 5000 23.99999999999938      
 ')
 
+df <- subset(df, prediction <= 2000)
+df$prediction <- df$prediction / 1000
+
 ggplot(data=df, aes(y=fitness, x=prediction, group=method)) + 
 	geom_line(aes(color=method)) + 
-	geom_point(aes(color=method))
+	geom_point(aes(color=method)) +
+        xlab('Prediction Radius') +
+        ylab('Fitness')
+
+# Consider area instead of radius
+df2 <- subset(df, prediction <= 2000)
+df2$area <- 3.141516 * (df2$prediction * df2$prediction)
+
+p<-ggplot(data=df2, aes(y=fitness, x=area, group=method)) + 
+geom_line(aes(color=method)) + 
+geom_point(aes(color=method, shape=method))  +
+        xlab('Prediction Area') +
+        ylab('Fitness') 
+
+p + labs( fill = 'Comparison Method' )
+        
+#scale_fill_discrete(name='Comparison Method', labels = c('Goodness of Fit', 'Normalized Symmetric Difference')) #+ theme_classic()
+
+
+#-----------------------------------------------------------------------
 
 dfGoF <- read.table( header=T, text='
 prediction  fitness
