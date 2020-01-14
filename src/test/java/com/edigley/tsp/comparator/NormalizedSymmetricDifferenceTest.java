@@ -82,7 +82,24 @@ public class NormalizedSymmetricDifferenceTest extends ComparisonMethodTest {
 
 	@Test
 	public void testCalculateNSDForRealFirePerimeters() throws Exception {
+		assertComparison("shape_1_1.shp", "jonquera_perimeter_1.shp", 1.0251414755268);
 		assertComparison("shape_1_3.shp", "jonquera_perimeter_1.shp", 0.9148345582325907);
+		
+		assertComparison("ellipses/shape_1_20_ellipses_1.shp", "jonquera_perimeter_1.shp", 0.9942183874774133);
+		assertComparison("ellipses/shape_1_20_ellipses_2.shp", "jonquera_perimeter_1.shp", 0.9861630031316391);
+		assertComparison("ellipses/shape_1_20_ellipses_3.shp", "jonquera_perimeter_1.shp", 0.9441139158100407);
+		assertComparison("ellipses/shape_1_20_ellipses_4.shp", "jonquera_perimeter_1.shp", 0.8558486072649902);
+		assertComparison("ellipses/shape_1_20_ellipses_5.shp", "jonquera_perimeter_1.shp", 0.7399959292798259);
+		assertComparison("ellipses/shape_1_20_ellipses_6.shp", "jonquera_perimeter_1.shp", 0.6884699599479789);
+		assertComparison("ellipses/shape_1_20_ellipses_7.shp", "jonquera_perimeter_1.shp", 0.815994601879348);
+		assertComparison("ellipses/shape_1_20_ellipses_8.shp", "jonquera_perimeter_1.shp", 1.222831892720469);
+		assertComparison("ellipses/shape_1_20_ellipses_9.shp", "jonquera_perimeter_1.shp", 1.7684421343254297);
+
+		assertComparison("ellipses/shape_1_30_ellipses_1.shp", "jonquera_perimeter_1.shp", 0.9655195050758258);
+		assertComparison("ellipses/shape_1_30_ellipses_2.shp", "jonquera_perimeter_1.shp", 0.6418486018839118);
+		assertComparison("ellipses/shape_1_30_ellipses_3.shp", "jonquera_perimeter_1.shp", 0.6006207398839123);
+		assertComparison("ellipses/shape_1_30_ellipses_4.shp", "jonquera_perimeter_1.shp", 1.9829366011599692);
+
 	}
 	
 }

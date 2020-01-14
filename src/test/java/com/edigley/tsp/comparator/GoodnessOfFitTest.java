@@ -91,6 +91,22 @@ public class GoodnessOfFitTest extends ComparisonMethodTest {
 	public void testCalculateGoFForRealFirePerimeters() throws Exception {
 		assertComparison("shape_1_1.shp", "jonquera_perimeter_1.shp", 0.27865477309465514);
 		assertComparison("shape_1_3.shp", "jonquera_perimeter_1.shp", 0.3851732212437519);
+		
+		assertComparison("ellipses/shape_1_20_ellipses_1.shp", "jonquera_perimeter_1.shp", 0.008683470286520773);
+		assertComparison("ellipses/shape_1_20_ellipses_2.shp", "jonquera_perimeter_1.shp", 0.03280215350499049);
+		assertComparison("ellipses/shape_1_20_ellipses_3.shp", "jonquera_perimeter_1.shp", 0.09384080628347038);
+		assertComparison("ellipses/shape_1_20_ellipses_4.shp", "jonquera_perimeter_1.shp", 0.20311092530668487);
+		assertComparison("ellipses/shape_1_20_ellipses_5.shp", "jonquera_perimeter_1.shp", 0.3495513799473572);
+		assertComparison("ellipses/shape_1_20_ellipses_6.shp", "jonquera_perimeter_1.shp", 0.4703544017747526);
+		assertComparison("ellipses/shape_1_20_ellipses_7.shp", "jonquera_perimeter_1.shp", 0.5046185911587997);
+		assertComparison("ellipses/shape_1_20_ellipses_8.shp", "jonquera_perimeter_1.shp", 0.4352509553901924);
+		assertComparison("ellipses/shape_1_20_ellipses_9.shp", "jonquera_perimeter_1.shp", 0.36121397937171046);
+
+		assertComparison("ellipses/shape_1_30_ellipses_1.shp", "jonquera_perimeter_1.shp", 0.04386556869285137);
+		assertComparison("ellipses/shape_1_30_ellipses_2.shp", "jonquera_perimeter_1.shp", 0.36804360312586876);
+		assertComparison("ellipses/shape_1_30_ellipses_3.shp", "jonquera_perimeter_1.shp", 0.6134777324744385);
+		assertComparison("ellipses/shape_1_30_ellipses_4.shp", "jonquera_perimeter_1.shp", 0.33474053821712024);
+
 	}
 
 	public static void main(String[] args) throws Exception {
