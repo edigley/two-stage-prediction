@@ -40,6 +40,7 @@ public class FarsiteExecutorTest {
 		NormalizedSymmetricDifference nsdComparator = new NormalizedSymmetricDifference();
 		assertFarsiteExecution(nsdComparator, 10, "  9  12  14  22  87   165  353  38  50  1.7 ", 210, 0.9184562678635393, 2.099329);
 		assertFarsiteExecution(nsdComparator, 11, "  6   7  14  37  79    53  350  31  96  1.5 ", 180, 0.9184562678635393, 2.439559);
+		assertFarsiteExecution(nsdComparator, 12, "  7  15   2  66  80     6  345  30  77  1.3 ", 480, 0.9184562678635393, 1.140693);
 	}
 
 	@Test
@@ -47,6 +48,7 @@ public class FarsiteExecutorTest {
 		GoodnessOfFit gofComparator = new GoodnessOfFit();
 		assertFarsiteExecution(gofComparator, 20, "  15   5  13  51  93   10  354  37 100  0.7 ", 480, 0.325292, 0.325292);
 		assertFarsiteExecution(gofComparator, 21, "  15  14   9  59  93   10  354  34 100  0.7 ", 480, 0.203161, 0.203161);
+		assertFarsiteExecution(gofComparator, 22, "   7  15   2  66  80    6  345  30  77  1.3 ", 480, 0.012381, 0.012381);
 	}
 	
 	private void assertFarsiteExecution(ComparisonMethod comparator, int individualId, String individualAsString, int expectedSimulatedTime, Double expectedDifference, Double expectedWeightedError) throws Exception {
@@ -77,7 +79,7 @@ public class FarsiteExecutorTest {
 				expectedSimulatedTime, 
 				parallelizationLevel,
 				execution.getExecutionTime(), 
-				predictionFile.getName(),
+				predictionFile.getPath(),
 				timeToBeSimulated, 
 				expectedDifference);
 		

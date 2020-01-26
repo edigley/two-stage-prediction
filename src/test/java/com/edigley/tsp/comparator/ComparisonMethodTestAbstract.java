@@ -14,7 +14,7 @@ public abstract class ComparisonMethodTestAbstract {
 	void assertComparison(String prediction, String perimeter, double comparisonMetric) throws IOException {
 		File perimeter1File = new File(resourcesDir, perimeter);
 		File predictionFile = new File(resourcesDir, prediction);
-		System.out.println(comparator.compare(predictionFile, perimeter1File));
+		//System.out.println(comparator.compare(predictionFile, perimeter1File));
 		assertEquals(Double.valueOf(comparisonMetric), comparator.compare(predictionFile, perimeter1File));
 	}
 	

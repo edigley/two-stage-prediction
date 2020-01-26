@@ -32,7 +32,6 @@ public class FarsiteExecutionTest {
 	}
 
 	private void assertComparison(String shapeFile1Path, String shapeFile2Path) {
-		File perimeter1File = new File(resourcesDir, "jonquera_perimeter_1.shp");
 		File shapeFile1 = new File(resourcesDir, shapeFile1Path);
 		File shapeFile2 = new File(resourcesDir, shapeFile2Path);
 		execution1.setPredictionFile(shapeFile1);
@@ -80,7 +79,7 @@ public class FarsiteExecutionTest {
 		execution1.setMaxSimulatedTime(480L);
 		File shapeFile1 = new File(resourcesDir, "shape_1_1.shp");
 		execution1.setPredictionFile(shapeFile1);
-		assertEquals("  9  12  14  22  87  165  353  38  50  1,7  3,900000     480      1     59 shape_1_1.shp", execution1.toString());
+		assertEquals("  9  12  14  22  87  165  353  38  50  1,7  3,900000     480      1     59 src/test/resources/shape_1_1.shp", execution1.toString());
 	}
 	
 }
