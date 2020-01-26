@@ -153,6 +153,7 @@ public class FarsiteIndividual {
 	public String toString() {
 		double adj = convertAdjustmentFactorToDouble(this.adj); // convert the adjustment factor to decimal ranging from 0.1 to 1.9
 		String pattern = "%3s %3s %3s %3s %3s %4s %4s %3s %3s  %.1f";
+		// "%3s %3s %3s %3s %3s %4s %4s %3s %3s  %.1f  %.6f  %6s %6s %6s %s\n";
 		return String.format(pattern, t1, t10, t100, t1000, t10000, ws, wd, th, hh, adj);
 	}
 	

@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.edigley.tsp.util.shapefile.ShapeFileWriter;
 
-public class GoodnessOfFitTest extends ComparisonMethodTest {
+public class GoodnessOfFitTest extends ComparisonMethodTestAbstract {
 
 	String shapeFile = null;
 	

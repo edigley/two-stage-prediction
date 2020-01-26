@@ -121,7 +121,7 @@ public class Calibrator {
 		
 	}
 	
-	public void run() throws java.text.ParseException, IOException, ParseException, NoSuchAlgorithmException {
+	public List<FarsiteExecution> run() throws java.text.ParseException, IOException, ParseException, NoSuchAlgorithmException {
 		assert !finished;
 		
 		if (!prepared) {
@@ -131,11 +131,24 @@ public class Calibrator {
 		this.results = geneticAlgorithm.run();
 		
 		finished = true;
+		
+		return this.results;
 	}
 
 	public void printSummaryStatistics(StopWatch stopWatch) {
-		msg = String.format("Genetic Algorithm - Best Calibrated Result: %s", results.get(0));
-        logger.info(msg);System.out.println(msg);
+		
+		if (this.finished && this.results != null && !this.results.isEmpty()) {
+			msg = "Best calibrated results:";
+			logger.info(msg);System.out.println(msg);			
+			this.results.stream().forEach(result -> {
+				msg = String.format("%s", result);
+				logger.info(msg);System.out.println(msg);
+			});
+		} else {
+			msg = String.format("Calibrator: - No Result to be printed. The calibrator is not finished.");
+			logger.info(msg);System.out.println(msg);
+		}
+		
 	}
 
 	public void releaseResources() {

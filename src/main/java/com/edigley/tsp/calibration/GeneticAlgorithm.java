@@ -150,7 +150,7 @@ public class GeneticAlgorithm {
         for (int i = 0; i < NUMBER_OF_BEST_INDIVIDUALS; i++) {
         	FarsiteExecution individual = it.next();
         	bestIndividuals.add(individual);
-			System.out.printf("Best Result %s: %s\n", i, individual);
+//			System.out.printf("Best Result %s: %s\n", i, individual);
 		}
         
         //FarsiteIndividual bestIndividual = new FarsiteIndividual(evolutionResult.getBestPhenotype().getGenotype());

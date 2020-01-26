@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
-public class ComparisonMethodTest {
+public abstract class ComparisonMethodTestAbstract {
 
 	File resourcesDir = new File("src/test/resources/");
 

@@ -45,6 +45,7 @@ public class FarsiteOutputSaver {
 
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteOutputSaver.class);
 
+	@SuppressWarnings("rawtypes")
 	public static void saveAsJPG(File perimeterFile, File predictionFile, File layerExtentFile)
 			throws IOException, NoSuchAuthorityCodeException, FactoryException {
 		// Step 1: Create map
@@ -100,8 +101,8 @@ public class FarsiteOutputSaver {
 			GoodnessOfFit gofComparator = new GoodnessOfFit();
 			Double gof = gofComparator.compare(predictionFile, perimeterFile);
 			
-			GoodnessOfFit insGofComparator = new AdjustedGoodnessOfFit();
-			Double adjGof = insGofComparator.compare(predictionFile, perimeterFile);
+			GoodnessOfFit adjGofComparator = new AdjustedGoodnessOfFit();
+			Double adjGof = adjGofComparator.compare(predictionFile, perimeterFile);
 			
 			String[] textToImage = { 
 				"File: " + predictionFile.getName(), 
@@ -135,8 +136,8 @@ public class FarsiteOutputSaver {
 		ReferencedEnvelope mapBounds = null;
 		try {
 			mapBounds = map.getMaxBounds();
-			System.out.println(mapBounds.getSpan(1));
-			System.out.println(mapBounds.getSpan(0));
+			//System.out.println(mapBounds.getSpan(1));
+			//System.out.println(mapBounds.getSpan(0));
 			double heightToWidth = mapBounds.getSpan(1) / mapBounds.getSpan(0);
 			// imageBounds = new Rectangle( 0, 0, imageWidth, (int) Math.round(imageWidth *
 			// heightToWidth) );

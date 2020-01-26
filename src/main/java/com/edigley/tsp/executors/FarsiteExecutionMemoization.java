@@ -9,6 +9,8 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.edigley.tsp.comparator.AdjustedGoodnessOfFit;
+import com.edigley.tsp.comparator.GoodnessOfFit;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.util.ErrorCode;
@@ -32,7 +34,8 @@ public class FarsiteExecutionMemoization {
 			} else {
 				Scanner sc = new Scanner(file);
 				String firstLine = sc.nextLine(); 
-				if (!firstLine.equals(FarsiteExecution.header.toString())) {
+				//if (!firstLine.trim().equals(FarsiteExecution.header.toString().trim())) {
+				if (!FarsiteExecution.header.equals(firstLine)) {
 					String pattern = "First line from file %s doesn't contain expected header. Expected: %s. Actual: %s";
 					msg = String.format(pattern, file.getAbsolutePath(), FarsiteExecution.header, firstLine);
 					logger.error(msg);System.err.println(msg);
@@ -78,6 +81,7 @@ public class FarsiteExecutionMemoization {
 			fw.append(execution.toString() + "\n");
 			fw.flush();
 		} catch (IOException e) {
+			logger.error("Could not save execution into memoization file: " + e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
@@ -97,4 +101,47 @@ public class FarsiteExecutionMemoization {
 		System.out.println(cache.get(individual));
 	}
 	
+	@SuppressWarnings("unlikely-arg-type")
+	public void recalculateFireError(File memoizationFile, File perimeterFile) {
+		try {
+			if (!memoizationFile.exists()) {
+				fw = new FileWriter(memoizationFile);
+				fw.append(FarsiteExecution.header + "\n");
+				fw.flush();
+			} else {
+				Scanner sc = new Scanner(memoizationFile);
+				String firstLine = sc.nextLine(); 
+				if (!FarsiteExecution.header.equals(firstLine)) {
+					String pattern = "First line from file %s doesn't contain expected header. Expected: %s. Actual: %s";
+					msg = String.format(pattern, memoizationFile.getAbsolutePath(), FarsiteExecution.header, firstLine);
+					logger.error(msg);System.err.println(msg);
+					System.exit(ErrorCode.UNEXPECTED_MEMOIZATION_FILE_HEADER);
+				}
+				GoodnessOfFit adjGofComparator = new AdjustedGoodnessOfFit();
+				String nextLine;
+				while (sc.hasNextLine() && !(nextLine=sc.nextLine()).trim().isEmpty()) {
+					FarsiteExecution execution = new FarsiteExecution(nextLine);
+					Double adjGof = adjGofComparator.compare(execution.getPredictionFile(), perimeterFile);
+					execution.setFireError(adjGof);
+					msg = String.format("Going to add cached value for individual %s: %s %s", execution.getIndividual(), execution.getFireError(), execution.getExecutionTime()); 
+					logger.info(msg);
+					executions.put(execution.getIndividual(), execution);
+				}
+				sc.close();
+				fw = new FileWriter(memoizationFile, true);
+				
+				executions.values().stream().forEach(execution -> {this.add(execution);});
+			}
+			
+			
+			
+		} catch (IOException e) {
+			msg = String.format("Error when loading memoization file: %s", e.getMessage());
+			logger.error(msg);
+			System.err.println(msg);
+			e.printStackTrace();
+		}
+		
+	}
+
 }

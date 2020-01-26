@@ -29,5 +29,14 @@ public class FileHeader {
 	public String toString() {
 		return HEADER;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return removeDuplicatedSpaces(this.toString()).equals(removeDuplicatedSpaces(obj.toString()));
+	}
+
+	private static String removeDuplicatedSpaces(String s) {
+		return s.trim().replaceAll(" +", " ");
+	}
 
 }

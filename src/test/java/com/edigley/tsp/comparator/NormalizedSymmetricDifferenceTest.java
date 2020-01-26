@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NormalizedSymmetricDifferenceTest extends ComparisonMethodTest {
+public class NormalizedSymmetricDifferenceTest extends ComparisonMethodTestAbstract {
 
 	@Before
 	public void setUp( ) {

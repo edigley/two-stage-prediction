@@ -7,7 +7,7 @@ import com.edigley.tsp.io.FileHeader;
 
 public class FarsiteExecution implements Comparable<FarsiteExecution> {
 
-	public static final FileHeader header = new FileHeader(FarsiteIndividual.header + " fireError maxSimulatedTime parallelizationLevel executionTime ");
+	public static final FileHeader header = new FileHeader(FarsiteIndividual.header + " fireError maxSimulatedTime parallelizationLevel executionTime predictionFile ");
 	
 	public static final int PARAMS_START_POS = FarsiteIndividual.header.length;
 	
@@ -33,10 +33,16 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 		String[] params = executionAsString.trim().split("\\s+");
 		assert header.length <= params.length;
 		individual = new FarsiteIndividual(params);
-		fireError = Double.valueOf(params[PARAMS_START_POS]);
-		maxSimulatedTime = Long.valueOf(params[PARAMS_START_POS+1]);
-		parallelizationLevel = Long.valueOf(params[PARAMS_START_POS+2]);
-		executionTime = Long.valueOf(params[PARAMS_START_POS+3]);
+		int currentPosition = 0;
+		fireError = Double.valueOf(params[PARAMS_START_POS + currentPosition]);
+		currentPosition++;
+		maxSimulatedTime = Long.valueOf(params[PARAMS_START_POS + currentPosition]);
+		currentPosition++;
+		parallelizationLevel = Long.valueOf(params[PARAMS_START_POS + currentPosition]);
+		currentPosition++;
+		executionTime = Long.valueOf(params[PARAMS_START_POS + currentPosition]);
+		currentPosition++;
+		predictionFile = new File(params[PARAMS_START_POS + currentPosition]);
 	}
 
 	public Double getFireError() {
@@ -74,8 +80,8 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 	@Override
 	public String toString() {
 		String pattern = "%s  %.6f  %6s %6s %6s %s";
-		String name = (predictionFile != null) ? predictionFile.getName() : null;
-		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime, name);
+		String predictionFilePath = (predictionFile != null) ? predictionFile.getPath() : null;
+		return String.format(pattern, individual, fireError, maxSimulatedTime, parallelizationLevel, executionTime, predictionFilePath);
 	}
 
 	public Long getMaxSimulatedTime() {
@@ -100,6 +106,13 @@ public class FarsiteExecution implements Comparable<FarsiteExecution> {
 
 	public void setComparator(ComparisonMethod comparator) {
 		this.comparator = comparator;
+	}
+
+	public static void main(String[] args) {
+		File predictionFile = new File("playpen/execution_agof_seed_21_1/output/shape_9_1041.shp");
+		System.out.println(predictionFile.getName());
+		System.out.println(predictionFile.getPath());
+		System.out.println(predictionFile.getAbsolutePath());
 	}
 	
 }
