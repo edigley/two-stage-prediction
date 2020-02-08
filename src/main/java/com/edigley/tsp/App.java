@@ -39,6 +39,7 @@ import com.edigley.tsp.util.shapefile.ShapeFileReader;
  * Hello world!
  *
  */
+@Deprecated
 public class App {
 	
 	public static void main(String[] args) throws NoSuchAuthorityCodeException, FactoryException, IOException {
@@ -91,7 +92,7 @@ public class App {
 		vp.setCoordinateReferenceSystem(crs);
 
 		//Step 4: Save image
-		FarsiteOutputSaver.saveAsJPG(map, "graticules.jpg", 800, new String[] {"BLA"});
+		FarsiteOutputSaver.saveAsJPG(map, new File("graticules.jpg"), 800, new String[] {"BLA"});
 	}
 	
     public static void main2(String[] args) throws Exception {
