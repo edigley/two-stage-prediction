@@ -15,5 +15,7 @@ Class-Path: dependency-jars/prngine-1.0.1.jar dependency-jars/slf4j-api-
  mons-pool-1.5.4.jar dependency-jars/gt-metadata-19.3.jar dependency-jar
  s/gt-opengis-19.3.jar dependency-jars/jsr-275-1.0-beta-2.jar dependency
  -jars/jgridshift-1.0.jar dependency-jars/GeographicLib-Java-1.44.jar de
- pendency-jars/hsqldb-2.3.0.jar dependency-jars/jenetics-5.0.1.jar
+ pendency-jars/hsqldb-2.3.0.jar dependency-jars/gt-swing-19.3.jar depend
+ ency-jars/gt-grid-19.3.jar dependency-jars/gt-render-19.3.jar dependenc
+ y-jars/jenetics-5.0.1.jar
 Main-Class: com.edigley.tsp.ui.CLI

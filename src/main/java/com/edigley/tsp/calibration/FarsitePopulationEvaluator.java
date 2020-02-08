@@ -76,7 +76,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 						try {
 							p.eval(FarsitePopulationEvaluator::eval); 
 						} catch (Exception e) { 
-							String msg = String.format("Individual evalualtion failed -> %s -> %s", individual, e.getMessage());
+							String msg = String.format("Individual evaluation failed -> %s -> %s", individual, e.getMessage());
 							logger.error(msg, e);System.err.println(msg); 
 						} finally {
 							latch.countDown();

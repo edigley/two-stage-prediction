@@ -28,7 +28,7 @@ public class ScenarioProperties {
 	//CoordinateReferenceSystem
 	public static final String CRS = "EPSG:4326";
 
-	public static final Long DEFAULT_EXPECTED_SIMULATED_TIME = 480L;
+	public static Long DEFAULT_EXPECTED_SIMULATED_TIME;// = 480L;
 	
 	private Properties scenarioProperties;
 
@@ -152,10 +152,11 @@ public class ScenarioProperties {
 		this.endTime = LocalDateTime.of(2011, farsiteEndMonth, farsiteEndDay, farsiteEndHour, farsiteEndMin);
 		
 		this.timeToBeSimulated = Duration.between(startTime, endTime).getSeconds()/60;
+		DEFAULT_EXPECTED_SIMULATED_TIME = this.timeToBeSimulated; 
 		
 		logger.info("ScenarioProperties.startTime                    : " + this.startTime);
 		logger.info("ScenarioProperties.endTime                      : " + this.endTime);
-		logger.info("ScenarioProperties.simulatedTime                : " + this.timeToBeSimulated + " seconds");
+		logger.info("ScenarioProperties.simulatedTime                : " + this.timeToBeSimulated + " minutes");
 		
 		logger.info("ScenarioProperties.numGenerations               : " + this.numGenerations);
 		logger.info("ScenarioProperties.populationSize               : " + this.populationSize);

@@ -43,6 +43,16 @@ public class Main {
 		
 		tspCMD = tspCMD_Recalculate;
 		
+		// to generate a .jpg file referent to the prediction shape file
+		tspCMD_Compare = ""
+				+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+				+ " -c playpen/fire-scenarios/arkadia/ "
+				+ " -compare  "
+				+ " -prediction src/test/resources/scenarios/arkadia/shape_9_517.shp "  
+				+ " -perimeter  playpen/fire-scenarios/arkadia/landscape/Per2_utm.shp "
+				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
+		tspCMD = tspCMD_Compare;
+		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);
 

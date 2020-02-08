@@ -92,7 +92,8 @@ public class GeneticAlgorithm {
         	IntegerChromosome.of( 20,  70, 1 ),   // fms - t1000
         	IntegerChromosome.of( 70, 100, 1 ),   // fms - t10000
         	IntegerChromosome.of(  0, 150, 1 ),   //  ws - wind speed
-        	IntegerChromosome.of(345, 360, 1 ),   //  wd - wind direction (  0, 360, 1 )
+        	//IntegerChromosome.of(345, 360, 1 ),   //  wd - wind direction (  0, 360, 1 ) jonquera
+        	IntegerChromosome.of(  0, 360, 1 ),   //  wd - wind direction (  0, 360, 1 ) jonquera
         	IntegerChromosome.of( 30,  50, 1 ),   //  th - temperature highest
         	IntegerChromosome.of( 30, 100, 1 ),   //  hh - humidity highest
         	IntegerChromosome.of( -9,   9, 1 )    // adj - adjustment factor

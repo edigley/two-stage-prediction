@@ -29,7 +29,6 @@ import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.TextSymbolizer;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,25 +45,33 @@ public class FarsiteOutputSaver {
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteOutputSaver.class);
 
 	@SuppressWarnings("rawtypes")
-	public static void saveAsJPG(File perimeterFile, File predictionFile, File layerExtentFile)
-			throws IOException, NoSuchAuthorityCodeException, FactoryException {
-		// Step 1: Create map
-		MapContent map = new MapContent();
-		map.setTitle("Farsite Scenario");
+	public static File saveAsJPG(File perimeterFile, File predictionFile, File layerExtentFile)
+			throws RuntimeException {
 
-		DataStore dataStore1 = ShapeFileReader.getDataStore(perimeterFile);
-		DataStore dataStore2 = ShapeFileReader.getDataStore(predictionFile);
-		DataStore dataStore3 = ShapeFileReader.getDataStore(layerExtentFile);
-
-		Style style = SLD.createPointStyle("square", Color.red, Color.red, 1.0f, 8.0f);
-		StyleBuilder styleBuilder = new StyleBuilder();
-		String attributeName = "MINX";
-		Font font = styleBuilder.createFont("Times New Roman", 10.0);
-		TextSymbolizer textSymb = styleBuilder.createTextSymbolizer(Color.black, font, attributeName);
-		Rule rule = styleBuilder.createRule(textSymb);
-		style.featureTypeStyles().get(0).rules().add(rule);
-
+		File savedFile = null;
+		DataStore dataStore1 = null;
+		DataStore dataStore2 = null;
+		DataStore dataStore3 = null;
+		
 		try {
+			
+			// Step 1: Create map
+			MapContent map = new MapContent();
+			map.setTitle("Farsite Scenario");
+	
+			dataStore1 = ShapeFileReader.getDataStore(perimeterFile);
+			dataStore2 = ShapeFileReader.getDataStore(predictionFile);
+			dataStore3 = ShapeFileReader.getDataStore(layerExtentFile);
+	
+			Style style = SLD.createPointStyle("square", Color.red, Color.red, 1.0f, 8.0f);
+			StyleBuilder styleBuilder = new StyleBuilder();
+			String attributeName = "MINX";
+			Font font = styleBuilder.createFont("Times New Roman", 10.0);
+			TextSymbolizer textSymb = styleBuilder.createTextSymbolizer(Color.black, font, attributeName);
+			Rule rule = styleBuilder.createRule(textSymb);
+			style.featureTypeStyles().get(0).rules().add(rule);
+	
+
 			String[] typeNames1 = dataStore1.getTypeNames();
 			String typeName1 = typeNames1[0];
 			FeatureSource featureSource1 = dataStore1.getFeatureSource(typeName1);
@@ -115,19 +122,33 @@ public class FarsiteOutputSaver {
 			};
 
 			// Step 3: Save image
-			saveAsJPG(map, predictionFile.getName().replace(".shp", ".jpg"), 800, textToImage);
+			String fileName = predictionFile.getAbsolutePath().replace(".shp", ".jpg");
+			File jpgFile = new File(fileName);
+			
+			boolean savedAsJPG = saveAsJPG(map, jpgFile, 800, textToImage);
+			
+			savedFile = savedAsJPG ? jpgFile : null;
 			
 			map.dispose();
-
+		} catch (IOException | FactoryException e){
+			logger.error("There was an exception when trying to generate the .jpg image for prediction file " + predictionFile.getAbsolutePath(), e);
+			throw new RuntimeException(e);
 		} finally {
-			dataStore1.dispose();
-			dataStore2.dispose();
-			dataStore3.dispose();
+			if (dataStore1 != null) {
+				dataStore1.dispose();
+			}
+			if (dataStore2 != null) {
+				dataStore2.dispose();
+			}
+			if (dataStore3 != null) {
+				dataStore3.dispose();
+			}
 		}
+		
+		return savedFile;
 	}
 
-	public static void saveAsJPG(final MapContent map, final String fileName, final int imageWidth,
-			String[] textToImage) throws MalformedURLException, IOException {
+	public static boolean saveAsJPG(final MapContent map, File outputFile, final int height, String[] textToImage) throws MalformedURLException, IOException {
 
 		GTRenderer renderer = new StreamingRenderer();
 		renderer.setMapContent(map);
@@ -141,7 +162,8 @@ public class FarsiteOutputSaver {
 			double heightToWidth = mapBounds.getSpan(1) / mapBounds.getSpan(0);
 			// imageBounds = new Rectangle( 0, 0, imageWidth, (int) Math.round(imageWidth *
 			// heightToWidth) );
-			imageBounds = new Rectangle(0, 0, (int) Math.round(imageWidth * heightToWidth), imageWidth);
+			int width = Math.max(1200,(int) Math.round(height * heightToWidth));
+			imageBounds = new Rectangle(0, 0, width, height);
 
 		} catch (Exception e) {
 			// failed to access map layers
@@ -156,11 +178,11 @@ public class FarsiteOutputSaver {
 
 		try {
 			renderer.paint(gr, imageBounds, mapBounds);
-			File fileToSave = new File(fileName);
 
 			addTextToImage(image, textToImage);
 
-			ImageIO.write(image, "jpeg", fileToSave);
+			//ImageIO.write(theImage, "png", new File("test.png"));
+			return ImageIO.write(image, "jpeg", outputFile);
 
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -174,14 +196,16 @@ public class FarsiteOutputSaver {
 		// URL("https://www.researchgate.net/profile/Ronny_Vallejos/publication/273362498/figure/fig1/AS:353314869923841@1461248237727/a-Original-image-Lenna-with-a-size-of-512-512-b-Transformation-of-the-original.png"));
 
 		Graphics g = theImage.getGraphics();
+		
 		g.setFont(g.getFont().deriveFont(20f));
 		g.setColor(Color.BLACK);
-		for (int i =0; i < theText.length; i++) {
+		
+		for (int i=0; i < theText.length; i++) {
 			g.drawString(theText[i], 500, (i+1) * 100);
 		}
+		
 		g.dispose();
 
-		// ImageIO.write(theImage, "png", new File("test.png"));
 	}
 	
 }

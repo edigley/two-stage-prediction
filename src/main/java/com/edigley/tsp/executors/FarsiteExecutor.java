@@ -14,6 +14,7 @@ import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.exceptions.TSPFarsiteExecutionException;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
+import com.edigley.tsp.io.output.FarsiteOutputSaver;
 import com.edigley.tsp.util.ProcessUtil;
 
 import io.jenetics.Genotype;
@@ -79,6 +80,19 @@ public class FarsiteExecutor {
 			File perimeterFile = scenarioProperties.getPerimeterAtT1();
 			File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
 			fireError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, scenarioProperties.getTimeToBeSimulated());
+			
+			try {
+				logger.info("Going to save prediction result as a .jpg image: " + predictionFile.getAbsolutePath());
+				File layerExtentFile = scenarioProperties.getLandscapeLayerExtentFile();
+				File jpgFile = FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile);
+				if (jpgFile != null) {
+					logger.info("Saved to image: " + jpgFile.getAbsolutePath());
+				}
+			} catch(Exception e) {
+				System.err.printf("There was an error when trying to save the .jpg image for prediction file: %s \n", predictionFile.getAbsolutePath());
+				logger.warn("There was an error when trying to save the .jpg image for prediction file: " + predictionFile.getAbsolutePath());
+				e.printStackTrace();
+			}
 		//}
 		
 		try {
