@@ -61,7 +61,8 @@ public class FarsiteExecutionMonitor {
 					File perimeterFile = scenarioProperties.getPerimeterAtT1();
 					
 					//Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(gAFile, gBFile);
-					Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeterFile, comparator);
+					//Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeterFile, comparator);
+					Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeterFile);
 					
 					maxSimulatedTime = fireEvolution.getKey();
 					fireError = fireEvolution.getValue();
@@ -76,8 +77,10 @@ public class FarsiteExecutionMonitor {
 					logger.info(String.format("Individual [ %s %s ] %s -> Fire Evolution [ %s ] repeated < %s > times", generation, id, individual, fireEvolution, nOfRepetitionsOfLastFireError));
 					
 					if (mustKillFarsiteIndividual(predictionFile, scenarioProperties, fireError, nOfRepetitionsOfLastFireError)) {
+						logger.info(String.format("Going to kill individual [ %s %s ] %s - with maxSimulatedTime = %s, fireError = %s ...\n", generation, id, individual, maxSimulatedTime, fireError));
 						ProcessUtil.killAllDescendants(process);
 						process.destroyForcibly();
+						logger.info(String.format("Killed individual [ %s %s ] %s - with maxSimulatedTime = %s, fireError = %s \n", generation, id, individual, maxSimulatedTime, fireError));
 					};
 				}
 
@@ -97,9 +100,9 @@ public class FarsiteExecutionMonitor {
 	}
 
 	private static boolean mustKillFarsiteIndividual(File firePerimeter, ScenarioProperties scenarioProperties, Double fireError, int nOfRepetitionsOfLastFireError) throws IOException {
-		Double maxTolerableFireError = scenarioProperties.getMaxTolerableFireError();
+		Double maxTolerablePredictionError = scenarioProperties.getMaxTolerablePredictionError();
 		Long maxNonProgressingIterations = scenarioProperties.getMaxNonProgressingIterations();
-		return (Double.compare(fireError, maxTolerableFireError) > 0) 
+		return (Double.compare(fireError, maxTolerablePredictionError) > 0) 
 			|| (nOfRepetitionsOfLastFireError > maxNonProgressingIterations) 
 			|| (firePerimeterReachesLandscapeExtent(firePerimeter, scenarioProperties));
 	}

@@ -25,7 +25,7 @@ public class ScenarioProperties {
 	public static final double RECOMBINATION_PROBABILITY = 0.4;
 	public static final double MUTATION_PROBABILITY = 0.1;
 
-	//CoordinateReferenceSystem
+	//Coordinate Reference System
 	public static final String CRS = "EPSG:4326";
 
 	public static Long DEFAULT_EXPECTED_SIMULATED_TIME;// = 480L;
@@ -67,7 +67,7 @@ public class ScenarioProperties {
 	
 	private long timeToBeSimulated;
 
-	private Double maxTolerableFireError;
+	private Double maxTolerablePredictionError;
 
 	private Long maxNonProgressingIterations;
 
@@ -129,7 +129,7 @@ public class ScenarioProperties {
 		
 		this.numberOfBestIndividuals = Integer.valueOf(scenarioProperties.getProperty("numberOfBestIndividuals", Integer.toString(NUMBER_OF_BEST_INDIVIDUALS)).trim());
 		
-		this.maxTolerableFireError = Double.valueOf(scenarioProperties.getProperty("maxTolerableFireError", "1.5").trim());
+		this.maxTolerablePredictionError = Double.valueOf(scenarioProperties.getProperty("maxTolerableFireError", "1.5").trim());
 		this.maxNonProgressingIterations = Long.valueOf(scenarioProperties.getProperty("maxNonProgressingIterations", "10").trim());
 		
 		this.farsiteParallelizationLevel = Long.valueOf(scenarioProperties.getProperty("num_threads", "1").trim());
@@ -163,7 +163,7 @@ public class ScenarioProperties {
 		logger.info("ScenarioProperties.crossoverProbability         : " + this.crossoverProbability);
 		logger.info("ScenarioProperties.mutationProbability          : " + this.mutationProbability);
 		
-		logger.info("ScenarioProperties.maxTolerableFireError        : " + this.maxTolerableFireError);
+		logger.info("ScenarioProperties.maxTolerablePredictionError  : " + this.maxTolerablePredictionError);
 		logger.info("ScenarioProperties.maxNonProgressingIterations  : " + this.maxNonProgressingIterations);
 		
 	}
@@ -246,8 +246,8 @@ public class ScenarioProperties {
 		return timeToBeSimulated;
 	}
 
-	public Double getMaxTolerableFireError() {
-		return maxTolerableFireError;
+	public Double getMaxTolerablePredictionError() {
+		return maxTolerablePredictionError;
 	}
 
 	public Long getMaxNonProgressingIterations() {

@@ -26,14 +26,15 @@ public class FarsiteIndividualEvaluator {
 	}
 	
 	public Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile) throws IOException {
-		return ImmutablePair.of(getSimulatedTime(predictionFile), this.comparator.compare(predictionFile, perimeterFile));
+		//return ImmutablePair.of(getSimulatedTime(predictionFile), this.comparator.compare(predictionFile, perimeterFile));
+		return getFireEvolution(predictionFile, perimeterFile, this.comparator);
 	}
 
-	public Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile, ComparisonMethod comparator) throws IOException {
+	public static Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile, ComparisonMethod comparator) throws IOException {
 		return ImmutablePair.of(getSimulatedTime(predictionFile), comparator.compare(predictionFile, perimeterFile));
 	}
 	
-	public Long getSimulatedTime(File file) throws IOException {
+	public static Long getSimulatedTime(File file) throws IOException {
 		Feature lastFeature = ShapeFileReader.getLastFeature(file);
 		// properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
 		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi")

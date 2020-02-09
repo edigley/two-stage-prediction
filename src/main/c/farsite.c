@@ -421,7 +421,7 @@ void createSettingsFile(char * filename, int idInd, int generation, int res) {
         fprintf(file, "StartHour = %s\n", StartHour);
         fprintf(file, "StartMin = %s\n", StartMin);
         fprintf(file, "EndMonth = %s\n", EndMonth);
-        if (generation==10) {
+        if (generation==numGenerations+1) {
             fprintf(file, "EndDay = %d\n", atoi(StartDay)+1);
         } else {
             fprintf(file, "EndDay = %s\n", EndDay);

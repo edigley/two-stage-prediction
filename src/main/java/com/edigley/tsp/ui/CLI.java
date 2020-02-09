@@ -52,15 +52,15 @@ public class CLI {
 	public static final String EXECUTION_LINE = "java -jar two-stage-prediction.jar";
 
 	public static void main(String[] args) throws Exception {
-		logger.info("Going to start the overall execution...");
+		
 		Locale.setDefault(new Locale("en", "US"));
 		
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
-
 		CommandLine cmd = parseCommandLine(args, prepareOptions(), HELP, USAGE, EXECUTION_LINE);
 		
-		if (cmd.hasOption(COMPARE)) {
+		if (cmd.hasOption(COMPARE)) { //generates a jpg image comparing prediction and actual fire perimeter 
+			
+			logger.info("Going to generate a jpg image comparing prediction and actual fire perimeter...");
+			
 			File predictionFile = (File) cmd.getParsedOptionValue(PREDICTION_FILE);
 			File perimeterFile = (File) cmd.getParsedOptionValue(PERIMETER_FILE);
 			File layerExtentFile = (File) cmd.getParsedOptionValue(LAYER_EXTENT_FILE);
@@ -68,7 +68,12 @@ public class CLI {
 			assertsFilesExist(predictionFile, perimeterFile, layerExtentFile);
 			
 			FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile);
-		} else if (cmd.hasOption(RECALCULATE)) {
+			
+			logger.info("JPG image successfully generated.");
+			
+		} else if (cmd.hasOption(RECALCULATE)) { //recalculate fitness function to all individuals in the memoization file
+			
+			logger.info("Going to recalculate fitness function to all individuals in the memoization file...");
 			
 			File perimeterFile = (File) cmd.getParsedOptionValue(PERIMETER_FILE);
 			File memoizationFile = (File) cmd.getParsedOptionValue(MEMOIZATION);
@@ -77,8 +82,16 @@ public class CLI {
 			
 			memoization.recalculateFireError(memoizationFile, perimeterFile);
 			
-		} else {
+			logger.info("Recalculation finished.");
+			
+		} else { //normal execution to calibrate finding the best individuals
 		
+			logger.info("Going to start the overall execution...");
+			logger.info("ScenarioProperties.seed                         : " + (Long) cmd.getParsedOptionValue(SEED));
+			
+			StopWatch stopWatch = new StopWatch();
+			stopWatch.start();
+			
 			Calibrator calibrator = new Calibrator(cmd);
 			calibrator.prepare();
 			calibrator.run();
