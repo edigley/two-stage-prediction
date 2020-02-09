@@ -1,6 +1,7 @@
 package com.edigley.tsp.io.output;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -22,7 +23,7 @@ import org.geotools.map.MapViewport;
 import org.geotools.referencing.CRS;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
-import org.geotools.styling.Font;
+//import org.geotools.styling.Font;
 import org.geotools.styling.Rule;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
@@ -45,13 +46,14 @@ public class FarsiteOutputSaver {
 	private static final Logger logger = LoggerFactory.getLogger(FarsiteOutputSaver.class);
 
 	@SuppressWarnings("rawtypes")
-	public static File saveAsJPG(File perimeterFile, File predictionFile, File layerExtentFile)
-			throws RuntimeException {
+	public static File saveAsJPG(File perimeterFile, File predictionFile, File landscapeExtentFile, ScenarioProperties scenarioProperties) throws RuntimeException {
 
 		File savedFile = null;
-		DataStore dataStore1 = null;
-		DataStore dataStore2 = null;
-		DataStore dataStore3 = null;
+		DataStore perimeterFiledataStore = null;
+		DataStore predictionFileDataStore = null;
+		DataStore layerExtentDataStore = null;
+		
+		long expectedSimulatedTime = scenarioProperties.getTimeToBeSimulated();
 		
 		try {
 			
@@ -59,71 +61,75 @@ public class FarsiteOutputSaver {
 			MapContent map = new MapContent();
 			map.setTitle("Farsite Scenario");
 	
-			dataStore1 = ShapeFileReader.getDataStore(perimeterFile);
-			dataStore2 = ShapeFileReader.getDataStore(predictionFile);
-			dataStore3 = ShapeFileReader.getDataStore(layerExtentFile);
+			perimeterFiledataStore = ShapeFileReader.getDataStore(perimeterFile);
+			predictionFileDataStore = ShapeFileReader.getDataStore(predictionFile);
+			layerExtentDataStore = ShapeFileReader.getDataStore(landscapeExtentFile);
 	
 			Style style = SLD.createPointStyle("square", Color.red, Color.red, 1.0f, 8.0f);
 			StyleBuilder styleBuilder = new StyleBuilder();
 			String attributeName = "MINX";
-			Font font = styleBuilder.createFont("Times New Roman", 10.0);
-			TextSymbolizer textSymb = styleBuilder.createTextSymbolizer(Color.black, font, attributeName);
-			Rule rule = styleBuilder.createRule(textSymb);
-			style.featureTypeStyles().get(0).rules().add(rule);
+			//Font font = styleBuilder.createFont("Times New Roman", 10.0);
+			//TextSymbolizer textSymb = styleBuilder.createTextSymbolizer(Color.black, font, attributeName);
+			//Rule rule = styleBuilder.createRule(textSymb);
+			//style.featureTypeStyles().get(0).rules().add(rule);
 	
 
-			String[] typeNames1 = dataStore1.getTypeNames();
+			String[] typeNames1 = perimeterFiledataStore.getTypeNames();
 			String typeName1 = typeNames1[0];
-			FeatureSource featureSource1 = dataStore1.getFeatureSource(typeName1);
-			Layer layer1 = new FeatureLayer(featureSource1, SLD.createLineStyle(Color.BLUE, 2));
-			layer1.setTitle(perimeterFile.getName());
+			FeatureSource featureSource1 = perimeterFiledataStore.getFeatureSource(typeName1);
+			Layer perimeterLayer = new FeatureLayer(featureSource1, SLD.createLineStyle(Color.BLUE, 2));
+			perimeterLayer.setTitle(perimeterFile.getName());
 
-			String[] typeNames2 = dataStore2.getTypeNames();
+			String[] typeNames2 = predictionFileDataStore.getTypeNames();
 			String typeName2 = typeNames2[0];
-			FeatureSource featureSource2 = dataStore2.getFeatureSource(typeName2);
-			Layer layer2 = new FeatureLayer(featureSource2, SLD.createLineStyle(Color.RED, 2));
-			layer2.setTitle(predictionFile.getName());
+			FeatureSource featureSource2 = predictionFileDataStore.getFeatureSource(typeName2);
+			Layer predictionLayer = new FeatureLayer(featureSource2, SLD.createLineStyle(Color.RED, 2));
+			predictionLayer.setTitle(predictionFile.getName());
 
-			String[] typeNames3 = dataStore3.getTypeNames();
+			String[] typeNames3 = layerExtentDataStore.getTypeNames();
 			String typeName3 = typeNames3[0];
-			FeatureSource featureSource3 = dataStore3.getFeatureSource(typeName3);
-			Layer layer3 = new FeatureLayer(featureSource3, SLD.createLineStyle(Color.BLACK, 1));
-			layer3.setTitle(layerExtentFile.getName());
+			FeatureSource featureSource3 = layerExtentDataStore.getFeatureSource(typeName3);
+			Layer landscapeExtentLayer = new FeatureLayer(featureSource3, SLD.createLineStyle(Color.BLACK, 1));
+			landscapeExtentLayer.setTitle(landscapeExtentFile.getName());
 
-			map.addLayer(layer2);
-			map.addLayer(layer1);
-			map.addLayer(layer3);
+			map.addLayer(predictionLayer);
+			map.addLayer(perimeterLayer);
+			map.addLayer(landscapeExtentLayer);
 
 			// Step 2: Set projection
 			CoordinateReferenceSystem crs = CRS.decode(ScenarioProperties.CRS);
-			MapViewport vp = map.getViewport();
-			vp.setCoordinateReferenceSystem(crs);
+			MapViewport viewport = map.getViewport();
+			viewport.setCoordinateReferenceSystem(crs);
 
-			FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference());
-			Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeterFile);
+			NormalizedSymmetricDifference nsdComparator = new NormalizedSymmetricDifference();
+			nsdComparator.setIgnitionPerimeterFile(scenarioProperties.getPerimeterAtT0File());
+			FarsiteIndividualEvaluator nsdEvaluator = new FarsiteIndividualEvaluator(nsdComparator);
+			Pair<Long, Double> fireEvolution = nsdEvaluator.getFireEvolution(predictionFile, perimeterFile);
 			Long simulatedTime = fireEvolution.getLeft();
-			Double normalizedSymmetricDifference = fireEvolution.getRight();
-			Double weightedPredictionError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME);
+			Double nsd = fireEvolution.getRight();
+			Double nsdWeightedPredictionError = nsdEvaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, expectedSimulatedTime);
 			
 			GoodnessOfFit gofComparator = new GoodnessOfFit();
+			gofComparator.setIgnitionPerimeterFile(scenarioProperties.getPerimeterAtT0File());
 			Double gof = gofComparator.compare(predictionFile, perimeterFile);
 			
 			GoodnessOfFit adjGofComparator = new AdjustedGoodnessOfFit();
+			adjGofComparator.setIgnitionPerimeterFile(scenarioProperties.getPerimeterAtT0File());
 			Double adjGof = adjGofComparator.compare(predictionFile, perimeterFile);
 			
 			String[] textToImage = { 
-				"File: " + predictionFile.getName(), 
-				"Simulated Time: " + simulatedTime,
-				"Expected Simulated Time: " + ScenarioProperties.DEFAULT_EXPECTED_SIMULATED_TIME,
-				"Normalized Symmetric Difference: " + normalizedSymmetricDifference,
-				"Goodness of Fit: " + gof,
-				"Adjusted Goodness of Fit: " + adjGof,
-				"Fitness: " + weightedPredictionError 
+				"Pred File    : " + predictionFile.getName(), 
+				"Sim Time     : " + simulatedTime,
+				"Exp Sim Time : " + expectedSimulatedTime,
+				"NSD          : " + nsd,
+				"NSD Fitness  : " + nsdWeightedPredictionError,
+				"GoF          : " + gof,
+				"aGoF         : " + adjGof
 			};
 
 			// Step 3: Save image
-			String fileName = predictionFile.getAbsolutePath().replace(".shp", ".jpg");
-			File jpgFile = new File(fileName);
+			String jpgFileName = predictionFile.getAbsolutePath().replace(".shp", ".jpg");
+			File jpgFile = new File(jpgFileName);
 			
 			boolean savedAsJPG = saveAsJPG(map, jpgFile, 800, textToImage);
 			
@@ -134,14 +140,14 @@ public class FarsiteOutputSaver {
 			logger.error("There was an exception when trying to generate the .jpg image for prediction file " + predictionFile.getAbsolutePath(), e);
 			throw new RuntimeException(e);
 		} finally {
-			if (dataStore1 != null) {
-				dataStore1.dispose();
+			if (perimeterFiledataStore != null) {
+				perimeterFiledataStore.dispose();
 			}
-			if (dataStore2 != null) {
-				dataStore2.dispose();
+			if (predictionFileDataStore != null) {
+				predictionFileDataStore.dispose();
 			}
-			if (dataStore3 != null) {
-				dataStore3.dispose();
+			if (layerExtentDataStore != null) {
+				layerExtentDataStore.dispose();
 			}
 		}
 		
@@ -197,15 +203,23 @@ public class FarsiteOutputSaver {
 
 		Graphics g = theImage.getGraphics();
 		
-		g.setFont(g.getFont().deriveFont(20f));
+		Font f = new Font(Font.MONOSPACED, Font.PLAIN, 18);
+		//Font f = new Font("Courier New", Font.BOLD, 18);
+		//g.setFont(g.getFont().deriveFont(20f));
+		//Font("Courier", Font.Style.NORMAL)
+		//Font font = g.getFont().;
+		g.setFont(f);
 		g.setColor(Color.BLACK);
 		
+		int leftMargin = 50;
+		int verticalDistance = 100;
+		
 		for (int i=0; i < theText.length; i++) {
-			g.drawString(theText[i], 500, (i+1) * 100);
+			g.drawString(theText[i], leftMargin, (i+1) * verticalDistance);
 		}
 		
 		g.dispose();
 
 	}
-	
+
 }

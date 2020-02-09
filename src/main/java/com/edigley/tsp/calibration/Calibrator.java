@@ -103,6 +103,7 @@ public class Calibrator {
 		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut, farsiteExecutionParallelizationLevel);
 		executor.setScenarioProperties(scenarioProperties);
+		comparator.setIgnitionPerimeterFile(scenarioProperties.getPerimeterAtT0File());
 		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(comparator);
 		executor.setFitnessEvaluator(evaluator);
 		geneticAlgorithm.setExecutor(executor);

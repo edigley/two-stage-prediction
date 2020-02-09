@@ -31,10 +31,14 @@ public class FarsiteIndividualEvaluator {
 	}
 
 	public static Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile, ComparisonMethod comparator) throws IOException {
-		return ImmutablePair.of(getSimulatedTime(predictionFile), comparator.compare(predictionFile, perimeterFile));
+		return ImmutablePair.of(extractSimulatedTime(predictionFile), comparator.compare(predictionFile, perimeterFile));
 	}
 	
-	public static Long getSimulatedTime(File file) throws IOException {
+	public Long getSimulatedTime(File file) throws IOException {
+		return extractSimulatedTime(file);
+	}
+	
+	public static Long extractSimulatedTime(File file) throws IOException {
 		Feature lastFeature = ShapeFileReader.getLastFeature(file);
 		// properties: the_geom, Fire_Type, Month, Day, Hour, Elapsed_Mi
 		Double maxSimulatedTime = lastFeature.getProperties("Elapsed_Mi")
@@ -54,11 +58,11 @@ public class FarsiteIndividualEvaluator {
 			Pair<Long, Double> fireEvolution = this.getFireEvolution(predictionFile, perimeterFile);
 			
 			Long effectivelySimulatedTime = fireEvolution.getKey();
-			Double normalizedSymmetricDifference = fireEvolution.getValue();
+			Double comparisonMetric = fireEvolution.getValue(); // nsd or gof
 			
 			Double factor = comparator.defineAdjustmentFactor(effectivelySimulatedTime, expectedSimulatedTime);
 			
-			fireError = ParserUtil.parseDouble(factor * normalizedSymmetricDifference);
+			fireError = ParserUtil.parseDouble(factor * comparisonMetric);
 				
 		} catch (Exception e) {
 			System.err.printf("Couldn't compare non-finished scenario result for individual. Error message: %s\n",

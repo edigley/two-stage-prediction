@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.edigley.tsp.comparator.ComparisonMethod;
@@ -18,6 +19,7 @@ import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 
+@Ignore
 public class FarsiteExecutorTest {
 
 	private File farsiteFile = new File("target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction"); 
@@ -60,7 +62,7 @@ public class FarsiteExecutorTest {
 
 		FarsiteExecution execution = executor.run(generation, individualId, individual);
 		
-		File perimeter1File = scenarioProperties.getPerimeterAtT1();
+		File perimeter1File = scenarioProperties.getPerimeterAtT1File();
 		
 		File predictionFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		

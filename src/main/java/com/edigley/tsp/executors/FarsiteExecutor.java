@@ -77,14 +77,14 @@ public class FarsiteExecutor {
 		
 		//if (fireError.equals(Double.NaN) || fireError > 9999) {
 		//	logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
-			File perimeterFile = scenarioProperties.getPerimeterAtT1();
+			File perimeterFile = scenarioProperties.getPerimeterAtT1File();
 			File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
 			fireError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, scenarioProperties.getTimeToBeSimulated());
 			
 			try {
 				logger.info("Going to save prediction result as a .jpg image: " + predictionFile.getAbsolutePath());
 				File layerExtentFile = scenarioProperties.getLandscapeLayerExtentFile();
-				File jpgFile = FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile);
+				File jpgFile = FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile, scenarioProperties);
 				if (jpgFile != null) {
 					logger.info("Saved to image: " + jpgFile.getAbsolutePath());
 				}
@@ -185,7 +185,7 @@ public class FarsiteExecutor {
 		
 		FarsiteExecutionMonitor.release();
 		
-		File perimeter1File = scenarioProperties.getPerimeterAtT1();
+		File perimeter1File = scenarioProperties.getPerimeterAtT1File();
 		
 		File shapeFile = scenarioProperties.getShapeFileOutput(generation, individualId);
 		

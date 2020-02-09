@@ -57,7 +57,7 @@ public class App {
 		//for (Integer i: representatives) {
 			try {
 				File shapeFile = new File(farsiteOutputDir, "shape_1_" + i + ".shp");
-				FarsiteOutputSaver.saveAsJPG(p1File, shapeFile, layerExtentFile);
+				FarsiteOutputSaver.saveAsJPG(p1File, shapeFile, layerExtentFile, null);
 				System.out.println("Successfully generated for: " + "shape_1_" + i + ".shp");
 			} catch (Exception e) {
 				System.err.println("Failed for: " + "shape_1_" + i + ".shp");

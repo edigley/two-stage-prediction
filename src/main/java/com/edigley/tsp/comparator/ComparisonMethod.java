@@ -15,5 +15,7 @@ public interface ComparisonMethod extends Comparator<FarsiteExecution>{
 	Double defineAdjustmentFactor(Long effectivelySimulatedTime, Long expectedSimulatedTime);
 
 	int compare(FarsiteExecution e1, FarsiteExecution e2);
+
+	void setIgnitionPerimeterFile(File perimeterAtT0File);
 	
 }

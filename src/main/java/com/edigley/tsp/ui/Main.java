@@ -53,6 +53,26 @@ public class Main {
 				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
 		tspCMD = tspCMD_Compare;
 		
+		// to generate a .jpg file referent to the prediction shape file
+		tspCMD_Compare = ""
+				+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+				+ " -c playpen/fire-scenarios/arkadia/ "
+				+ " -compare  "
+				+ " -prediction /home/edigley/git/two-stage-prediction/playpen/executions/cached/arkadia/execution_nsd_seed_88_1/output/shape_1_2.shp "  
+				+ " -perimeter  playpen/fire-scenarios/arkadia/landscape/Per2_utm.shp "
+				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
+		tspCMD = tspCMD_Compare;
+
+		// to generate a .jpg file referent to the prediction shape file
+		tspCMD_Compare = ""
+				+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+				+ " -c playpen/fire-scenarios/arkadia/ "
+				+ " -compare  "
+				+ " -prediction /home/edigley/git/two-stage-prediction/playpen/intermediate_polygons/shape_1_2.shp "  
+				+ " -perimeter  /home/edigley/git/two-stage-prediction/playpen/intermediate_polygons/Per2_utm.shp "
+				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
+		tspCMD = tspCMD_Compare;
+		
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);
 

@@ -16,6 +16,10 @@ public class NormalizedSymmetricDifference implements ComparisonMethod {
 
 	private static final Logger logger = LoggerFactory.getLogger(NormalizedSymmetricDifference.class);
 	
+	private File ignitionPerimeterFile;
+	
+	private MultiPolygon ignitionPerimeterMap;
+	
 	public Double compare(String predictionFilePath, String perimeterFilePath) throws IOException {
 		return compare(new File(predictionFilePath), new File(perimeterFilePath));
 	}
@@ -24,6 +28,11 @@ public class NormalizedSymmetricDifference implements ComparisonMethod {
 		MultiPolygon mpA = ShapeFileUtil.toMultiPolygon(perimeterFile);
 
 		MultiPolygon mpB = ShapeFileUtil.toMultiPolygon(predictionFile);
+		
+		if (this.ignitionPerimeterMap != null) {
+			mpA = ShapeFileUtil.toMultiPolygon(mpA.difference(this.ignitionPerimeterMap));
+			mpB = ShapeFileUtil.toMultiPolygon(mpB.difference(this.ignitionPerimeterMap));
+		}
 		
 		Geometry symmetricDifference = mpA.symDifference(mpB);
 		
@@ -45,4 +54,14 @@ public class NormalizedSymmetricDifference implements ComparisonMethod {
 		return e1.getFireError().compareTo(e2.getFireError());
 	}
 
+	@Override
+	public void setIgnitionPerimeterFile(File ignitionPerimeterFile) {
+		this.ignitionPerimeterFile = ignitionPerimeterFile;
+		try {
+			this.ignitionPerimeterMap = ShapeFileUtil.toMultiPolygon(ShapeFileReader.getGeometriesPoligon(this.ignitionPerimeterFile));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 }

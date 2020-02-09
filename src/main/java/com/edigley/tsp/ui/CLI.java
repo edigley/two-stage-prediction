@@ -4,17 +4,22 @@ import static com.edigley.tsp.util.CLIUtils.assertsFilesExist;
 import static com.edigley.tsp.util.CLIUtils.parseCommandLine;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.edigley.tsp.calibration.Calibrator;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
+import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.io.output.FarsiteOutputSaver;
 
 public class CLI {
@@ -51,60 +56,60 @@ public class CLI {
 	
 	public static final String EXECUTION_LINE = "java -jar two-stage-prediction.jar";
 
-	public static void main(String[] args) throws Exception {
+	private static void runCalibration(CommandLine cmd) throws ParseException, java.text.ParseException, IOException, NoSuchAlgorithmException {
+		logger.info("Going to start the overall execution...");
+		logger.info("ScenarioProperties.seed                         : " + (Long) cmd.getParsedOptionValue(SEED));
 		
-		Locale.setDefault(new Locale("en", "US"));
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
 		
-		CommandLine cmd = parseCommandLine(args, prepareOptions(), HELP, USAGE, EXECUTION_LINE);
+		Calibrator calibrator = new Calibrator(cmd);
+		calibrator.prepare();
+		calibrator.run();
+
+		stopWatch.stop();
 		
-		if (cmd.hasOption(COMPARE)) { //generates a jpg image comparing prediction and actual fire perimeter 
-			
-			logger.info("Going to generate a jpg image comparing prediction and actual fire perimeter...");
-			
-			File predictionFile = (File) cmd.getParsedOptionValue(PREDICTION_FILE);
-			File perimeterFile = (File) cmd.getParsedOptionValue(PERIMETER_FILE);
-			File layerExtentFile = (File) cmd.getParsedOptionValue(LAYER_EXTENT_FILE);
-			
-			assertsFilesExist(predictionFile, perimeterFile, layerExtentFile);
-			
-			FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile);
-			
-			logger.info("JPG image successfully generated.");
-			
-		} else if (cmd.hasOption(RECALCULATE)) { //recalculate fitness function to all individuals in the memoization file
-			
-			logger.info("Going to recalculate fitness function to all individuals in the memoization file...");
-			
-			File perimeterFile = (File) cmd.getParsedOptionValue(PERIMETER_FILE);
-			File memoizationFile = (File) cmd.getParsedOptionValue(MEMOIZATION);
-			
-			FarsiteExecutionMemoization memoization = new FarsiteExecutionMemoization(memoizationFile);
-			
-			memoization.recalculateFireError(memoizationFile, perimeterFile);
-			
-			logger.info("Recalculation finished.");
-			
-		} else { //normal execution to calibrate finding the best individuals
+		calibrator.printSummaryStatistics(stopWatch);
 		
-			logger.info("Going to start the overall execution...");
-			logger.info("ScenarioProperties.seed                         : " + (Long) cmd.getParsedOptionValue(SEED));
-			
-			StopWatch stopWatch = new StopWatch();
-			stopWatch.start();
-			
-			Calibrator calibrator = new Calibrator(cmd);
-			calibrator.prepare();
-			calibrator.run();
-	
-			stopWatch.stop();
-			
-			calibrator.printSummaryStatistics(stopWatch);
-			
-			calibrator.releaseResources();
-	
-			logger.info("Overall execution finished.");
-			
+		calibrator.releaseResources();
+
+		logger.info("Overall execution finished.");
+	}
+
+	private static void recalculateFitnessForAllIndividuals(CommandLine cmd) throws ParseException {
+		logger.info("Going to recalculate fitness function to all individuals in the memoization file...");
+		
+		File perimeterFile = (File) cmd.getParsedOptionValue(PERIMETER_FILE);
+		File memoizationFile = (File) cmd.getParsedOptionValue(MEMOIZATION);
+		
+		FarsiteExecutionMemoization memoization = new FarsiteExecutionMemoization(memoizationFile);
+		
+		memoization.recalculateFireError(memoizationFile, perimeterFile);
+		
+		logger.info("Recalculation finished.");
+	}
+
+	private static File generatePredictionImageComparison(CommandLine cmd) throws ParseException, FileNotFoundException, IOException {
+		logger.info("Going to generate a jpg image comparing prediction and actual fire perimeter...");
+		
+		File predictionFile = (File) cmd.getParsedOptionValue(PREDICTION_FILE);
+		File perimeterFile = (File) cmd.getParsedOptionValue(PERIMETER_FILE);
+		File layerExtentFile = (File) cmd.getParsedOptionValue(LAYER_EXTENT_FILE);
+
+		File scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
+		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
+		
+		assertsFilesExist(predictionFile, perimeterFile, layerExtentFile);
+		
+		File savedFile = FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile, scenarioProperties);
+		
+		if (savedFile != null) {
+			logger.info("JPG image successfully generated: " + savedFile.getAbsolutePath());				
+		} else {
+			logger.error("Couldn't save jpg file.");
 		}
+		
+		return savedFile;
 	}
 
 	public static Options prepareOptions() {
@@ -160,5 +165,24 @@ public class CLI {
 		return options;
 	}
 
+	public static void main(String[] args) throws Exception {
+		
+		Locale.setDefault(new Locale("en", "US"));
+		
+		CommandLine cmd = parseCommandLine(args, prepareOptions(), HELP, USAGE, EXECUTION_LINE);
+		
+		if (cmd.hasOption(COMPARE)) { 
+			//generates a jpg image comparing prediction and actual fire perimeter 
+			generatePredictionImageComparison(cmd);
+		} else if (cmd.hasOption(RECALCULATE)) { 
+			//recalculate fitness function to all individuals in the memoization file
+			recalculateFitnessForAllIndividuals(cmd);
+		} else { 
+			//normal execution to calibrate and find the best individuals
+			runCalibration(cmd);
+		}
+		
+	}
+	
 }
 

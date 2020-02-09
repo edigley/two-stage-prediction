@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -92,8 +93,26 @@ public class ShapeFileUtil {
 					MultiPolygon mp = (MultiPolygon) geometry;
 					return mp;
 				} catch (ClassCastException e3) {
-					Point p = (Point) geometry;
-					return wrapInAMultiPolygon((Polygon)p.buffer(0.0000001));
+					try {
+						GeometryCollection gc = (GeometryCollection) geometry;
+						//return wrapInAMultiPolygon((Polygon) gc.getNumGeometries());
+						
+						GeometryFactory gf = new GeometryFactory();
+
+						int numGeometries = gc.getNumGeometries();
+						
+						Polygon[] polys = new Polygon[numGeometries];
+						for (int i = 0; i < numGeometries; i++) {
+							polys[i] = toPolygonBKP(gc.getGeometryN(i));
+						}
+						
+						MultiPolygon multiPolygon = gf.createMultiPolygon(polys);
+						
+						return multiPolygon;
+					} catch (ClassCastException e4) {
+						e4.printStackTrace();
+						throw e4;
+					}
 				}
 			}
 		}

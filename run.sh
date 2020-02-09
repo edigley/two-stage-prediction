@@ -3,7 +3,8 @@
 #echo "dry run"
 
 scenario="arkadia"
-evaluation="nsd"
+evaluation="agof"
+
 scenarioDir="../playpen/fire-scenarios/${scenario}"
 scenarioFile="${scenarioDir}/scenario.ini"
 memoizationFile="../playpen/executions/${scenario}_farsite_execution_memoization_${evaluation}.txt"

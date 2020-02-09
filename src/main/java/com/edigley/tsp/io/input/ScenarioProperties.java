@@ -28,7 +28,7 @@ public class ScenarioProperties {
 	//Coordinate Reference System
 	public static final String CRS = "EPSG:4326";
 
-	public static Long DEFAULT_EXPECTED_SIMULATED_TIME;// = 480L;
+	public static Long EXPECTED_SIMULATED_TIME = null;// = 480L;
 	
 	private Properties scenarioProperties;
 
@@ -152,7 +152,7 @@ public class ScenarioProperties {
 		this.endTime = LocalDateTime.of(2011, farsiteEndMonth, farsiteEndDay, farsiteEndHour, farsiteEndMin);
 		
 		this.timeToBeSimulated = Duration.between(startTime, endTime).getSeconds()/60;
-		DEFAULT_EXPECTED_SIMULATED_TIME = this.timeToBeSimulated; 
+		EXPECTED_SIMULATED_TIME = this.timeToBeSimulated; 
 		
 		logger.info("ScenarioProperties.startTime                    : " + this.startTime);
 		logger.info("ScenarioProperties.endTime                      : " + this.endTime);
@@ -168,7 +168,7 @@ public class ScenarioProperties {
 		
 	}
 	
-	public File getPerimeterAtT1() {
+	public File getPerimeterAtT1File() {
 		return perimeterAtT1File;
 	}
 
@@ -182,32 +182,6 @@ public class ScenarioProperties {
 		assert generation >= 0;
 		assert individual >= 1;
 		return new File(outputDir, String.format("shape_%s_%s.shp", generation, individual));
-	}
-
-	public static void main(String[] args) throws Exception {
-
-		String scenarioDir = "/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/";
-
-		File scenarioFile = new File(scenarioDir, "scenario.ini");
-
-		System.out.println(scenarioFile.exists());
-		System.out.println(scenarioFile.getCanonicalPath());
-
-		FileInputStream ip = new FileInputStream(scenarioFile);
-		Properties prop = new Properties();
-		prop.load(ip);
-
-		System.out.println(prop);
-
-		File p1File = new File(scenarioDir, prop.getProperty("real_fire_map_t1").replace(".asc", ".shp"));
-		File outputDir = new File(scenarioDir, prop.getProperty("output_path"));
-		File outputFile = new File(outputDir, String.format("shape_%s_%s.shp", 0, 6));
-
-		System.out.println(p1File.exists());
-		System.out.println(outputFile.exists());
-
-		System.out.println(p1File);
-		System.out.println(outputFile);
 	}
 
 	public int getNumGenerations() {
@@ -260,6 +234,32 @@ public class ScenarioProperties {
 
 	public File getLandscapeLayerExtentFile() {
 		return landscapeLayerExtentFile;
+	}
+
+	public static void main(String[] args) throws Exception {
+
+		String scenarioDir = "/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/";
+
+		File scenarioFile = new File(scenarioDir, "scenario.ini");
+
+		System.out.println(scenarioFile.exists());
+		System.out.println(scenarioFile.getCanonicalPath());
+
+		FileInputStream ip = new FileInputStream(scenarioFile);
+		Properties prop = new Properties();
+		prop.load(ip);
+
+		System.out.println(prop);
+
+		File p1File = new File(scenarioDir, prop.getProperty("real_fire_map_t1").replace(".asc", ".shp"));
+		File outputDir = new File(scenarioDir, prop.getProperty("output_path"));
+		File outputFile = new File(outputDir, String.format("shape_%s_%s.shp", 0, 6));
+
+		System.out.println(p1File.exists());
+		System.out.println(outputFile.exists());
+
+		System.out.println(p1File);
+		System.out.println(outputFile);
 	}
 
 }

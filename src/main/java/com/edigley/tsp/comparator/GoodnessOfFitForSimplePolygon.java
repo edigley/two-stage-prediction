@@ -17,6 +17,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public class GoodnessOfFitForSimplePolygon implements ComparisonMethod {
 
 	private static final Logger logger = LoggerFactory.getLogger(GoodnessOfFitForSimplePolygon.class);
+	private File ignitionPerimeterFile;
 	
 	public Double compare(String predictionFile, String perimeterFile) throws IOException {
 		return compare(new File(predictionFile), new File(perimeterFile));
@@ -73,4 +74,8 @@ public class GoodnessOfFitForSimplePolygon implements ComparisonMethod {
 		return e2.getFireError().compareTo(e1.getFireError());
 	}
 
+	@Override
+	public void setIgnitionPerimeterFile(File ignitionPerimeterFile) {
+		this.ignitionPerimeterFile = ignitionPerimeterFile;		
+	}
 }

@@ -58,7 +58,7 @@ public class FarsiteExecutionMonitor {
 					}
 				
 					File predictionFile = scenarioProperties.getShapeFileOutput(generation, id); 
-					File perimeterFile = scenarioProperties.getPerimeterAtT1();
+					File perimeterFile = scenarioProperties.getPerimeterAtT1File();
 					
 					//Pair<Long, Double> fireEvolution = FarsiteOutputProcessor.getInstance().getFireEvolution(gAFile, gBFile);
 					//Pair<Long, Double> fireEvolution = evaluator.getFireEvolution(predictionFile, perimeterFile, comparator);
@@ -117,14 +117,14 @@ public class FarsiteExecutionMonitor {
 		
 		Callable<Long> callable = new Callable<Long>() {
 			public Long call() throws Exception {
-				return new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference()).getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+				return new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference()).extractSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 			}
 		};
 		
 		Runnable runnable = new Runnable() {
 			public void run() {
 				try {
-					Long maxSimulatedTime = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference()).getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+					Long maxSimulatedTime = new FarsiteIndividualEvaluator(new NormalizedSymmetricDifference()).extractSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
 					System.out.println("---> maxSimulatedTime: " + maxSimulatedTime);
 					logger.info("---> maxSimulatedTime: " + maxSimulatedTime);
 				} catch (Exception e) {
