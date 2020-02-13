@@ -82,12 +82,15 @@ public class Calibrator {
 		
 		ComparisonMethod comparator = null;
 		Optimize optimizationStrategy = null;
+		
 		if (cmd.hasOption(EVALUATION_FUNCTION)) {
 			String evaluationFunction = cmd.getOptionValue(EVALUATION_FUNCTION);
 			if (evaluationFunction.equals("gof")) {
 				comparator = new GoodnessOfFit();
+				optimizationStrategy = Optimize.MAXIMUM;
 			} else if (evaluationFunction.equals("agof")) {
 				comparator = new AdjustedGoodnessOfFit();
+				optimizationStrategy = Optimize.MAXIMUM;
 			} else if (evaluationFunction.equals("nsd")) {
 				comparator = new NormalizedSymmetricDifference();
 				optimizationStrategy = Optimize.MINIMUM;
@@ -95,8 +98,8 @@ public class Calibrator {
 				throw new NoSuchAlgorithmException("There was no evaluator for '" + evaluationFunction + "'.");
 			}
 		} else {
-			comparator = new NormalizedSymmetricDifference();
-			optimizationStrategy = Optimize.MINIMUM;
+			comparator = new AdjustedGoodnessOfFit();
+			optimizationStrategy = Optimize.MAXIMUM;
 		}
 		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut, farsiteExecutionParallelizationLevel);
