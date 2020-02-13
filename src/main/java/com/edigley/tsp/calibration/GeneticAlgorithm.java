@@ -58,19 +58,20 @@ public class GeneticAlgorithm {
 
     private final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
 	
-    private Optimize optimizationStrategy = Optimize.MAXIMUM;
+    private Optimize optimizationStrategy = null;
 	
 	public GeneticAlgorithm(ScenarioProperties scenarioProperties) {
-		this(scenarioProperties, null);
+		this(scenarioProperties, Optimize.MAXIMUM, null);
 	}
     
-	public GeneticAlgorithm(ScenarioProperties scenarioProperties, Long seed) {
+	public GeneticAlgorithm(ScenarioProperties scenarioProperties, Optimize optimizationStrategy, Long seed) {
 		
 		if (seed != null) {
 			RandomRegistry.setRandom(new LCG64ShiftRandom.ThreadSafe(seed));
 		}
 		
 		this.scenarioProperties = scenarioProperties;
+		this.optimizationStrategy = optimizationStrategy;
 		
 		this.NUMBER_OF_GENERATIONS = this.scenarioProperties.getNumGenerations();
 		this.POPULATION_SIZE = this.scenarioProperties.getPopulationSize();
@@ -169,8 +170,4 @@ public class GeneticAlgorithm {
     	FarsitePopulationEvaluator.setFarsiteExecutor(executor);
     }
 
-	public void setOptimizationStrategy(Optimize optimizationStrategy) {
-		this.optimizationStrategy = optimizationStrategy;
-	}
-   
 }

@@ -66,8 +66,6 @@ public class Calibrator {
 		
 		scenarioProperties = new ScenarioProperties(scenarioDir);
 
-		geneticAlgorithm = new GeneticAlgorithm(scenarioProperties, (Long) cmd.getParsedOptionValue(SEED));
-		
 		Long farsiteExecutionTimeOut = null;
 		if (cmd.hasOption(TIME_OUT)) {
 			farsiteExecutionTimeOut = (Long) cmd.getParsedOptionValue(TIME_OUT);
@@ -83,7 +81,7 @@ public class Calibrator {
 		}
 		
 		ComparisonMethod comparator = null;
-		Optimize optimizationStrategy = Optimize.MAXIMUM;
+		Optimize optimizationStrategy = null;
 		if (cmd.hasOption(EVALUATION_FUNCTION)) {
 			String evaluationFunction = cmd.getOptionValue(EVALUATION_FUNCTION);
 			if (evaluationFunction.equals("gof")) {
@@ -103,11 +101,14 @@ public class Calibrator {
 		
 		FarsiteExecutor executor = new FarsiteExecutor(farsiteFile, scenarioDir, farsiteExecutionTimeOut, farsiteExecutionParallelizationLevel);
 		executor.setScenarioProperties(scenarioProperties);
+		
 		comparator.setIgnitionPerimeterFile(scenarioProperties.getPerimeterAtT0File());
+		
 		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(comparator);
 		executor.setFitnessEvaluator(evaluator);
+
+		geneticAlgorithm = new GeneticAlgorithm(scenarioProperties, optimizationStrategy, (Long) cmd.getParsedOptionValue(SEED));
 		geneticAlgorithm.setExecutor(executor);
-		geneticAlgorithm.setOptimizationStrategy(optimizationStrategy);
 		
 		FarsiteExecutionMemoization cache;
 		if (cmd.hasOption(MEMOIZATION)) {
