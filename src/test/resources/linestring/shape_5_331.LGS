@@ -1,0 +1,21 @@
+Log File:  output/shape_5_331.LGS
+Landscape File:  landscape/arkadia.lcp
+Weather File 1: input/gen_5_ind_331.wtr
+Wind File 1: input/gen_5_ind_331.wnd
+Adjustment File:  input/gen_5_ind_331.adj
+Fuel Moisture File:  input/gen_5_ind_331.fms
+Conversion File:  None
+Custom Fuel Model File:  aux_files/CustomFuel.fmd
+Crown Fire: Disabled
+Ember Generation: Disabled
+Backing Spread: Calculated from Elliptical Dimensions
+Acceleration File Used:  None (feature toggled off)
+
+Simulation Started (Day Hour:Min): 8/26 9:00
+Simulation Ended (Day Hour:Min): 08/26  10:30
+Elapsed Time (Days Hours:Mins): 00 01:30
+
+Actual Time Step (min): 30.000000
+Visible Time Step (min): 30.000000
+Perimeter Resolution (m): 100.000000
+Distance Resolution (m): 100.000000
