@@ -336,3 +336,76 @@ eog ${scenario}.gif
 edigley@cariri:~/doutorado_uab/git/two-stage-prediction/playpen/executions/cached/arkadia/execution_nsd_seed_95_1$ tail -n 15 two_stage_prediction_nsd_95.txt  | grep shape_ | awk '{print $15}' | sed "s#../playpen/fire-scenarios/arkadia/##g" | sed 's/_1_/_01_/g' | sed 's/_2_/_02_/g' | sed 's/_3_/_03_/g' | sed 's/_4_/_04_/g' | sed 's/_5_/_05_/g' | sed 's/_6_/_06_/g' | sed 's/_7_/_07_/g' |sed 's/_8_/_08_/g' | sed 's/_9_/_09_/g' | sed 's/.shp/.jpg/g' | sed 's#output/#output/jpgs/#g' | xargs -n1 cp -t bests/
 edigley@cariri:~/doutorado_uab/git/two-stage-prediction/playpen/executions/cached/arkadia/execution_nsd_seed_95_1$ ls bests/
 
+
+
+
+
+
+
+
+
+
+
+
+
+ 492 -  20 ==> [  9 495 ]  15   2  11  43  73   35  321  32  89  1.3  0.219380      90      1      7 ../playpen/fire-scenarios/arkadia/output/shape_8_465.shp -> [pool-1-thread-1] - CACHED
+java.lang.ClassCastException: class com.vividsolutions.jts.geom.LineString cannot be cast to class com.vividsolutions.jts.geom.Point (com.vividsolutions.jts.geom.LineString and com.vividsolutions.jts.geom.Point are in unnamed module of loader 'app')
+	at com.edigley.tsp.util.shapefile.ShapeFileUtil.toPolygonBKP(ShapeFileUtil.java:77)
+	at com.edigley.tsp.util.shapefile.ShapeFileUtil.toMultiPolygon(ShapeFileUtil.java:106)
+	at com.edigley.tsp.comparator.GoodnessOfFit.calculateGoodnessOfFit(GoodnessOfFit.java:68)
+	at com.edigley.tsp.comparator.GoodnessOfFit.calculateGoodnessOfFit(GoodnessOfFit.java:48)
+	at com.edigley.tsp.comparator.GoodnessOfFit.compare(GoodnessOfFit.java:34)
+	at com.edigley.tsp.fitness.FarsiteIndividualEvaluator.getFireEvolution(FarsiteIndividualEvaluator.java:34)
+	at com.edigley.tsp.fitness.FarsiteIndividualEvaluator.getFireEvolution(FarsiteIndividualEvaluator.java:30)
+	at com.edigley.tsp.fitness.FarsiteIndividualEvaluator.calculateWeightedPredictionError(FarsiteIndividualEvaluator.java:58)
+	at com.edigley.tsp.executors.FarsiteExecutor.run(FarsiteExecutor.java:82)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.evaluateNewExecution(FarsitePopulationEvaluator.java:131)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.eval(FarsitePopulationEvaluator.java:122)
+	at io.jenetics.Phenotype.eval(Phenotype.java:113)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.lambda$eval$0(FarsitePopulationEvaluator.java:77)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:835)
+Couldn't compare non-finished scenario result for individual. Error message: class com.vividsolutions.jts.geom.LineString cannot be cast to class com.vividsolutions.jts.geom.Point (com.vividsolutions.jts.geom.LineString and com.vividsolutions.jts.geom.Point are in unnamed module of loader 'app')
+java.lang.ClassCastException: class com.vividsolutions.jts.geom.LineString cannot be cast to class com.vividsolutions.jts.geom.Point (com.vividsolutions.jts.geom.LineString and com.vividsolutions.jts.geom.Point are in unnamed module of loader 'app')
+	at com.edigley.tsp.util.shapefile.ShapeFileUtil.toPolygonBKP(ShapeFileUtil.java:77)
+	at com.edigley.tsp.util.shapefile.ShapeFileUtil.toMultiPolygon(ShapeFileUtil.java:106)
+	at com.edigley.tsp.comparator.GoodnessOfFit.calculateGoodnessOfFit(GoodnessOfFit.java:68)
+	at com.edigley.tsp.comparator.GoodnessOfFit.calculateGoodnessOfFit(GoodnessOfFit.java:48)
+	at com.edigley.tsp.comparator.GoodnessOfFit.compare(GoodnessOfFit.java:34)
+	at com.edigley.tsp.io.output.FarsiteOutputSaver.saveAsJPG(FarsiteOutputSaver.java:114)
+	at com.edigley.tsp.executors.FarsiteExecutor.run(FarsiteExecutor.java:87)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.evaluateNewExecution(FarsitePopulationEvaluator.java:131)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.eval(FarsitePopulationEvaluator.java:122)
+	at io.jenetics.Phenotype.eval(Phenotype.java:113)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.lambda$eval$0(FarsitePopulationEvaluator.java:77)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:835)
+There was an error when trying to save the .jpg image for prediction file: /home/edigley/doutorado_uab/git/two-stage-prediction/target/../playpen/fire-scenarios/arkadia/output/shape_9_496.shp 
+java.lang.ClassCastException: class com.vividsolutions.jts.geom.LineString cannot be cast to class com.vividsolutions.jts.geom.Point (com.vividsolutions.jts.geom.LineString and com.vividsolutions.jts.geom.Point are in unnamed module of loader 'app')
+	at com.edigley.tsp.util.shapefile.ShapeFileUtil.toPolygonBKP(ShapeFileUtil.java:77)
+	at com.edigley.tsp.util.shapefile.ShapeFileUtil.toMultiPolygon(ShapeFileUtil.java:106)
+	at com.edigley.tsp.comparator.GoodnessOfFit.calculateGoodnessOfFit(GoodnessOfFit.java:68)
+	at com.edigley.tsp.comparator.GoodnessOfFit.calculateGoodnessOfFit(GoodnessOfFit.java:48)
+	at com.edigley.tsp.comparator.GoodnessOfFit.compare(GoodnessOfFit.java:34)
+	at com.edigley.tsp.io.output.FarsiteOutputSaver.saveAsJPG(FarsiteOutputSaver.java:114)
+	at com.edigley.tsp.executors.FarsiteExecutor.run(FarsiteExecutor.java:87)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.evaluateNewExecution(FarsitePopulationEvaluator.java:131)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.eval(FarsitePopulationEvaluator.java:122)
+	at io.jenetics.Phenotype.eval(Phenotype.java:113)
+	at com.edigley.tsp.calibration.FarsitePopulationEvaluator.lambda$eval$0(FarsitePopulationEvaluator.java:77)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:835)
+ 493 -  21 ==> [  9 496 ]  12   7   2  35  73   35   54  41  79  1.3  NaN      90      1      4 ../playpen/fire-scenarios/arkadia/output/shape_9_496.shp -> [pool-1-thread-1]
+Feb 13, 2020 12:17:33 AM org.geotools.map.MapContent finalize
+SEVERE: Call MapContent dispose() to prevent memory leaks
+ 494 -  22 ==> [  9 488 ]  11  13   6  51  85   52    7  43  79  0.5  0.184564      90      1      9 ../playpen/fire-scenarios/arkadia/output/shape_9_488.shp -> [pool-1-thread-3]
+

@@ -1,0 +1,27 @@
+body {
+  margin: 0px;
+}
+
+.box {
+  background-color: #444;
+  color: #fff;
+  border-radius: 0px;
+  padding: 0px;
+  margin: 0px;
+  font-size: 150%;
+  height: 100px;
+}
+
+.box:nth-child(even) {
+  background-color: #ccc;
+  color: #000;
+}
+
+.wrapper {
+  width: 1300px;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(4, auto);
+  grid-template-rows: repeat(4, 200px);
+  grid-auto-flow: row;
+}
