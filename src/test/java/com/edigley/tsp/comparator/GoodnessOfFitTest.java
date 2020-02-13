@@ -1,12 +1,17 @@
 package com.edigley.tsp.comparator;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.edigley.tsp.util.shapefile.ShapeFileReader;
+import com.edigley.tsp.util.shapefile.ShapeFileUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileWriter;
+import com.vividsolutions.jts.geom.MultiPolygon;
 
 public class GoodnessOfFitTest extends ComparisonMethodTestAbstract {
 
@@ -106,9 +111,34 @@ public class GoodnessOfFitTest extends ComparisonMethodTestAbstract {
 		assertComparison("ellipses/shape_1_30_ellipses_2.shp", "jonquera_perimeter_1.shp", 0.36804360312586876);
 		assertComparison("ellipses/shape_1_30_ellipses_3.shp", "jonquera_perimeter_1.shp", 0.6134777324744385);
 		assertComparison("ellipses/shape_1_30_ellipses_4.shp", "jonquera_perimeter_1.shp", 0.33474053821712024);
-
+		
+		assertComparison("linestring/shape_5_331.shp", "arkadia_perimeter_1.shp", 0.5717947492300302);
+		
 	}
 
+	@Test
+	public void testCalculateGoFForRealFirePerimetersWithIgnitionPerimeter() throws Exception {
+		File perimeter0File = new File(resourcesDir, "arkadia_perimeter_0.shp");
+		File perimeter1File = new File(resourcesDir, "arkadia_perimeter_1.shp");
+		File predictionFile = new File(resourcesDir, "linestring/shape_5_331.shp");
+		ComparisonMethod comparatorWithIgnitionPerimeter = new GoodnessOfFit();
+		comparatorWithIgnitionPerimeter.setIgnitionPerimeterFile(perimeter0File);
+		Double calculatedGoF = comparatorWithIgnitionPerimeter.compare(predictionFile, perimeter1File);
+		//System.out.println(calculatedGoF);
+		assertEquals(Double.valueOf(0.14933814743764626), calculatedGoF);
+	}
+
+	/*
+	@Test
+	public void testTopologyException() throws Exception {
+		
+		MultiPolygon map1 = ShapeFileUtil.toMultiPolygon(ShapeFileReader.getGeometriesPoligon(new File("map1Problem.shp")));
+		MultiPolygon polygonC = ShapeFileUtil.toMultiPolygon(ShapeFileReader.getGeometriesPoligon(new File("cProblem.shp")));
+		
+		MultiPolygon polygonA = ShapeFileUtil.toMultiPolygon(map1.difference(polygonC));
+	}
+	*/
+	
 	public static void main(String[] args) throws Exception {
 		GoodnessOfFit gofEvaluator = new GoodnessOfFit();
 		File resourcesDir = new File("src/test/resources/");

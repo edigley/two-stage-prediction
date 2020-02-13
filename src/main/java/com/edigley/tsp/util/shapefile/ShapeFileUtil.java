@@ -3,21 +3,26 @@ package com.edigley.tsp.util.shapefile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.opengis.feature.Feature;
 import org.opengis.feature.GeometryAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Collections2;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.TopologyException;
 
 public class ShapeFileUtil {
 
@@ -74,8 +79,16 @@ public class ShapeFileUtil {
 							.sorted(Comparator.comparingDouble(Geometry::getArea).reversed()).findFirst().get();
 					return (Polygon) biggestGeometry;
 				} catch (ClassCastException e3) {
-					Point p = (Point) geometry;
-					return (Polygon)p.buffer(0.0000001);
+					try {
+						Point p = (Point) geometry;
+						return (Polygon)p.buffer(0.0000001);
+					} catch (ClassCastException e4) {
+						//LineString ls = (LineString) geometry;
+						//return (Polygon) ls.convexHull();
+						//return (Polygon)ls.buffer(0.0000001);
+						return null;
+					}
+					
 				}
 			}
 		}
@@ -101,11 +114,23 @@ public class ShapeFileUtil {
 
 						int numGeometries = gc.getNumGeometries();
 						
-						Polygon[] polys = new Polygon[numGeometries];
+						ArrayList<Polygon> polysA = new ArrayList<>();
 						for (int i = 0; i < numGeometries; i++) {
-							polys[i] = toPolygonBKP(gc.getGeometryN(i));
+							try {
+								//polys[i] = toPolygonBKP(gc.getGeometryN(i));
+								Polygon polygonBKP = toPolygonBKP(gc.getGeometryN(i));
+								if (polygonBKP != null) {
+									polysA.add(polygonBKP);
+								}
+							} catch (TopologyException te) {
+								//FIXME silently ignore any further exception
+							}
 						}
-						
+
+						Polygon[] polys = new Polygon[polysA.size()];
+						for (int i = 0; i < polysA.size(); i++) {
+							polys[i] = polysA.get(i);
+						}
 						MultiPolygon multiPolygon = gf.createMultiPolygon(polys);
 						
 						return multiPolygon;
