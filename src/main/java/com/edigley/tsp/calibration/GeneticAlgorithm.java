@@ -112,13 +112,13 @@ public class GeneticAlgorithm {
 	    		new MultiPointCrossover<>(RECOMBINATION_PROBABILITY), 
 	    		new Mutator<>(MUTATION_PROBABILITY)
 	    	)
-	    	/*.mapping(EvolutionResult.toUniquePopulation())*/
+	    	//.mapping(EvolutionResult.toUniquePopulation())
 	    	.build();
 	}
 	
 	public List<FarsiteExecution> run() {
         Phenotype<IntegerGene, Double> bestPhenotype = null; 
-        List<EvolutionResult<IntegerGene, Double>> collect = engine.stream(/*population*/)
+        List<EvolutionResult<IntegerGene, Double>> streamCollectedIndividuals = engine.stream(/*population*/)
         	//.limit(Limits.byFitnessThreshold(0.3))
         	//.limit(Limits.byExecutionTime(Duration.ofDays(10)))
         	.limit(NUMBER_OF_GENERATIONS)
@@ -128,22 +128,23 @@ public class GeneticAlgorithm {
         		String pattern = "Generation = %s / Evaluation Duration = %s\n";
 				System.out.println(String.format(pattern, generation, duration));
         	})
-        	/*.peek(statistics)
-        	.peek(r -> System.out.println(statistics))
-        	*/.collect(Collectors.toList());
+        	//.peek(statistics)
+        	//.peek(r -> System.out.println(statistics))
+        	.collect(Collectors.toList());
         	//.collect(EvolutionResult.toBestPhenotype());
         
         //System.out.println("---> collect.size(): " + collect.size());
-        EvolutionResult<IntegerGene, Double> lastEvolutionResult = collect.get(collect.size()-1);
+        EvolutionResult<IntegerGene, Double> lastEvolutionResult = streamCollectedIndividuals.get(streamCollectedIndividuals.size()-1);
         
         System.out.println("Going to perform the last evaluation...");
         
         FarsitePopulationEvaluator.getInstance().eval(lastEvolutionResult.getPopulation());
         
-        System.out.println("Last evaluation have been performed.");
+        System.out.println("Last evaluation has been performed.");
         
+        //add all individuals executions retrieved from cache
         Set<FarsiteExecution> allIndividuals = new TreeSet<>();
-        collect.forEach(r -> r.getGenotypes().forEach(gt -> {allIndividuals.add(cache.get(new FarsiteIndividual(gt)));}));
+        streamCollectedIndividuals.forEach(r -> r.getGenotypes().forEach(gt -> {allIndividuals.add(cache.get(new FarsiteIndividual(gt)));}));
         //Collections.sort(allIndividuals);
 
         List<FarsiteExecution> bestIndividuals = new ArrayList<>();
@@ -152,7 +153,7 @@ public class GeneticAlgorithm {
         for (int i = 0; i < NUMBER_OF_BEST_INDIVIDUALS; i++) {
         	FarsiteExecution individual = it.next();
         	bestIndividuals.add(individual);
-//			System.out.printf("Best Result %s: %s\n", i, individual);
+        	//System.out.printf("Best Result %s: %s\n", i, individual);
 		}
         
         //FarsiteIndividual bestIndividual = new FarsiteIndividual(evolutionResult.getBestPhenotype().getGenotype());

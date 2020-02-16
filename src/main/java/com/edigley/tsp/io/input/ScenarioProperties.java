@@ -237,6 +237,17 @@ public class ScenarioProperties {
 	}
 
 	public static void main(String[] args) throws Exception {
+		
+		File arkadiaFile = new File("/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/arkadia");
+		ScenarioProperties sp = new ScenarioProperties(arkadiaFile);
+		System.out.println(sp.startTime);
+		System.out.println(sp.endTime);
+		System.out.println(sp.timeToBeSimulated);
+		
+		System.out.println(Integer.valueOf("0943".trim())/100);
+		System.out.println(Integer.valueOf("1127".trim())/100);
+		
+		System.exit(1);
 
 		String scenarioDir = "/home/edigley/doutorado_uab/git/two-stage-prediction/playpen/fire-scenarios/jonquera/";
 

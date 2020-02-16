@@ -76,6 +76,10 @@ public class CLI {
 		logger.info("Overall execution finished.");
 	}
 
+	private static void runPrediction(CommandLine cmd) {
+		
+	}
+	
 	private static void recalculateFitnessForAllIndividuals(CommandLine cmd) throws ParseException {
 		logger.info("Going to recalculate fitness function to all individuals in the memoization file...");
 		
@@ -180,6 +184,7 @@ public class CLI {
 		} else { 
 			//normal execution to calibrate and find the best individuals
 			runCalibration(cmd);
+			runPrediction(cmd);
 		}
 		
 	}

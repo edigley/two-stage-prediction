@@ -2,7 +2,7 @@
 
 #echo "dry run"
 
-scenario="arkadia"
+scenario=$1
 evaluation=$2
 
 scenarioDir="../playpen/fire-scenarios/${scenario}"
@@ -10,12 +10,12 @@ scenarioFile="${scenarioDir}/scenario.ini"
 memoizationFile="../playpen/executions/${scenario}_farsite_execution_memoization_${evaluation}.txt"
 outputDir="../playpen/fire-scenarios/${scenario}/output"
 
-#exit 0;
-
-rm ../playpen/fire-scenarios/arkadia/{input,output}/*.???
+#continues if scenario file exists; leaves otherwise
+ls ${scenarioFile} || exit 1;
 
 #for seed in 90 91 92 93 94 98 99; do
-for seed in $1; do
+for seed in $3; do
+	rm ../playpen/fire-scenarios/${scenario}/{input,output}/*.???
 	scenarioSpec="execution_${evaluation}_seed_${seed}_1"
 	outputFile="../playpen/two_stage_prediction_${evaluation}_${seed}.txt"
 	cacheDir="../playpen/executions/cached/arkadia/${scenarioSpec}"
@@ -30,6 +30,9 @@ for seed in $1; do
 		-s    ${seed} \
 		-e    ${evaluation} \
 		| tee ${outputFile}
+
+	ls ${outputDir}/shape_1_1.shp || exit 2;
+
 	mkdir -p               ${cacheDir}/output/
 	mv ${outputDir}/*      ${cacheDir}/output/
 	mv ${outputFile}       ${cacheDir}/
@@ -54,7 +57,8 @@ for seed in $1; do
 	mv generation_??.gif generations/
 	cp ~/git/two-stage-prediction/src/main/resources/*.html generations/
 	cp ~/git/two-stage-prediction/src/main/resources/*.css  generations/
-	echo "eog ${jpgsDir}/${scenario}.gif"
+	#echo "eog ${jpgsDir}/${scenario}.gif"
+	echo "nautilus ${jpgsDir}/generations/"
 	cd ~/git/two-stage-prediction/target
 done;
 
