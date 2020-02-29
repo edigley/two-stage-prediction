@@ -21,10 +21,12 @@ public class Main {
 		+ " -m playpen/executions/jonquera_farsite_execution_memoization_agof.txt "
 		+ " -t 1800 " 
 		+ " -p 1 " 
+		+ " -calibrate "
+		+ " -predict "
 		+ " -e agof "
-		+ " -s 200 ";// 59873423 98075 47334  9876 720 123 321 159
+		+ " -s 200 ";
 		
-		String tspCMD_Arkadia = "" 
+		String tspCMD_Arkadia_Calibration = "" 
 		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
 		+ " -c playpen/fire-scenarios/arkadia/ " 
 		+ " -m playpen/executions/arkadia_farsite_execution_memoization_agof.txt "
@@ -42,6 +44,17 @@ public class Main {
 		+ " -p 1 "
 		+ " -predict "
 		+ " -b best_calibrated_results_1.txt "
+		+ " -e agof "
+		+ " -s 201 ";
+		
+		String tspCMD_Arkadia = "" 
+		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+		+ " -c playpen/fire-scenarios/arkadia/ " 
+		+ " -m playpen/executions/arkadia_farsite_execution_memoization_agof.txt "
+		+ " -t 1800 " 
+		+ " -p 1 "
+		+ " -calibrate "
+		+ " -predict "
 		+ " -e agof "
 		+ " -s 201 ";
 		
@@ -94,8 +107,9 @@ public class Main {
 				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
 		tspCMD = tspCMD_Compare;
 		tspCMD = tspCMD_Jonquera;
-		tspCMD = tspCMD_Arkadia;
 		tspCMD = tspCMD_Arkadia_Prediction;
+		tspCMD = tspCMD_Arkadia_Calibration;
+		tspCMD = tspCMD_Arkadia;
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);
 

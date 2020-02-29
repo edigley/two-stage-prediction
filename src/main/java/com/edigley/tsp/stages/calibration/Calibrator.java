@@ -1,4 +1,4 @@
-package com.edigley.tsp.calibration;
+package com.edigley.tsp.stages.calibration;
 
 import static com.edigley.tsp.ui.CLI.FARSITE;
 import static com.edigley.tsp.ui.CLI.SCENARIO_CONFIGURATION;
@@ -24,35 +24,22 @@ import com.edigley.tsp.executors.FarsiteExecutionMonitor;
 import com.edigley.tsp.executors.FarsiteExecutor;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
+import com.edigley.tsp.stages.Stage;
 import com.edigley.tsp.ui.CommandLineInterpreter;
 
 import io.jenetics.Optimize;
 
-public class Calibrator {
+public class Calibrator extends Stage {
 
 	private static final Logger logger = LoggerFactory.getLogger(Calibrator.class);
-	private static transient String msg;
-	
-	private CommandLine cmd;
-	
-	private File farsiteFile;
-	
-	private File scenarioDir;
-	
-	private ScenarioProperties scenarioProperties; 
 	
 	private GeneticAlgorithm geneticAlgorithm;
-	
-	private List<FarsiteExecution> results;
 
-	// auxiliary flags
-	private boolean prepared = false;
-	private boolean finished = false;
-	
 	public Calibrator(CommandLine cmd) {
-		this.cmd = cmd;
+		super(cmd);
 	}
 
+	@Override
 	public void prepare() throws java.text.ParseException, IOException, ParseException, NoSuchAlgorithmException {
 		
 		this.farsiteFile = (File) cmd.getParsedOptionValue(FARSITE);
@@ -86,39 +73,34 @@ public class Calibrator {
 		
 	}
 
-	public List<FarsiteExecution> run() throws java.text.ParseException, IOException, ParseException, NoSuchAlgorithmException {
-		assert !finished;
-		
-		if (!prepared) {
-			prepare();			
-		}
-		
-		this.results = geneticAlgorithm.run();
-		
-		finished = true;
-		
-		return this.results;
-	}
-
-	public void printSummaryStatistics(StopWatch stopWatch) {
+	@Override
+	public boolean printSummaryStatistics(StopWatch stopWatch) {
 		
 		if (this.finished && this.results != null && !this.results.isEmpty()) {
 			msg = "Best calibrated results:";
 			logger.info(msg);System.out.println(msg);			
 			this.results.stream().forEach(result -> {
 				msg = String.format("%s", result);
-				logger.info(msg);//System.out.println(msg);
+				logger.info(msg);System.out.println(msg);
 			});
+			return true;
 		} else {
-			msg = String.format("Calibrator: - No Result to be printed. The calibrator is not finished.");
-			logger.warn(msg);//System.err.println(msg);
+			msg = String.format("Calibrator: - No result to be printed because this calibrator is not finished.");
+			logger.warn(msg);System.err.println(msg);
+			return false;
 		}
 		
 	}
 
+	@Override
 	public void releaseResources() {
 		FarsitePopulationEvaluator.getInstance().release();
 		FarsiteExecutionMonitor.release();
+	}
+
+	@Override
+	protected List<FarsiteExecution> execute() {
+		return this.geneticAlgorithm.run();
 	}
 
 }

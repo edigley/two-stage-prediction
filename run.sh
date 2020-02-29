@@ -31,6 +31,8 @@ for seed in $3; do
 			-p      1 \
 			-s    ${seed} \
 			-e    ${evaluation} \
+			-calibrate \
+			-predict \
 			| tee ${outputFile}
 	fi
 

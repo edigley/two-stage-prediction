@@ -12,31 +12,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.edigley.tsp.calibration.Calibrator;
-import com.edigley.tsp.comparator.ComparisonMethod;
 import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
-import com.edigley.tsp.executors.FarsiteExecutor;
-import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.io.output.FarsiteOutputSaver;
+import com.edigley.tsp.stages.Stage;
+import com.edigley.tsp.stages.calibration.Calibrator;
+import com.edigley.tsp.stages.prediction.Predictor;
 import com.edigley.tsp.util.ErrorCode;
-import com.edigley.tsp.util.ExecutorServiceUtil;
-
-import io.jenetics.Optimize;
 
 public class CLI {
 
@@ -77,66 +67,48 @@ public class CLI {
 	public static final String USAGE = "usage";
 	
 	public static final String EXECUTION_LINE = "java -jar two-stage-prediction.jar";
-	
-	public static final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-	
-	private static List<FarsiteExecution> runCalibration(CommandLine cmd) throws ParseException, java.text.ParseException, IOException, NoSuchAlgorithmException {
-		logger.info("Going to start the calibration stage...");
-		logger.info("ScenarioProperties.seed                         : " + (Long) cmd.getParsedOptionValue(SEED));
-		
+
+	private static List<FarsiteExecution> runStage(Stage stage) throws ParseException, java.text.ParseException, IOException, NoSuchAlgorithmException {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		
-		Calibrator calibrator = new Calibrator(cmd);
+		stage.prepare();
 		
-		calibrator.prepare();
-		
-		List<FarsiteExecution> bestIndividuals = calibrator.run();
+		List<FarsiteExecution> executions = stage.run();
 
 		stopWatch.stop();
 		
-		calibrator.printSummaryStatistics(stopWatch);
+		stage.printSummaryStatistics(stopWatch);
 		
 		//it is crucial to release the resources and then be able to finish the application
-		calibrator.releaseResources();
+		stage.releaseResources();
+		
+		return executions;
+	}
+	
+	private static List<FarsiteExecution> runCalibrationStage(CommandLine cmd) throws ParseException, java.text.ParseException, IOException, NoSuchAlgorithmException {
+		logger.info("Going to start the calibration stage...");
+		logger.info("ScenarioProperties.seed                         : " + (Long) cmd.getParsedOptionValue(SEED));
+		
+		Calibrator calibrator = new Calibrator(cmd);
+		
+		List<FarsiteExecution> bestIndividuals = runStage(calibrator);
 
 		logger.info("Calibration finished.");
 		
 		return bestIndividuals;
 	}
 
-	private static void runPrediction(int generation, List<FarsiteExecution> bestIndividuals, FarsiteExecutor farsiteExecutor) throws ParseException, InterruptedException {
+	private static List<FarsiteExecution> runPredictionStage(CommandLine cmd, List<FarsiteExecution> bestIndividuals) throws ParseException, InterruptedException, NoSuchAlgorithmException, java.text.ParseException, IOException {
 		logger.info("Going to start the prediction stage...");
 		
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
+		Predictor predictor = new Predictor(cmd, bestIndividuals);
 		
-		CountDownLatch latch = new CountDownLatch(bestIndividuals.size());
-
-		final AtomicInteger atomicIdCount = new AtomicInteger(0);
-		
-		bestIndividuals.stream()
-			.map(b -> b.getIndividual())
-			.forEach( individual -> {
-				executorService.submit(() -> {
-					try {
-						farsiteExecutor.run(generation, atomicIdCount.incrementAndGet(), individual);
-						String msg = String.format("Finished prediction for Individual -> %s ", individual);
-						logger.info(msg);System.out.println(msg);
-					} catch (Exception e) { 
-						String msg = String.format("Prediction failed for Individual -> %s -> %s", individual, e.getMessage());
-						logger.error(msg, e);System.err.println(msg); 
-					} finally {
-						latch.countDown();
-					}
-				});
-			});
-
-		latch.await(farsiteExecutor.getTimeout()*3, TimeUnit.SECONDS);
-		
-		stopWatch.stop();
+		List<FarsiteExecution> predictions = runStage(predictor);
 		
 		logger.info("Prediction finished.");
+		
+		return predictions;
 	}
 	
 	private static void recalculateFitnessForAllIndividuals(CommandLine cmd) throws ParseException {
@@ -175,91 +147,11 @@ public class CLI {
 		return savedFile;
 	}
 
-	public static void main(String[] args) throws Exception {
-		
-		Locale.setDefault(new Locale("en", "US"));
-		
-		CommandLine cmd = parseCommandLine(args, CommandLineInterpreter.prepareOptions(), HELP, USAGE, EXECUTION_LINE);
-		
-		if (cmd.hasOption(COMPARE)) { // generates a jpg image comparing prediction and actual fire perimeter 
-			generatePredictionImageComparison(cmd);
-		} else if (cmd.hasOption(RECALCULATE)) { // recalculate fitness function to all individuals in the memoization file
-			recalculateFitnessForAllIndividuals(cmd);
-		} else { 
-			
-			List<FarsiteExecution> bestIndividuals = null;
-			
-			if (cmd.hasOption(CALIBRATE)) { // execution to calibrate and find the best individuals 
-				bestIndividuals = runCalibration(cmd);
-				saveBestIndividuals(cmd, bestIndividuals);
-			}
-			
-			if (cmd.hasOption(PREDICT)) { // execution to predict fire spread
-
-				FarsiteExecutor farsiteExecutor = defineFarsiteExecutor(cmd);
-				
-				if (bestIndividuals == null) {
-					System.out.println("Going to run prediction for best individuals provided by the user");
-					bestIndividuals = defineBestIndividuals(cmd);
-				} else {
-					System.out.println("Going to run prediction for calibrated best individuals");
-				}
-
-				int predictionGeneration = definePredictionGeneration(cmd);
-				runPrediction(predictionGeneration, bestIndividuals, farsiteExecutor);
-				
-				ExecutorServiceUtil.release(executorService);
-			}
-
-			//farsite wrapper running
-			//if (fireError.equals(Double.NaN) || fireError > 9999) {
-			//	logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
-			//Long maxSimulatedTime = evaluator.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
-			//Long maxSimulatedTime = evaluator.getSimulatedTime(predictionFile);
-			//if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
-			/*} else {
-				String msg = String.format("%2s %3s %s -> [%s] - NaN", generation, individualId, cachedExecution, currentThread.getName());
-				logger.info(msg);System.out.println(msg);
-				error = Double.NaN;
-			}*/
-			//latch.await(executor.getTimeout()*3, TimeUnit.SECONDS);
-			//latch.await();
-		}
-		
-	}
-
-	private static int definePredictionGeneration(CommandLine cmd) throws ParseException, FileNotFoundException, IOException {
-		File scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
-		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
-		int predictionGeneration = scenarioProperties.getNumGenerations() + 1;
-		return predictionGeneration;
-	}
-
-	private static FarsiteExecutor defineFarsiteExecutor(CommandLine cmd)
-			throws NoSuchAlgorithmException, ParseException, FileNotFoundException, IOException {
-		Pair<ComparisonMethod, Optimize> comparisonCriteria = CommandLineInterpreter.defineComparisonCriteria(cmd);
-		
-		FarsiteExecutor farsiteExecutor = CommandLineInterpreter.prepareFarsiteExecutor(cmd);
-		File scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
-		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
-		farsiteExecutor.setScenarioProperties(scenarioProperties);
-
-		ComparisonMethod comparator = comparisonCriteria.getLeft();
-		Optimize optimizationStrategy = comparisonCriteria.getRight();
-		
-		comparator.setIgnitionPerimeterFile(scenarioProperties.getPerimeterAtT1File());
-		
-		FarsiteIndividualEvaluator evaluator = new FarsiteIndividualEvaluator(comparator);
-		farsiteExecutor.setFitnessEvaluator(evaluator);
-		return farsiteExecutor;
-	}
-
-	private static List<FarsiteExecution> defineBestIndividuals(CommandLine cmd)
-			throws ParseException, FileNotFoundException {
+	private static List<FarsiteExecution> defineBestIndividuals(CommandLine cmd) throws ParseException, FileNotFoundException {
 		if (cmd.hasOption(BEST_INDIVIDUALS_FILE)) {
 			File bestIndividualsFile = (File) cmd.getParsedOptionValue(BEST_INDIVIDUALS_FILE);
 			assertsFilesExist(bestIndividualsFile);
-			return readIndividualsFile(bestIndividualsFile);
+			return readIndividuals(bestIndividualsFile);
 			
 		} else {
 			System.err.println("No best individuals file was informed to run the prediction phase.");
@@ -268,7 +160,7 @@ public class CLI {
 		}
 	}
 
-	private static List<FarsiteExecution> readIndividualsFile(File bestIndividualsFile) throws FileNotFoundException {
+	private static List<FarsiteExecution> readIndividuals(File bestIndividualsFile) throws FileNotFoundException {
 
 		Scanner sc = new Scanner(bestIndividualsFile);
 		String firstLine = sc.nextLine(); 
@@ -307,6 +199,54 @@ public class CLI {
 		}
 		fw.close();
 	}
+
+	public static void main(String[] args) throws Exception {
+		
+		Locale.setDefault(new Locale("en", "US"));
+		
+		CommandLine cmd = parseCommandLine(args, CommandLineInterpreter.prepareOptions(), HELP, USAGE, EXECUTION_LINE);
+		
+		if (cmd.hasOption(COMPARE)) { // generates a jpg image comparing prediction and actual fire perimeter 
+			generatePredictionImageComparison(cmd);
+		} else if (cmd.hasOption(RECALCULATE)) { // recalculate fitness function to all individuals in the memoization file
+			recalculateFitnessForAllIndividuals(cmd);
+		} else { 
+			
+			List<FarsiteExecution> bestIndividuals = null;
+			
+			if (cmd.hasOption(CALIBRATE)) { // execution to calibrate and find the best individuals 
+				bestIndividuals = runCalibrationStage(cmd);
+				saveBestIndividuals(cmd, bestIndividuals);
+			}
+			
+			if (cmd.hasOption(PREDICT)) { // execution to predict fire spread
+
+				if (bestIndividuals == null) {
+					System.out.println("Going to run prediction for best individuals provided by the user");
+					bestIndividuals = defineBestIndividuals(cmd);
+				} else {
+					System.out.println("Going to run prediction for calibrated best individuals");
+				}
+
+				runPredictionStage(cmd, bestIndividuals);
+				
+			}
+
+			//farsite wrapper running
+			//if (fireError.equals(Double.NaN) || fireError > 9999) {
+			//	logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
+			//Long maxSimulatedTime = evaluator.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
+			//Long maxSimulatedTime = evaluator.getSimulatedTime(predictionFile);
+			//if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
+			/*} else {
+				String msg = String.format("%2s %3s %s -> [%s] - NaN", generation, individualId, cachedExecution, currentThread.getName());
+				logger.info(msg);System.out.println(msg);
+				error = Double.NaN;
+			}*/
+			//latch.await(executor.getTimeout()*3, TimeUnit.SECONDS);
+			//latch.await();
+		}
+		
+	}
 	
 }
-

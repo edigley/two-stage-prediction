@@ -1,4 +1,4 @@
-package com.edigley.tsp.calibration;
+package com.edigley.tsp.stages.calibration;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;

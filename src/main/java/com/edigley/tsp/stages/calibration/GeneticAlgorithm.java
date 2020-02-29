@@ -1,4 +1,4 @@
-package com.edigley.tsp.calibration;
+package com.edigley.tsp.stages.calibration;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
