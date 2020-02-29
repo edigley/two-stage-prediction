@@ -26,7 +26,6 @@ public class FarsiteIndividualEvaluator {
 	}
 	
 	public Pair<Long, Double> getFireEvolution(File predictionFile, File perimeterFile) throws IOException {
-		//return ImmutablePair.of(getSimulatedTime(predictionFile), this.comparator.compare(predictionFile, perimeterFile));
 		return getFireEvolution(predictionFile, perimeterFile, this.comparator);
 	}
 

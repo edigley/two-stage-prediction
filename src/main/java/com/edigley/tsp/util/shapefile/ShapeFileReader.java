@@ -17,9 +17,11 @@ import org.opengis.feature.GeometryAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.TopologyException;
 
 public class ShapeFileReader {
@@ -50,8 +52,16 @@ public class ShapeFileReader {
 			// Polygon pB = gf.createPolygon(lB.getCoordinates());
 			// Geometry geometry = ((GeometryCollection)
 			// it.next().getDefaultGeometryProperty().getValue()).convexHull();
-			Geometry geometry = gf.createPolygon(
-					((GeometryCollection) it.next().getDefaultGeometryProperty().getValue()).getCoordinates());
+			Geometry geometry;
+			Feature next = it.next();
+			try {
+				GeometryCollection value = (GeometryCollection) next.getDefaultGeometryProperty().getValue();
+				Coordinate[] coordinates = value.getCoordinates();
+				geometry = gf.createPolygon(coordinates);
+			} catch (ClassCastException e) {
+				Point thePoint = (Point) next.getDefaultGeometryProperty().getValue();
+				geometry = gf.createPolygon(thePoint.buffer(0.000000001).getCoordinates());
+			}
 
 			try {
 				while (it.hasNext()) {

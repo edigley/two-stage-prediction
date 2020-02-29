@@ -75,25 +75,24 @@ public class FarsiteExecutor {
 			logger.error("There was an error when trying to execute individual: " + e.getMessage(), e);
 		}
 		
-		//if (fireError.equals(Double.NaN) || fireError > 9999) {
-		//	logger.error("fireError == Double.NaN  or fireError > 9999: " + fireError);
-			File perimeterFile = scenarioProperties.getPerimeterAtT1File();
-			File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
-			fireError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, scenarioProperties.getTimeToBeSimulated());
-			
-			try {
-				logger.info("Going to save prediction result as a .jpg image: " + predictionFile.getAbsolutePath());
-				File layerExtentFile = scenarioProperties.getLandscapeLayerExtentFile();
-				File jpgFile = FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile, scenarioProperties);
-				if (jpgFile != null) {
-					logger.info("Saved to image: " + jpgFile.getAbsolutePath());
-				}
-			} catch(Exception e) {
-				System.err.printf("There was an error when trying to save the .jpg image for prediction file: %s \n", predictionFile.getAbsolutePath());
-				logger.warn("There was an error when trying to save the .jpg image for prediction file: " + predictionFile.getAbsolutePath());
-				e.printStackTrace();
+		File perimeterFile = scenarioProperties.getPerimeterAtT1File();
+		File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
+		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
+		
+		fireError = evaluator != null ? evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, timeToBeSimulated) : 999;
+		
+		try {
+			logger.info("Going to save prediction result as a .jpg image: " + predictionFile.getAbsolutePath());
+			File layerExtentFile = scenarioProperties.getLandscapeLayerExtentFile();
+			File jpgFile = FarsiteOutputSaver.saveAsJPG(perimeterFile, predictionFile, layerExtentFile, scenarioProperties);
+			if (jpgFile != null) {
+				logger.info("Saved to image: " + jpgFile.getAbsolutePath());
 			}
-		//}
+		} catch(Exception e) {
+			System.err.printf("There was an error when trying to save the .jpg image for prediction file: %s \n", predictionFile.getAbsolutePath());
+			logger.warn("There was an error when trying to save the .jpg image for prediction file: " + predictionFile.getAbsolutePath(), e);
+			//e.printStackTrace();
+		}
 		
 		try {
 			//Long maxSimulatedTime = evaluator.getSimulatedTime(scenarioProperties.getShapeFileOutput(generation, id));
@@ -115,7 +114,7 @@ public class FarsiteExecutor {
 		
 		return execution;
 	}
-	
+
 	private Double execute(long generation, long id, FarsiteIndividual individual) throws TSPFarsiteExecutionException {
 		String commandPattern = "%s scenario.ini run %s   %s   %s | grep \"adjustmentError\" | head -n1 | awk '{print $9}'";
 		String command = String.format(commandPattern, this.farsiteFile.getAbsolutePath(), toCmdArg(generation, id, individual), timeout, parallelizationLevel);
@@ -127,7 +126,9 @@ public class FarsiteExecutor {
 		try {
 			Process process = Runtime.getRuntime().exec(args, null, scenarioDir);
 			
-			FarsiteExecutionMonitor.monitorFarsiteExecution(generation, id, individual, scenarioProperties, process);
+			if ((generation <= scenarioProperties.getNumGenerations())) {
+				FarsiteExecutionMonitor.monitorFarsiteExecution(generation, id, individual, scenarioProperties, process);
+			}
 			
 			Double fireError = ProcessUtil.monitorProcessExecution(process, timeout);
 			return fireError;

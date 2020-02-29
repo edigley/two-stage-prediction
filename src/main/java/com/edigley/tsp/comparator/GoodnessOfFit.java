@@ -14,6 +14,7 @@ import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
 import com.edigley.tsp.util.shapefile.ShapeFileUtil;
 import com.edigley.tsp.util.shapefile.ShapeFileWriter;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 
 public class GoodnessOfFit implements ComparisonMethod {
@@ -103,7 +104,8 @@ public class GoodnessOfFit implements ComparisonMethod {
 	public void setIgnitionPerimeterFile(File ignitionPerimeterFile) {
 		this.ignitionPerimeterFile = ignitionPerimeterFile;
 		try {
-			this.ignitionPerimeterMap = ShapeFileUtil.toMultiPolygon(ShapeFileReader.getGeometriesPoligon(this.ignitionPerimeterFile));
+			Geometry geometriesPoligon = ShapeFileReader.getGeometriesPoligon(this.ignitionPerimeterFile);
+			this.ignitionPerimeterMap = ShapeFileUtil.toMultiPolygon(geometriesPoligon);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

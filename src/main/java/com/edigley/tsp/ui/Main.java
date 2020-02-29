@@ -15,14 +15,35 @@ public class Main {
 		String cmdPattern = "two-stage-prediction.jar -f %s -s %s -m %s -t %s";
 		String tspCMD = String.format(cmdPattern, farsiteExecutor, scenarioDir, memoizationFile, timeout);
 		
-		String tspCMD_TSP = "" 
+		String tspCMD_Jonquera = "" 
 		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
 		+ " -c playpen/fire-scenarios/jonquera/ " 
 		+ " -m playpen/executions/jonquera_farsite_execution_memoization_agof.txt "
 		+ " -t 1800 " 
 		+ " -p 1 " 
 		+ " -e agof "
-		+ " -s 51 ";// 59873423 98075 47334  9876 720 123 321 159
+		+ " -s 200 ";// 59873423 98075 47334  9876 720 123 321 159
+		
+		String tspCMD_Arkadia = "" 
+		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+		+ " -c playpen/fire-scenarios/arkadia/ " 
+		+ " -m playpen/executions/arkadia_farsite_execution_memoization_agof.txt "
+		+ " -t 1800 " 
+		+ " -p 1 "
+		+ " -calibrate "
+		+ " -e agof "
+		+ " -s 201 ";
+		
+		String tspCMD_Arkadia_Prediction = "" 
+		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
+		+ " -c playpen/fire-scenarios/arkadia/ " 
+		+ " -m playpen/executions/arkadia_farsite_execution_memoization_agof.txt "
+		+ " -t 1800 " 
+		+ " -p 1 "
+		+ " -predict "
+		+ " -b best_calibrated_results_1.txt "
+		+ " -e agof "
+		+ " -s 201 ";
 		
 		// to generate a .jpg file referent to the prediction shape file
 		String tspCMD_Compare = ""
@@ -72,7 +93,9 @@ public class Main {
 				+ " -perimeter  /home/edigley/git/two-stage-prediction/playpen/intermediate_polygons/Per2_utm.shp "
 				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
 		tspCMD = tspCMD_Compare;
-		
+		tspCMD = tspCMD_Jonquera;
+		tspCMD = tspCMD_Arkadia;
+		tspCMD = tspCMD_Arkadia_Prediction;
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);
 

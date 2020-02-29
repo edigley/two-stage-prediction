@@ -40,6 +40,7 @@ import com.edigley.tsp.comparator.NormalizedSymmetricDifference;
 import com.edigley.tsp.fitness.FarsiteIndividualEvaluator;
 import com.edigley.tsp.io.input.ScenarioProperties;
 import com.edigley.tsp.util.shapefile.ShapeFileReader;
+import com.vividsolutions.jts.geom.TopologyException;
 
 public class FarsiteOutputSaver {
 
@@ -54,13 +55,13 @@ public class FarsiteOutputSaver {
 		DataStore layerExtentDataStore = null;
 		
 		long expectedSimulatedTime = scenarioProperties.getTimeToBeSimulated();
+
+		// Step 1: Create map
+		MapContent map = new MapContent();
+		map.setTitle("Farsite Scenario");
 		
 		try {
 			
-			// Step 1: Create map
-			MapContent map = new MapContent();
-			map.setTitle("Farsite Scenario");
-	
 			perimeterFiledataStore = ShapeFileReader.getDataStore(perimeterFile);
 			predictionFileDataStore = ShapeFileReader.getDataStore(predictionFile);
 			layerExtentDataStore = ShapeFileReader.getDataStore(landscapeExtentFile);
@@ -135,8 +136,7 @@ public class FarsiteOutputSaver {
 			
 			savedFile = savedAsJPG ? jpgFile : null;
 			
-			map.dispose();
-		} catch (IOException | FactoryException e){
+		} catch (IOException | FactoryException | TopologyException e){
 			logger.error("There was an exception when trying to generate the .jpg image for prediction file " + predictionFile.getAbsolutePath(), e);
 			throw new RuntimeException(e);
 		} finally {
@@ -148,6 +148,9 @@ public class FarsiteOutputSaver {
 			}
 			if (layerExtentDataStore != null) {
 				layerExtentDataStore.dispose();
+			}
+			if (map != null) {
+				map.dispose();
 			}
 		}
 		

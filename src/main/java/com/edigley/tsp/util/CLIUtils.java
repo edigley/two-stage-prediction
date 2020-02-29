@@ -50,7 +50,7 @@ public class CLIUtils {
 	
 	public static void assertsFilesExist(File...files) {
 		for (File file : files) {
-			if (!file.exists()) {
+			if (file == null || !file.exists()) {
 				throw new RuntimeException("File doesn't exist: " + file);	
 			}
 		}

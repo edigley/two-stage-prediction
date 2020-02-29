@@ -13,6 +13,7 @@ import com.edigley.tsp.entity.FarsiteExecution;
 import com.edigley.tsp.entity.FarsiteIndividual;
 import com.edigley.tsp.executors.FarsiteExecutionMemoization;
 import com.edigley.tsp.executors.FarsiteExecutor;
+import com.edigley.tsp.util.ExecutorServiceUtil;
 
 import io.jenetics.Genotype;
 import io.jenetics.IntegerGene;
@@ -89,7 +90,6 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 			String msg = "Going to wait for all the " + nOfNonEvaluated + " threads in order to finish...";
 			logger.debug(msg);System.out.println(msg);
 			latch.await(executor.getTimeout()*3, TimeUnit.SECONDS);
-			//latch.await();
 			msg = "All threads have been finished successfully.";
 			logger.debug(msg);System.out.println(msg);
 		} catch (InterruptedException e) {
@@ -127,7 +127,7 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		Thread currentThread = Thread.currentThread();
 		
 		String msg = String.format("Individual  started: [ %2s %3s ] %s -> [%s]", generation, individualId, individual, currentThread.getName());
-		logger.info(msg);//System.out.println(msg);
+		logger.info(msg);
 		FarsiteExecution execution = executor.run(GeneticAlgorithm.generation, individualId, individual);
 		cache.add(execution);
 		msg = String.format(       "Individual finished: [ %2s %3s ] %s -> [%s]", generation, individualId, execution, currentThread.getName());
@@ -142,33 +142,16 @@ public class FarsitePopulationEvaluator implements Evaluator<IntegerGene, Double
 		FarsiteExecution cachedExecution = cache.get(individual);
 		Double error = null;
 		
-		//if (cachedExecution.getMaxSimulatedTime().equals(executor.getSimulatedTime())) {
-			String msg = String.format("Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", generation, individualId, cachedExecution, currentThread.getName());
-			logger.info(msg);//System.out.println(msg);
-			System.out.println(String.format(" %3s - %3s ==> [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName()));
-			error = cachedExecution.getFireError();
-		/*} else {
-			String msg = String.format("%2s %3s %s -> [%s] - NaN", generation, individualId, cachedExecution, currentThread.getName());
-			logger.info(msg);System.out.println(msg);
-			error = Double.NaN;
-		}*/
+		String msg = String.format("Individual finished: [ %2s %3s ] %s -> [%s] - CACHED", generation, individualId, cachedExecution, currentThread.getName());
+		logger.info(msg);
+		System.out.println(String.format(" %3s - %3s ==> [ %2s %3s ] %s -> [%s] - CACHED", executionIdCount.incrementAndGet(), executionIdPerGenerationCount.incrementAndGet(), generation, individualId, cachedExecution, currentThread.getName()));
+		error = cachedExecution.getFireError();
+
 		return error;
 	}
 
 	public void release() {
-		msg = "Going to shutdown the thread pool...";
-		logger.debug(msg);System.out.println(msg);
-		executorService.shutdownNow();
-		try {
-			msg = "Going to wait for all the threads in order to finish...";
-			logger.debug(msg);System.out.println(msg);
-			executorService.awaitTermination(60, TimeUnit.SECONDS);
-			msg = "All threads have been finished successfully.";
-			logger.debug(msg);System.out.println(msg);
-		} catch (InterruptedException e) {
-			msg = "Error when trying to shutdown executor service";
-			logger.info(msg, e);System.err.println(msg + " " + e.getMessage());
-		}
+		ExecutorServiceUtil.release(executorService);
 	}
 	
 	private void populationSummary(String position, int nOfEvaluationCalls, Seq<Phenotype<IntegerGene, Double>> population) {
