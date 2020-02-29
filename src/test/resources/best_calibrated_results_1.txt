@@ -1,0 +1,3 @@
+t1 t10 t100 t1000 t10000 ws wd th hh adj fireError maxSimulatedTime parallelizationLevel executionTime predictionFile
+ 15  14   4  46  78   37  344  40  64  0.6  0.316179     120      1      6 playpen/fire-scenarios/arkadia/output/shape_4_278.shp
+

@@ -38,6 +38,7 @@ public class ScenarioProperties {
 	
 	private File perimeterAtT0File;
 	private File perimeterAtT1File;
+	private File perimeterAtT2File;
 	
 	private File inputDir;
 	private File outputDir;
@@ -104,6 +105,7 @@ public class ScenarioProperties {
 		
 		this.perimeterAtT0File = new File(scenarioDir, scenarioProperties.getProperty("ignitionFile"));
 		this.perimeterAtT1File = new File(scenarioDir, scenarioProperties.getProperty("real_fire_map_t1").trim().replace(".asc", ".shp"));
+		this.perimeterAtT2File = new File(scenarioDir, scenarioProperties.getProperty("real_fire_map_t2").trim().replace(".asc", ".shp"));
 		
 		this.inputDir = new File(scenarioDir, scenarioProperties.getProperty("input_path").trim());
 		this.outputDir = new File(scenarioDir, scenarioProperties.getProperty("output_path").trim());
@@ -279,6 +281,10 @@ public class ScenarioProperties {
 
 	public File getBestIndividualsFile() {
 		return this.bestIndividualsFile;
+	}
+
+	public File getPerimeterAtT2File() {
+		return perimeterAtT2File;
 	}
 
 }

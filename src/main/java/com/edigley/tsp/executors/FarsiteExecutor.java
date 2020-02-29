@@ -59,8 +59,12 @@ public class FarsiteExecutor {
 	public static String toCmdArg(long generation, long id, FarsiteIndividual individual) {
 		return generation + " " + id + " " + individual.toString();// + " 1";
 	}
-	
+
 	public FarsiteExecution run(long generation, long id, FarsiteIndividual individual) throws RuntimeException {
+		return this.run(generation, id, individual, false);
+	}
+	
+	public FarsiteExecution run(long generation, long id, FarsiteIndividual individual, boolean isPrediction) throws RuntimeException {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		
@@ -75,11 +79,12 @@ public class FarsiteExecutor {
 			logger.error("There was an error when trying to execute individual: " + e.getMessage(), e);
 		}
 		
-		File perimeterFile = scenarioProperties.getPerimeterAtT1File();
+		File perimeterFile = isPrediction ? scenarioProperties.getPerimeterAtT2File() : scenarioProperties.getPerimeterAtT1File();
 		File predictionFile = scenarioProperties.getShapeFileOutput(generation, id);
 		long timeToBeSimulated = scenarioProperties.getTimeToBeSimulated();
 		
-		fireError = evaluator != null ? evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, timeToBeSimulated) : 999;
+		//fireError = evaluator != null ? evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, timeToBeSimulated) : 999;
+		fireError = evaluator.calculateWeightedPredictionError(predictionFile, perimeterFile, timeToBeSimulated);
 		
 		try {
 			logger.info("Going to save prediction result as a .jpg image: " + predictionFile.getAbsolutePath());

@@ -1,0 +1,12 @@
+t1 t10 t100 t1000 t10000 ws wd th hh adj fireError maxSimulatedTime parallelizationLevel executionTime predictionFile
+ 15  14   4  46  78   37  344  40  64  0.6  0.316179     120      1      6 playpen/fire-scenarios/arkadia/output/shape_4_278.shp
+ 15  14  14  46  71   38  344  31  64  0.6  0.315035     120      1      7 playpen/fire-scenarios/arkadia/output/shape_11_584.shp
+ 14  14   4  46  81   34  343  40  64  0.9  0.312890     120      1      8 playpen/fire-scenarios/arkadia/output/shape_11_566.shp
+ 15   9   4  46  71   34  344  50  64  0.9  0.311968     120      1      7 playpen/fire-scenarios/arkadia/output/shape_11_575.shp
+ 15  11   4  70  78   37  344  40  64  1.5  0.306340     120      1      7 playpen/fire-scenarios/arkadia/output/shape_11_585.shp
+ 15  14   4  46  71   34  343  40  64  0.9  0.302667     120      1      4 playpen/fire-scenarios/arkadia/output/shape_10_527.shp
+ 15  10   4  46  78   37  344  40  35  1.5  0.302455     120      1      9 playpen/fire-scenarios/arkadia/output/shape_10_556.shp
+ 15  14   4  46  71   34  344  40  64  0.9  0.302390     120      1      3 playpen/fire-scenarios/arkadia/output/shape_7_427.shp
+ 15  14  11  46  71   34  343  40  64  0.9  0.302383     120      1      7 playpen/fire-scenarios/arkadia/output/shape_10_548.shp
+ 15  14  14  46  71   34  344  40  64  0.9  0.301916     120      1      6 playpen/fire-scenarios/arkadia/output/shape_10_534.shp
+

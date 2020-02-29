@@ -94,7 +94,7 @@ public class Predictor extends Stage {
 				executorService.submit(() -> {
 					try {
 						int predictionGeneration = definePredictionGeneration(cmd);
-						FarsiteExecution prediction = farsiteExecutor.run(predictionGeneration, atomicIdCount.incrementAndGet(), individual);
+						FarsiteExecution prediction = farsiteExecutor.run(predictionGeneration, atomicIdCount.incrementAndGet(), individual, true);
 						this.results.add(prediction);
 						msg = String.format("Finished prediction for Individual -> %s ", individual);
 						logger.info(msg);System.out.println(msg);

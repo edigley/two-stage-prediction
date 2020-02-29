@@ -43,7 +43,7 @@ public class Main {
 		+ " -t 1800 " 
 		+ " -p 1 "
 		+ " -predict "
-		+ " -b best_calibrated_results_1.txt "
+		+ " -b src/test/resources/best_calibrated_results_1.txt "
 		+ " -e agof "
 		+ " -s 201 ";
 		
@@ -107,9 +107,9 @@ public class Main {
 				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
 		tspCMD = tspCMD_Compare;
 		tspCMD = tspCMD_Jonquera;
-		tspCMD = tspCMD_Arkadia_Prediction;
 		tspCMD = tspCMD_Arkadia_Calibration;
 		tspCMD = tspCMD_Arkadia;
+		tspCMD = tspCMD_Arkadia_Prediction;
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);
 
