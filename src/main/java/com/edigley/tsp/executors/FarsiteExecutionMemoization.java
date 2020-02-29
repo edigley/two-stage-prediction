@@ -133,8 +133,6 @@ public class FarsiteExecutionMemoization {
 				executions.values().stream().forEach(execution -> {this.add(execution);});
 			}
 			
-			
-			
 		} catch (IOException e) {
 			msg = String.format("Error when loading memoization file: %s", e.getMessage());
 			logger.error(msg);

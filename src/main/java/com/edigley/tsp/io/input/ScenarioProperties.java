@@ -25,10 +25,10 @@ public class ScenarioProperties {
 	public static final double RECOMBINATION_PROBABILITY = 0.4;
 	public static final double MUTATION_PROBABILITY = 0.1;
 
-	//Coordinate Reference System
+	// Coordinate Reference System
 	public static final String CRS = "EPSG:4326";
 
-	public static Long EXPECTED_SIMULATED_TIME = null;// = 480L;
+	public static Long EXPECTED_SIMULATED_TIME = null;
 	
 	private Properties scenarioProperties;
 
@@ -75,6 +75,8 @@ public class ScenarioProperties {
 
 	private File landscapeLayerExtentFile;
 
+	private File bestIndividualsFile;
+
 	public ScenarioProperties(File scenarioDir) throws FileNotFoundException, IOException {
 		assert scenarioDir.exists();
 		scenarioFile = new File(scenarioDir, SCENARIO_FILE_NAME);
@@ -90,6 +92,8 @@ public class ScenarioProperties {
 		
 		this.landscapeFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeFile"));
 		this.landscapeLayerExtentFile = new File(scenarioDir, scenarioProperties.getProperty("landscapeLayerExtentFile"));
+		
+		this.bestIndividualsFile = new File(scenarioDir, scenarioProperties.getProperty("best_individuals"));
 		
 		assert landscapeFile.exists() : "Landscape file is mandatory: " + landscapeFile.getAbsolutePath();
 		
@@ -271,6 +275,10 @@ public class ScenarioProperties {
 
 		System.out.println(p1File);
 		System.out.println(outputFile);
+	}
+
+	public File getBestIndividualsFile() {
+		return this.bestIndividualsFile;
 	}
 
 }

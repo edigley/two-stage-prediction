@@ -5,6 +5,7 @@ import static com.edigley.tsp.util.CLIUtils.parseCommandLine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -180,35 +181,31 @@ public class CLI {
 		
 		CommandLine cmd = parseCommandLine(args, CommandLineInterpreter.prepareOptions(), HELP, USAGE, EXECUTION_LINE);
 		
-		if (cmd.hasOption(COMPARE)) { 
-			//generates a jpg image comparing prediction and actual fire perimeter 
+		if (cmd.hasOption(COMPARE)) { // generates a jpg image comparing prediction and actual fire perimeter 
 			generatePredictionImageComparison(cmd);
-		} else if (cmd.hasOption(RECALCULATE)) { 
-			//recalculate fitness function to all individuals in the memoization file
+		} else if (cmd.hasOption(RECALCULATE)) { // recalculate fitness function to all individuals in the memoization file
 			recalculateFitnessForAllIndividuals(cmd);
 		} else { 
 			
 			List<FarsiteExecution> bestIndividuals = null;
 			
-			if (cmd.hasOption(CALIBRATE)) { //normal execution to calibrate and find the best individuals 
+			if (cmd.hasOption(CALIBRATE)) { // execution to calibrate and find the best individuals 
 				bestIndividuals = runCalibration(cmd);
+				saveBestIndividuals(cmd, bestIndividuals);
 			}
 			
-			if (cmd.hasOption(PREDICT)) { 
+			if (cmd.hasOption(PREDICT)) { // execution to predict fire spread
 
-				File scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
-				ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
-				int predictionGeneration = scenarioProperties.getNumGenerations() + 1;
-				
 				FarsiteExecutor farsiteExecutor = defineFarsiteExecutor(cmd);
 				
 				if (bestIndividuals == null) {
-					bestIndividuals = readBestIndividuals(cmd);
 					System.out.println("Going to run prediction for best individuals provided by the user");
+					bestIndividuals = defineBestIndividuals(cmd);
 				} else {
 					System.out.println("Going to run prediction for calibrated best individuals");
 				}
-				
+
+				int predictionGeneration = definePredictionGeneration(cmd);
 				runPrediction(predictionGeneration, bestIndividuals, farsiteExecutor);
 				
 				ExecutorServiceUtil.release(executorService);
@@ -231,6 +228,13 @@ public class CLI {
 		
 	}
 
+	private static int definePredictionGeneration(CommandLine cmd) throws ParseException, FileNotFoundException, IOException {
+		File scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
+		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
+		int predictionGeneration = scenarioProperties.getNumGenerations() + 1;
+		return predictionGeneration;
+	}
+
 	private static FarsiteExecutor defineFarsiteExecutor(CommandLine cmd)
 			throws NoSuchAlgorithmException, ParseException, FileNotFoundException, IOException {
 		Pair<ComparisonMethod, Optimize> comparisonCriteria = CommandLineInterpreter.defineComparisonCriteria(cmd);
@@ -250,7 +254,7 @@ public class CLI {
 		return farsiteExecutor;
 	}
 
-	private static List<FarsiteExecution> readBestIndividuals(CommandLine cmd)
+	private static List<FarsiteExecution> defineBestIndividuals(CommandLine cmd)
 			throws ParseException, FileNotFoundException {
 		if (cmd.hasOption(BEST_INDIVIDUALS_FILE)) {
 			File bestIndividualsFile = (File) cmd.getParsedOptionValue(BEST_INDIVIDUALS_FILE);
@@ -259,7 +263,7 @@ public class CLI {
 			
 		} else {
 			System.err.println("No best individuals file was informed to run the prediction phase.");
-			System.exit(99);
+			System.exit(ErrorCode.NONEXISTENT_BEST_INDIVIDUALS_FILE);
 			return null;
 		}
 	}
@@ -286,6 +290,22 @@ public class CLI {
 		sc.close();
 		
 		return bestIndividuals;
+	}
+
+	private static void saveBestIndividuals(CommandLine cmd, List<FarsiteExecution> bestIndividuals) throws IOException, ParseException {
+		File scenarioDir = (File) cmd.getParsedOptionValue(SCENARIO_CONFIGURATION);
+		ScenarioProperties scenarioProperties = new ScenarioProperties(scenarioDir);
+		File bestIndividualsFile = scenarioProperties.getBestIndividualsFile();
+		save(bestIndividualsFile, bestIndividuals);
+	}
+	
+	private static void save(File outputFile, List<FarsiteExecution> executions) throws IOException {
+		FileWriter fw = new FileWriter(outputFile, true);
+		for (FarsiteExecution execution : executions) {
+			fw.append(execution.toString() + "\n");
+			fw.flush();
+		}
+		fw.close();
 	}
 	
 }

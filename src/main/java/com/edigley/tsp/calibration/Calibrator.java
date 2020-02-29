@@ -107,11 +107,11 @@ public class Calibrator {
 			logger.info(msg);System.out.println(msg);			
 			this.results.stream().forEach(result -> {
 				msg = String.format("%s", result);
-				logger.info(msg);System.out.println(msg);
+				logger.info(msg);//System.out.println(msg);
 			});
 		} else {
 			msg = String.format("Calibrator: - No Result to be printed. The calibrator is not finished.");
-			logger.info(msg);System.out.println(msg);
+			logger.warn(msg);//System.err.println(msg);
 		}
 		
 	}
