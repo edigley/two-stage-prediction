@@ -416,16 +416,19 @@ void createSettingsFile(char * filename, int idInd, int generation, int res) {
         fprintf(file, "useConditioningPeriod = false\n");
         fprintf(file, "ConditMonth = %s\n",ConditMonth);
         fprintf(file, "ConditDay = %s\n", ConditDay);
+
         fprintf(file, "StartMonth = %s\n", StartMonth);
         fprintf(file, "StartDay = %s\n", StartDay);
         fprintf(file, "StartHour = %s\n", StartHour);
         fprintf(file, "StartMin = %s\n", StartMin);
         fprintf(file, "EndMonth = %s\n", EndMonth);
-        if (generation==numGenerations+1) {
-            fprintf(file, "EndDay = %d\n", atoi(StartDay)+1);
-        } else {
+
+        //if (generation > numGenerations) {
+            //fprintf(file, "EndDay = %d\n", atoi(StartDay)+1);
+        //    fprintf(file, "EndDay = %d\n", EndDay);
+        //} else {
             fprintf(file, "EndDay = %s\n", EndDay);
-        }
+        //}
 
         fprintf(file, "EndHour = %s\n", EndHour);
         fprintf(file, "EndMin = %s\n", EndMin);

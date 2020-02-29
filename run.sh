@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #echo "dry run"
+#cd ../ && mvn clean && mvn install && cd target && ./../run.sh arkadia nsd "133" run &&  ./../run.sh arkadia agof "133" run
 
 scenario=$1
 evaluation=$2
@@ -13,23 +14,25 @@ outputDir="../playpen/fire-scenarios/${scenario}/output"
 #continues if scenario file exists; leaves otherwise
 ls ${scenarioFile} || exit 1;
 
-#for seed in 90 91 92 93 94 98 99; do
 for seed in $3; do
-	rm ../playpen/fire-scenarios/${scenario}/{input,output}/*.???
 	scenarioSpec="execution_${evaluation}_seed_${seed}_1"
 	outputFile="../playpen/two_stage_prediction_${evaluation}_${seed}.txt"
 	cacheDir="../playpen/executions/cached/arkadia/${scenarioSpec}"
 	jpgsDir="${cacheDir}/output/jpgs"
-	java \
-		-jar  two-stage-prediction-0.0.1-SNAPSHOT.jar \
-		-f    nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction \
-		-c    ${scenarioDir} \
-		-m    ${memoizationFile} \
-		-t    900 \
-		-p      1 \
-		-s    ${seed} \
-		-e    ${evaluation} \
-		| tee ${outputFile}
+	if [ "$4" = "run" ]
+	then
+		rm ../playpen/fire-scenarios/${scenario}/{input,output}/*.???
+		java \
+			-jar  two-stage-prediction-0.0.1-SNAPSHOT.jar \
+			-f    nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction \
+			-c    ${scenarioDir} \
+			-m    ${memoizationFile} \
+			-t    900 \
+			-p      1 \
+			-s    ${seed} \
+			-e    ${evaluation} \
+			| tee ${outputFile}
+	fi
 
 	ls ${outputDir}/shape_1_1.shp || exit 2;
 
