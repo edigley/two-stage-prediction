@@ -239,6 +239,7 @@ void runIndividual(char * configurationFile, INDVTYPE_FARSITE individual, int ti
  * Create input files to be used in farsite simulation (fms, adj, wnd, wtr).
  * - individual
  * - configurationFile
+ * Reads farsite input file patterns from configuration file, and then
  */
 void createFarsiteInputFiles(INDVTYPE_FARSITE individual, int generation) {
     printf("INFO: FireSimulator.createFarsiteInputFiles -> Going to create input files for individual (%d,%d) \n", generation, individual.id);
@@ -250,6 +251,7 @@ void createFarsiteInputFiles(INDVTYPE_FARSITE individual, int generation) {
     wndFileNew = (char*)malloc(sizeof(char) * 200);
     wtrFileNew = (char*)malloc(sizeof(char) * 200);
 
+    // convert generantion and individualId to string in order to use it to replace in filename pattern
     char * generationAsString = (char*)malloc(sizeof(char) * 400);
     sprintf(generationAsString, "%d", generation);
     char * individualIdAsString = (char*)malloc(sizeof(char) * 400);

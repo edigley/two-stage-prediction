@@ -24,7 +24,7 @@ public class Main {
 		+ " -calibrate "
 		+ " -predict "
 		+ " -e agof "
-		+ " -s 200 ";
+	   	+ " -s 200 ";
 		
 		String tspCMD_Arkadia_Calibration = "" 
 		+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
@@ -82,7 +82,7 @@ public class Main {
 				+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
 				+ " -c playpen/fire-scenarios/arkadia/ "
 				+ " -compare  "
-				+ " -prediction src/test/resources/scenarios/arkadia/shape_9_517.shp "  
+				+ " -prediction src/test/resources/scenarios/arkadia/shape_9_517.shp " 
 				+ " -perimeter  playpen/fire-scenarios/arkadia/landscape/Per2_utm.shp "
 				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
 		tspCMD = tspCMD_Compare;
@@ -102,14 +102,16 @@ public class Main {
 				+ " -f target/nar/two-stage-prediction-0.0.1-SNAPSHOT-amd64-Linux-gcc-executable/bin/amd64-Linux-gcc/two-stage-prediction "  
 				+ " -c playpen/fire-scenarios/arkadia/ "
 				+ " -compare  "
-				+ " -prediction /home/edigley/git/two-stage-prediction/playpen/intermediate_polygons/shape_1_2.shp "  
+				+ " -prediction /home/edigley/git/two-stage-prediction/playpen/intermediate_polygons/shape_1_2.shp "
 				+ " -perimeter  /home/edigley/git/two-stage-prediction/playpen/intermediate_polygons/Per2_utm.shp "
 				+ " -layer      playpen/fire-scenarios/arkadia/landscape/arkadia_extent_layer.shp ";
 		tspCMD = tspCMD_Compare;
 		tspCMD = tspCMD_Jonquera;
 		tspCMD = tspCMD_Arkadia_Calibration;
-		tspCMD = tspCMD_Arkadia;
 		tspCMD = tspCMD_Arkadia_Prediction;
+		tspCMD = tspCMD_Arkadia;
+		
+		tspCMD = tspCMD_Arkadia;
 		args = tspCMD.trim().split("\\s+");
 		CLI.main(args);
 

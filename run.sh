@@ -1,14 +1,16 @@
 #!/bin/bash
 
-#echo "dry run"
-#cd ../ && mvn clean && mvn install && cd target && ./../run.sh arkadia nsd "133" run &&  ./../run.sh arkadia agof "133" run
+# echo "dry run"
+# cd ../ && mvn clean && mvn install && cd target && ./../run.sh arkadia nsd "133" run &&  ./../run.sh arkadia agof "133" run
+# scenario=jonquera ; evaluation=agof ; seed=200; time ./../run.sh ${scenario} ${evaluation} "${seed}" run
 
 scenario=$1
 evaluation=$2
 
 scenarioDir="../playpen/fire-scenarios/${scenario}"
 scenarioFile="${scenarioDir}/scenario.ini"
-memoizationFile="../playpen/executions/${scenario}_farsite_execution_memoization_${evaluation}.txt"
+#memoizationFile="../playpen/executions/${scenario}_farsite_execution_memoization_${evaluation}.txt"
+memoizationFile="../playpen/executions/farsite_execution_memoization_${scenario}_${evaluation}.txt"
 outputDir="../playpen/fire-scenarios/${scenario}/output"
 
 #continues if scenario file exists; leaves otherwise
@@ -17,7 +19,7 @@ ls ${scenarioFile} || exit 1;
 for seed in $3; do
 	scenarioSpec="execution_${evaluation}_seed_${seed}_1"
 	outputFile="../playpen/two_stage_prediction_${evaluation}_${seed}.txt"
-	cacheDir="../playpen/executions/cached/arkadia/${scenarioSpec}"
+	cacheDir="../playpen/executions/cached/$scenario/${scenarioSpec}"
 	jpgsDir="${cacheDir}/output/jpgs"
 	if [ "$4" = "run" ]
 	then
@@ -49,7 +51,7 @@ for seed in $3; do
 	cp ${cacheDir}/output/*.jpg ${jpgsDir}/
 	cd                          ${jpgsDir}
 	cd ../../
-	tail -n 13 two_stage_prediction_*.txt | head -n 10 | grep -v "NaN" | awk '{print $15}' | sed "s#shp#jpg#g" | sed "s#../playpen/fire-scenarios/arkadia/##g" | xargs -n1  cp -t output/jpgs/bests
+	tail -n 13 two_stage_prediction_*.txt | head -n 10 | grep -v "NaN" | awk '{print $15}' | sed "s#shp#jpg#g" | sed "s#../playpen/fire-scenarios/${scenario}/##g" | xargs -n1  cp -t output/jpgs/bests
 	cd output/jpgs/bests
 	convert -delay 10 -loop 0 shape_*_*.jpg ../generation_12.gif
 	cd ~/git/two-stage-prediction/target
@@ -68,3 +70,4 @@ for seed in $3; do
 done;
 
 exit 0;
+
