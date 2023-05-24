@@ -1,0 +1,55 @@
+version = 43
+
+adjustmentFile   = /root/docker_farsite/INPUT/PARAMETERSIM/adjusments.adj
+fuelmoisturefile = /root/docker_farsite/INPUT/PARAMETERSIM/moistures.fms
+landscapeFile    = /root/docker_farsite/INPUT/LCP/LCP.lcp
+fuelmodelFile    = /root/docker_farsite/INPUT/PARAMETERSIM/customfuels.fmd
+weatherFile0     = /root/docker_farsite/INPUT/PARAMETERSIM/weather.wtr
+windFile0        = /root/docker_farsite/INPUT/PARAMETERSIM/wind.wnd
+timestep             = 10m
+visibleStep          = 1h
+secondaryVisibleStep = 48h
+perimeterResolution  = 30m
+distanceResolution   = 30m
+
+enableCrownfire               = false
+linkCrownDensityAndCover      = false
+embersFromTorchingTrees       = false
+enableSpotFireGrowth          = false
+nwnsBackingROS                = false
+fireacceleration              = false
+accelerationtranstion         = 1m
+distanceChecking              = fireLevel
+simulatePostFrontalCombustion = false
+fuelInputOption               = absent
+calculationPrecision          = normal
+useConditioningPeriod         = false
+
+ignitionFile     = /root/docker_farsite/INPUT/SHAPES/ignition.shp
+ignitionFileType = polygon
+
+StartMonth = 4
+StartDay   = 25
+StartHour  = 2300
+StartMin   = 7
+EndMonth   = 4
+EndDay     = 26
+EndHour    = 0000
+EndMin     = 7
+
+RastMake 	   = true
+RasterFileName = /root/docker_farsite/OUTPUT/raster
+VectMake 	   = true
+VectorFileName = /root/docker_farsite/OUTPUT/vector.VCT
+ShapeMake      = true
+shapefile      = /root/docker_farsite/OUTPUT/shape.shp
+
+RAST_ARRIVALTIME       = true
+RAST_FIREINTENSITY     = true
+RAST_SPREADRATE        = true
+RAST_FLAMELENGTH       = false
+RAST_HEATPERAREA       = false
+RAST_CROWNFIRE         = false
+RAST_FIREDIRECTION     = true
+RAST_REACTIONINTENSITY = false
+

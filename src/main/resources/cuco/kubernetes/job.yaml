@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-wq-generation
+spec:
+  completions: ${ALL}
+  parallelism: ${N_OF_INDIVIDUALS}
+  template:
+    metadata:
+      name: job-wq-generation
+    spec:
+      containers:
+      - name: c
+        image: gcr.io/<project>/job-wq-generation
+        env:
+        - name: BROKER_URL
+          value: amqp://guest:guest@s3-service:5672
+        - name: QUEUE
+          value: job1
+      restartPolicy: OnFailure
