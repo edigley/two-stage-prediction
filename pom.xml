@@ -21,7 +21,8 @@
 		<subsystem.option />
 		<maven.antrun.version>1.8</maven.antrun.version>
 		<geotools.version>19.3</geotools.version>
-	</properties>
+        <aws.java.sdk.version>2.20.43</aws.java.sdk.version>
+    </properties>
 	
 	<build>
 		<plugins>
@@ -155,9 +156,54 @@
 		    <name>Java.net repository</name>
 		    <url>http://download.java.net/maven/2</url>
 		</repository>
+		<repository>
+		    <id>maven-central-repository</id>
+		    <name>Maven Central Repository</name>
+		    <url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
 	</repositories>
-	
+
   <dependencies>
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>s3</artifactId>
+        <version>${aws.java.sdk.version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>netty-nio-client</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>apache-client</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>sso</artifactId>
+        <version>${aws.java.sdk.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>ssooidc</artifactId>
+        <version>${aws.java.sdk.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>ec2</artifactId>
+        <version>${aws.java.sdk.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>ssm</artifactId>
+        <version>${aws.java.sdk.version}</version>
+    </dependency>
+        
   	<!-- jenetics artifacts -->
 	<dependency>
 	    <groupId>io.jenetics</groupId>
